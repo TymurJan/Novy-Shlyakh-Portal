@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Новий Шлях — Координаційний центр реінтеграції ветеранів</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Outfit:wght@300;400;700&display=swap" rel="stylesheet">
+    <!-- Open Graph / SEO -->
+    <meta property="og:title" content="Новий Шлях — Центр реінтеграції ветеранів">
+    <meta property="og:description" content="Захищений портал підтримки ветеранів: юристи, психологи, кар'єра та освіта. Проєкт ГО «Талан ЮА».">
+    <meta property="og:image" content="https://novyshlyakh.ua/assets/og-image.jpg">
+    <meta property="og:url" content="https://novyshlyakh.ua">
+    <meta name="description" content="Координаційний центр реінтеграції ветеранів Черкащини. Юридична, психологічна та кар'єрна підтримка.">
+
+    <!-- Telegram Web App Script (MUST be before CSS to detect platform) -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+        // AGGRESSIVE VIEWPORT OVERRIDE & EXPANSION
+        (function() {
+            var isDesktop = false;
+            var ua = navigator.userAgent.toLowerCase();
+            var tg = window.Telegram && window.Telegram.WebApp;
+            
+            if (tg) {
+                // Force expand the webapp window
+                tg.expand();
+                
+                // Detection logic
+                if (tg.platform && ['tdesktop', 'macos', 'weba', 'webk', 'web'].indexOf(tg.platform) !== -1) {
+                    isDesktop = true;
+                }
+            }
+            
+            if (!isDesktop && (ua.indexOf('telegramdesktop') !== -1 || ((ua.indexOf('windows') !== -1 || ua.indexOf('macintosh') !== -1) && ua.indexOf('android') === -1 && ua.indexOf('iphone') === -1))) {
+                isDesktop = true;
+            }
+
+            if (isDesktop) {
+                var vp = document.querySelector('meta[name="viewport"]');
+                if (vp) vp.setAttribute('content', 'width=1200');
+                document.documentElement.classList.add('is-desktop-tg');
+                // Force class to body as well for CSS selectors
+                window.addEventListener('DOMContentLoaded', function() {
+                    document.body.classList.add('is-desktop-tg');
+                    if (window.Telegram && window.Telegram.WebApp) {
+                        window.Telegram.WebApp.expand();
+                    }
+                });
+            }
+        })();
+    </script>
+
+    <link rel="stylesheet" href="style.css?v=25">
+    <link rel="stylesheet" href="accessibility.css?v=25">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <span class="ngo-badge">Проєкт ГО ТАЛАН ЮА</span>
+                <h1>НОВИЙ ШЛЯХ</h1>
+            </div>
+            <nav class="nav">
+                <a href="#specialists">Спеціалісти</a>
+                <a href="#employers">Роботодавці</a>
+                <a href="#training">Навчання</a>
+                <a href="javascript:void(0)" class="login-btn" onclick="handleLogin()" style="color: var(--primary-green); font-weight: 600; margin-left: 15px;">🔐 Вхід</a>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="hero-overlay"></div>
+        <div class="container">
+            <div class="hero-content">
+                <h2 class="outfit-font">Твоя Безпечна Гавань <br> після повернення</h2>
+                <p>Координаційний центр реінтеграції ветеранів. <br> Юридична, психологічна та кар'єрна підтримка в одному місці.</p>
+                <div class="hero-actions">
+                    <a href="https://t.me/Veteran_NovyShlyakh_Bot" class="btn-main">Отримати допомогу (Intake)</a>
+                    <a href="#specialists" class="btn-secondary">Знайти спеціаліста</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- БЛОК: AI-Пошук -->
+    <section class="ai-search-section" style="padding: 60px 0; background: var(--glass-bg); border-bottom: 1px solid var(--glass-border);">
+        <div class="container">
+            <div class="ai-search-container" style="max-width: 800px; margin: 0 auto; text-align: center;">
+                <h3 style="margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary-green)" stroke-width="2"><path d="M12 2a2 2 0 0 1 2 2c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2zm0 15a5 5 0 0 1-5-5V7a5 5 0 0 1 10 0v5a5 5 0 0 1-5 5z"/></svg>
+                    Розумний пошук послуг
+                </h3>
+                <div class="search-box-wrapper" style="position: relative;">
+                    <input type="text" placeholder="Наприклад: хочу отримати ваучер на навчання..." style="width: 100%; padding: 18px 25px; border-radius: 15px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.05); color: white; font-size: 16px;">
+                    <button style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: var(--primary-green); border: none; color: white; padding: 10px 20px; border-radius: 10px; cursor: pointer;">Шукати</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="specialists" class="specialists">
+        <div class="container">
+            <div class="section-header">
+                <h3 class="outfit-font">Професійна мережа допомоги</h3>
+                <p>Оберіть категорію фахівців у вашому регіоні</p>
+            </div>
+            <div class="categories-grid">
+                <div class="category-card" onclick="window.location.href='https://t.me/Veteran_NovyShlyakh_Bot?start=find_legal'">
+                    <div class="icon">⚖️</div>
+                    <h4>Юристи</h4>
+                    <p>Правова підтримка та консультації</p>
+                </div>
+                <div class="category-card" onclick="window.location.href='https://t.me/Veteran_NovyShlyakh_Bot?start=find_psychology'">
+                    <div class="icon">🧠</div>
+                    <h4>Психологи</h4>
+                    <p>Ментальне здоров'я та ПТСР</p>
+                </div>
+                <div class="category-card" onclick="window.location.href='https://t.me/Veteran_NovyShlyakh_Bot?start=find_rehab'">
+                    <div class="icon">🦾</div>
+                    <h4>Реабілітологи</h4>
+                    <p>Відновлення та протезування</p>
+                </div>
+                <div class="category-card" onclick="window.location.href='https://t.me/Veteran_NovyShlyakh_Bot?start=find_career'">
+                    <div class="icon">💼</div>
+                    <h4>Кар'єра</h4>
+                    <p>Працевлаштування та бізнес</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- БЛОК: КАРТА -->
+    <section class="map-section">
+        <div class="container">
+            <div class="section-header">
+                <h3 class="outfit-font">Офіси підтримки на карті</h3>
+            </div>
+            <div id="map" style="height: 500px; border-radius: 25px; border: 1px solid var(--glass-border);"></div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; 2024 НОВИЙ ШЛЯХ. Всі права захищені.</p>
+                <div class="footer-links">
+                    <a href="#">Про проєкт</a>
+                    <a href="#">Контакти</a>
+                    <a href="#">ГО ТАЛАН ЮА</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="main.js?v=22"></script>
+    <script src="accessibility.js"></script>
+    <script>
+        const webapp = window.Telegram ? window.Telegram.WebApp : null;
+        
+        if (webapp) {
+            webapp.ready();
+            webapp.expand();
+            
+            // Нативна функція для входу
+            window.handleLogin = function() {
+                webapp.openTelegramLink("https://t.me/Veteran_NovyShlyakh_Bot?start=login");
+                webapp.close();
+            };
+        }
+        
+        function closeWebApp() {
+            if (webapp) webapp.close();
+        }
+    </script>
+</body>
+</html>

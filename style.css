@@ -1,0 +1,662 @@
+:root {
+    --primary-green: #10B981;
+    --secondary-green: #59C44A;
+    --sage-green: #7D9D85;
+    --deep-teal: #2D4F4F;
+    --warm-sand: #F4EAE0;
+    --deep-charcoal: #1A1C1A;
+    --soft-white: #F9F9F9;
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--deep-charcoal);
+    color: var(--soft-white);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+.outfit-font {
+    font-family: 'Outfit', sans-serif;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* FORCE DESKTOP ON TG DESKTOP */
+body.is-desktop-tg {
+    width: 1200px !important;
+    margin: 0 auto !important;
+    overflow-x: auto !important;
+    min-height: 100vh;
+}
+
+body.is-desktop-tg .container {
+    max-width: 1200px !important;
+    width: 1200px !important;
+    margin: 0 auto !important;
+    padding: 0 20px !important;
+}
+
+body.is-desktop-tg .header .container {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+}
+
+/* Header */
+.header {
+    height: 80px;
+    display: flex;
+    align-items: center;
+    background: rgba(26, 28, 26, 0.8);
+    backdrop-filter: blur(10px);
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.logo {
+    display: flex;
+    flex-direction: column;
+}
+
+.ngo-badge {
+    font-size: 10px;
+    color: var(--secondary-green);
+    letter-spacing: 1px;
+    font-weight: 600;
+}
+
+.logo h1 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 24px;
+    letter-spacing: 2px;
+}
+
+.nav {
+    display: flex;
+    align-items: center;
+}
+
+.nav a {
+    color: var(--soft-white);
+    text-decoration: none;
+    margin-left: 30px;
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+.nav a:hover {
+    color: var(--primary-green);
+}
+
+.login-btn {
+    margin-left: 15px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+}
+
+.btn-primary {
+    background: var(--primary-green);
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-weight: 600;
+    color: white !important;
+    text-decoration: none;
+    display: inline-block;
+}
+
+/* Hero Section */
+.hero {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    position: relative;
+    background: url('https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&q=80&w=2070') center/cover;
+}
+
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to right, rgba(26, 28, 26, 0.9), rgba(26, 28, 26, 0.4));
+}
+
+.hero .container {
+    position: relative;
+    z-index: 1;
+}
+
+.hero-content h2 {
+    font-size: 64px;
+    line-height: 1.1;
+    margin-bottom: 20px;
+}
+
+.hero-content p {
+    font-size: 18px;
+    color: #ccc;
+    max-width: 600px;
+    margin-bottom: 40px;
+}
+
+.btn-main {
+    display: inline-flex;
+    justify-content: center;
+    background: var(--primary-green);
+    color: white;
+    text-decoration: none;
+    padding: 18px 40px;
+    border-radius: 50px;
+    font-weight: 600;
+    margin-right: 20px;
+    transition: 0.3s;
+}
+
+.btn-secondary {
+    display: inline-flex;
+    justify-content: center;
+    border: 1px solid var(--soft-white);
+    color: white;
+    text-decoration: none;
+    padding: 18px 40px;
+    border-radius: 50px;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+/* Common Layout Elements */
+.section-title {
+    font-size: 36px;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.section-subtitle {
+    text-align: center;
+    color: #888;
+    margin-bottom: 50px;
+}
+
+.specialist-tabs {
+    display: flex;
+    justify-content: flex-start;
+    gap: 12px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+}
+
+.tabs {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 50px;
+    flex-wrap: wrap;
+}
+
+.tab-btn {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--soft-white);
+    padding: 12px 25px;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: 0.3s;
+    font-size: 14px;
+}
+
+.tab-btn.active, .tab-btn:hover {
+    background: var(--primary-green);
+    border-color: var(--primary-green);
+}
+
+/* Specialist Cards */
+.specialist-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+}
+
+.spec-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    overflow: hidden;
+    transition: 0.3s;
+}
+
+.spec-card:hover {
+    transform: translateY(-10px);
+    border-color: var(--primary-green);
+}
+
+.spec-img {
+    height: 200px;
+    background: var(--deep-teal);
+    position: relative;
+}
+
+.spec-rating {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 5px 10px;
+    border-radius: 10px;
+    font-size: 12px;
+}
+
+.spec-info {
+    padding: 25px;
+}
+
+.spec-info h4 {
+    font-size: 20px;
+    margin-bottom: 5px;
+}
+
+.spec-tag {
+    font-size: 12px;
+    color: var(--primary-green);
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+
+.spec-power {
+    font-size: 14px;
+    color: #ccc;
+    margin-bottom: 20px;
+}
+
+.spec-stats {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 25px;
+}
+
+.btn-card {
+    width: 100%;
+    padding: 12px;
+    background: none;
+    border: 1px solid var(--primary-green);
+    color: var(--primary-green);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-card:hover {
+    background: var(--primary-green);
+    color: white;
+}
+
+/* Education Cards */
+.edu-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: 0.3s;
+    border-top: 4px solid var(--primary-green);
+}
+.edu-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary-green);
+    background: rgba(255,255,255,0.08);
+}
+.edu-badge {
+    align-self: flex-start;
+    padding: 5px 12px;
+    border-radius: 5px;
+    background: var(--deep-teal);
+    color: var(--primary-green);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 15px;
+}
+.edu-inst {
+    font-size: 14px;
+    color: #888;
+    margin-bottom: 5px;
+}
+.edu-card h4 {
+    font-size: 20px;
+    margin-bottom: 10px;
+    line-height: 1.3;
+}
+.edu-desc {
+    font-size: 14px;
+    color: #ccc;
+    margin-bottom: 20px;
+    flex: 1;
+}
+.edu-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--glass-border);
+    padding-top: 15px;
+}
+.edu-price {
+    font-weight: 700;
+    color: var(--secondary-green);
+    font-size: 16px;
+}
+
+/* Employer List */
+.employer-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 30px;
+    width: 100%;
+}
+
+.employer-item {
+    background: var(--glass-bg);
+    padding: 30px;
+    border-radius: 20px;
+    text-align: center;
+}
+
+.emp-logo {
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--secondary-green);
+    margin-bottom: 15px;
+}
+
+/* Footer */
+.footer {
+    padding: 50px 0;
+    text-align: center;
+    border-top: 1px solid var(--glass-border);
+    font-size: 12px;
+    color: #666;
+}
+
+@media (max-width: 768px) and (hover: none) {
+    .hero-content h2 { 
+        font-size: 32px; 
+    }
+    /* FORCE COMPACT DESKTOP NAV ALWAYS */
+    .nav {
+        display: flex !important;
+        gap: 5px !important;
+        margin-left: auto;
+    }
+    .nav a {
+        display: inline-block !important;
+        margin-left: 5px !important;
+        font-size: 10px !important;
+        white-space: nowrap;
+    }
+    .logo h1 {
+        font-size: 16px !important;
+    }
+    .ngo-badge {
+        font-size: 8px !important;
+    }
+    .hero-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    .btn-main {
+        margin-right: 0;
+        width: 100%;
+        padding: 15px 20px;
+    }
+    .btn-secondary {
+        width: 100%;
+        padding: 15px 20px;
+    }
+    .logo h1 {
+        font-size: 20px;
+    }
+    /* Виправлення кнопки доступності на мобільних */
+    .accessibility-toggle {
+        right: 0 !important; /* Keep it on the edge but we will fix the cutting issue in accessibility.css */
+        font-size: 12px !important;
+        padding: 8px 10px !important;
+    }
+}
+
+/* AI Chat Widget */
+.chat-fab {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--primary-green);
+    border: none;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+    cursor: pointer;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.3s;
+}
+.chat-fab:hover {
+    transform: scale(1.1);
+}
+.chat-widget {
+    position: fixed;
+    bottom: 100px;
+    right: 30px;
+    width: 350px;
+    height: 500px;
+    background: #1e201e;
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    z-index: 1000;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+.chat-widget.active {
+    display: flex;
+}
+.chat-header {
+    background: var(--deep-charcoal);
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--glass-border);
+}
+.chat-header h4 {
+    color: var(--soft-white);
+    margin: 0;
+    font-size: 16px;
+}
+.chat-header button {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 24px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.chat-header button:hover {
+    color: white;
+}
+.chat-body {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.chat-message {
+    max-width: 80%;
+    padding: 12px;
+    border-radius: 15px;
+    font-size: 14px;
+    line-height: 1.4;
+}
+.chat-message.bot {
+    background: rgba(16, 185, 129, 0.05);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    color: var(--soft-white);
+    align-self: flex-start;
+    border-bottom-left-radius: 2px;
+}
+.chat-message.user {
+    background: var(--deep-teal);
+    color: white;
+    align-self: flex-end;
+    border-bottom-right-radius: 2px;
+}
+.chat-footer {
+    padding: 15px;
+    background: var(--deep-charcoal);
+    border-top: 1px solid var(--glass-border);
+    display: flex;
+    gap: 10px;
+}
+.chat-footer input {
+    flex: 1;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 10px 15px;
+    color: white;
+    outline: none;
+}
+.chat-footer button {
+    background: var(--primary-green);
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* --- Rehab Category Specific Styles --- */
+.spec-card[data-category="rehab"] {
+    border-left: 4px solid #3b82f6 !important; /* Medical Blue accent */
+}
+
+.spec-card[data-category="rehab"] .spec-tag {
+    background: rgba(59, 130, 246, 0.1) !important;
+    color: #3b82f6 !important;
+}
+
+.spec-card[data-category="rehab"] .btn-card {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+}
+/* --- Telegram Mini App Mode --- */
+/* Спеціальні стилі для Telegram Mini App */
+body.is-tg-app .header {
+    display: flex; /* Показуємо хедер навіть у Telegram */
+    position: sticky;
+    top: 0;
+}
+body.is-tg-app .hero {
+    margin-top: 0;
+}
+
+body.is-tg-app {
+    background: #1A1C1A;
+}
+
+body.is-tg-app .container {
+    padding-top: 20px;
+}
+
+body.is-tg-app .section-title {
+    font-size: 24px;
+    text-align: left;
+}
+
+body.is-tg-app .section-subtitle {
+    text-align: left;
+}
+
+/* Leaflet Map Refinements */
+#networkMap {
+    z-index: 1;
+}
+
+.leaflet-popup-content-wrapper {
+    background: white;
+    border-radius: 10px;
+}
+
+.leaflet-popup-tip {
+    background: white;
+}
+
+.leaflet-container a.btn-primary {
+    color: white !important;
+}
+
+/* Floating Telegram Button */
+.tg-floating-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: #0088cc;
+    color: white;
+    padding: 12px 25px;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    box-shadow: 0 10px 20px rgba(0, 136, 204, 0.4);
+    z-index: 9999;
+    transition: 0.3s;
+    font-weight: 600;
+}
+
+.tg-floating-btn:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 136, 204, 0.6);
+}
+
+body.is-tg-app .tg-floating-btn {
+    display: none; /* Ховаємо в самому боті, щоб не дублювати */
+}
