@@ -7,7 +7,7 @@ from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton, WebAppInfo, ReplyKeyboardRemove
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton, WebAppInfo, ReplyKeyboardRemove, MenuButtonWebApp
 from dotenv import load_dotenv
 
 # Завантаження налаштувань
@@ -129,7 +129,7 @@ async def cmd_start(message: types.Message):
     else:
         kb.append([KeyboardButton(text="💼 Я Спеціаліст (Реєстрація)")])
         
-    kb.append([KeyboardButton(text="🌐 Перейти на Портал", web_app=WebAppInfo(url=f"{PORTAL_URL}?v=28"))])
+    kb.append([KeyboardButton(text="🌐 Перейти на Портал", web_app=WebAppInfo(url=f"{PORTAL_URL}?v=29"))])
     
     if str(message.from_user.id).strip() == str(ADMIN_ID).strip():
         kb.append([KeyboardButton(text="🛡️ Адмін-панель")])
@@ -1014,8 +1014,16 @@ async def to_admin_panel(callback: types.CallbackQuery):
 
 # ЗАПУСК
 async def main():
-    # Очищуємо системні команди, щоб повернути стандартну іконку сітки
+    # Очищуємо системні команди
     await bot.delete_my_commands()
+    
+    # Встановлюємо кнопку меню (mini-app) для всіх
+    await bot.set_chat_menu_button(
+        menu_button=MenuButtonWebApp(
+            text="Запустити бота",
+            web_app=WebAppInfo(url=f"{PORTAL_URL}?v=29")
+        )
+    )
     await dp.start_polling(bot)
 
 @dp.message(Command("admin"))
