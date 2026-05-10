@@ -14,46 +14,50 @@
     <meta property="og:url" content="https://novyshlyakh.ua">
     <meta name="description" content="Координаційний центр реінтеграції ветеранів Черкащини. Юридична, психологічна та кар'єрна підтримка.">
 
-    <!-- Telegram Web App Script (MUST be before CSS to detect platform) -->
+    <!-- Telegram Web App Script -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
-        // AGGRESSIVE VIEWPORT OVERRIDE & EXPANSION
         (function() {
-            var isDesktop = false;
-            var ua = navigator.userAgent.toLowerCase();
             var tg = window.Telegram && window.Telegram.WebApp;
-            
             if (tg) {
-                // Force expand the webapp window
+                tg.ready();
                 tg.expand();
-                
-                // Detection logic
-                if (tg.platform && ['tdesktop', 'macos', 'weba', 'webk', 'web'].indexOf(tg.platform) !== -1) {
-                    isDesktop = true;
-                }
-            }
-            
-            if (!isDesktop && (ua.indexOf('telegramdesktop') !== -1 || ((ua.indexOf('windows') !== -1 || ua.indexOf('macintosh') !== -1) && ua.indexOf('android') === -1 && ua.indexOf('iphone') === -1))) {
-                isDesktop = true;
             }
 
-            if (isDesktop) {
-                var vp = document.querySelector('meta[name="viewport"]');
-                if (vp) vp.setAttribute('content', 'width=1200');
-                document.documentElement.classList.add('is-desktop-tg');
-                // Force class to body as well for CSS selectors
-                window.addEventListener('DOMContentLoaded', function() {
-                    document.body.classList.add('is-desktop-tg');
-                    if (window.Telegram && window.Telegram.WebApp) {
-                        window.Telegram.WebApp.expand();
+            function applyDesktopScaling() {
+                var ua = navigator.userAgent.toLowerCase();
+                var isDesktop = false;
+                
+                if (tg && tg.platform && ['tdesktop', 'macos', 'weba', 'webk', 'web'].indexOf(tg.platform) !== -1) {
+                    isDesktop = true;
+                } else if (ua.indexOf('telegramdesktop') !== -1 || ((ua.indexOf('windows') !== -1 || ua.indexOf('macintosh') !== -1) && ua.indexOf('android') === -1 && ua.indexOf('iphone') === -1)) {
+                    isDesktop = true;
+                }
+
+                if (isDesktop) {
+                    var targetWidth = 1200;
+                    var currentWidth = window.innerWidth;
+                    
+                    if (currentWidth < targetWidth) {
+                        var scale = currentWidth / targetWidth;
+                        document.documentElement.style.width = targetWidth + 'px';
+                        document.documentElement.style.transform = 'scale(' + scale + ')';
+                        document.documentElement.style.transformOrigin = 'top left';
+                        document.documentElement.style.height = (100 / scale) + '%';
+                        document.documentElement.style.overflowX = 'hidden';
                     }
-                });
+                    document.documentElement.classList.add('is-desktop-tg');
+                    document.body.classList.add('is-desktop-tg');
+                }
             }
+
+            window.addEventListener('load', applyDesktopScaling);
+            window.addEventListener('resize', applyDesktopScaling);
         })();
     </script>
 
-    <link rel="stylesheet" href="style.css?v=25">
-    <link rel="stylesheet" href="accessibility.css?v=25">
+    <link rel="stylesheet" href="style.css?v=26">
+    <link rel="stylesheet" href="accessibility.css?v=26">
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
