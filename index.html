@@ -24,7 +24,7 @@
                 tg.expand();
             }
 
-            function applyDesktopScaling() {
+            function detectPlatform() {
                 var ua = navigator.userAgent.toLowerCase();
                 var isDesktop = false;
                 
@@ -35,29 +35,18 @@
                 }
 
                 if (isDesktop) {
-                    var targetWidth = 1200;
-                    var currentWidth = window.innerWidth;
-                    
-                    if (currentWidth < targetWidth) {
-                        var scale = currentWidth / targetWidth;
-                        document.documentElement.style.width = targetWidth + 'px';
-                        document.documentElement.style.transform = 'scale(' + scale + ')';
-                        document.documentElement.style.transformOrigin = 'top left';
-                        document.documentElement.style.height = (100 / scale) + '%';
-                        document.documentElement.style.overflowX = 'hidden';
-                    }
                     document.documentElement.classList.add('is-desktop-tg');
                     document.body.classList.add('is-desktop-tg');
+                    var vp = document.querySelector('meta[name="viewport"]');
+                    if (vp) vp.setAttribute('content', 'width=device-width, initial-scale=1.0');
                 }
             }
-
-            window.addEventListener('load', applyDesktopScaling);
-            window.addEventListener('resize', applyDesktopScaling);
+            window.addEventListener('DOMContentLoaded', detectPlatform);
         })();
     </script>
 
-    <link rel="stylesheet" href="style.css?v=26">
-    <link rel="stylesheet" href="accessibility.css?v=26">
+    <link rel="stylesheet" href="style.css?v=27">
+    <link rel="stylesheet" href="accessibility.css?v=27">
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
