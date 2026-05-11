@@ -614,11 +614,14 @@ body.is-tg-app .header {
     position: fixed;
     top: 0;
     width: 100%;
-    background: rgba(26, 28, 26, 0.7); /* Набагато прозоріше */
-    backdrop-filter: blur(15px); /* Сильніше розмиття */
+    background: rgba(26, 28, 26, 0.85); /* Трохи щільніше для читабельності меню */
+    backdrop-filter: blur(10px);
+    z-index: 2000; /* Вище за все */
 }
+
+body.is-tg-app main, 
 body.is-tg-app .hero {
-    margin-top: 0;
+    padding-top: 100px !important; /* Відступ, щоб контент не ховався під хедер */
 }
 
 body.is-tg-app {
@@ -714,15 +717,13 @@ body.is-tg-app .tg-floating-btn {
         width: 100%; /* Кнопки на всю ширину на мобілці */
         margin-right: 0;
     }
-    /* Виправлення кнопки доступності на мобілці */
+    /* ПРИМУСОВО переносимо око вниз на мобілці */
     .accessibility-trigger {
-        width: 45px !important;
-        height: 45px !important;
+        top: auto !important;
         bottom: 20px !important;
         right: 15px !important;
-    }
-    .accessibility-trigger svg {
-        width: 20px !important;
-        height: 20px !important;
+        width: 50px !important;
+        height: 50px !important;
+        z-index: 9999 !important;
     }
 }
