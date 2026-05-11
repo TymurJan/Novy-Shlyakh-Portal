@@ -3,14 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ветеранський портал "Новий Шлях" (v39) — Координаційний центр реінтеграції ветеранів</title>
+    <title>Ветеранський портал "Новий Шлях" (v40) — Координаційний центр реінтеграції ветеранів</title>
     <style>
         /* Примусові стилі для обходу кешу CSS на мобільних */
         @media (max-width: 768px) {
-            body.is-tg-app main, 
-            body.is-tg-app .hero {
-                padding-top: 110px !important;
-            }
+            body.is-tg-app .header {
+    display: flex;
+    position: relative; /* Дозволяємо хедеру скролитися разом зі сторінкою */
+    width: 100%;
+    background: transparent; /* Робимо його прозорим, бо він тепер не "літає" */
+    backdrop-filter: none;
+    z-index: 10;
+    border-bottom: none; /* Прибираємо лінію */
+}
+
+body.is-tg-app main, 
+body.is-tg-app .hero {
+    padding-top: 20px !important; /* Повертаємо нормальний відступ, бо хедер більше не fixed */
+}
             .accessibility-toggle {
                 top: auto !important;
                 bottom: 30px !important;
@@ -33,8 +43,8 @@
     <meta property="og:url" content="https://novyshlyakh.ua">
     <meta name="description" content="Координаційний центр реінтеграції ветеранів Черкащини. Юридична, психологічна та кар'єрна підтримка.">
 
-    <link rel="stylesheet" href="style.css?v=39">
-    <link rel="stylesheet" href="accessibility.css?v=39">
+    <link rel="stylesheet" href="style.css?v=40">
+    <link rel="stylesheet" href="accessibility.css?v=40">
     <!-- Telegram Web App Script -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
@@ -291,12 +301,12 @@
                 </div>
             </div>
             <p style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">&copy; 2026 Новий Шлях | Всі права захищені. Проєкт ГО «Талан ЮА»</p>
-            <div style="text-align: center; margin-top: 20px; opacity: 0.3; font-size: 10px;">Версія: 39</div>
+            <div style="text-align: center; margin-top: 20px; opacity: 0.3; font-size: 10px;">Версія: 40</div>
         </div>
     </footer>
     <!-- Scripts -->
-    <script src="main.js?v=39"></script>
-    <script src="accessibility.js?v=39"></script>
+    <script src="main.js?v=40"></script>
+    <script src="accessibility.js?v=40"></script>
     <script>
         const webapp = window.Telegram ? window.Telegram.WebApp : null;
         if (webapp) {
