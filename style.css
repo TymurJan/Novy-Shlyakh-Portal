@@ -718,7 +718,7 @@ body.is-tg-app .tg-floating-btn {
         margin-right: 0;
     }
     /* ПРИМУСОВО переносимо око вниз на мобілці */
-    .accessibility-trigger {
+    .accessibility-toggle {
         top: auto !important;
         bottom: 20px !important;
         right: 15px !important;
