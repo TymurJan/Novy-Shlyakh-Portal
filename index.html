@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ветеранський портал "Новий Шлях" (v40) — Координаційний центр реінтеграції ветеранів</title>
+    <title>Ветеранський портал "Новий Шлях" (v42) — Координаційний центр реінтеграції ветеранів</title>
     <style>
         /* Примусові стилі для обходу кешу CSS на мобільних */
         @media (max-width: 768px) {
@@ -30,6 +30,9 @@ body.is-tg-app .hero {
                 z-index: 9999 !important;
                 display: flex !important;
                 visibility: visible !important;
+                border-radius: 50% !important; /* Робимо ідеальне коло */
+                padding: 0 !important; /* Прибираємо зайві відступи */
+                justify-content: center !important; /* Центруємо іконку */
             }
         }
     </style>
@@ -43,8 +46,8 @@ body.is-tg-app .hero {
     <meta property="og:url" content="https://novyshlyakh.ua">
     <meta name="description" content="Координаційний центр реінтеграції ветеранів Черкащини. Юридична, психологічна та кар'єрна підтримка.">
 
-    <link rel="stylesheet" href="style.css?v=40">
-    <link rel="stylesheet" href="accessibility.css?v=40">
+    <link rel="stylesheet" href="style.css?v=42">
+    <link rel="stylesheet" href="accessibility.css?v=42">
     <!-- Telegram Web App Script -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
@@ -212,7 +215,7 @@ body.is-tg-app .hero {
                 <button class="tab-btn" data-edu="uni">ВНЗ та перепідготовка</button>
             </div>
 
-            <div class="training-grid" id="trainingGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 30px;">
+            <div class="training-grid" id="trainingGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 350px), 1fr)); gap: 30px;">
                 <!-- Дані завантажуються асинхронно з education.json -->
             </div>
             
@@ -251,7 +254,7 @@ body.is-tg-app .hero {
             <h3 class="section-title">Мережа підтримки Черкащини</h3>
             <p class="section-subtitle">Ми об'єднали перевірені локації, де ви можете отримати допомогу офлайн</p>
             
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 40px; align-items: start;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr)); gap: 40px; align-items: start;">
                 <div class="location-card" style="background: #111; padding: 25px; border-radius: 25px; border: 1px solid var(--glass-border);">
                     <div id="networkMap" style="width: 100%; height: 450px; background: #222; border-radius: 15px; overflow: hidden; border: 1px solid var(--primary-green);">
                         <!-- Реальна карта Leaflet -->
@@ -301,12 +304,12 @@ body.is-tg-app .hero {
                 </div>
             </div>
             <p style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">&copy; 2026 Новий Шлях | Всі права захищені. Проєкт ГО «Талан ЮА»</p>
-            <div style="text-align: center; margin-top: 20px; opacity: 0.3; font-size: 10px;">Версія: 40</div>
+            <div style="text-align: center; margin-top: 20px; opacity: 0.3; font-size: 10px;">Версія: 42</div>
         </div>
     </footer>
     <!-- Scripts -->
-    <script src="main.js?v=40"></script>
-    <script src="accessibility.js?v=40"></script>
+    <script src="main.js?v=42"></script>
+    <script src="accessibility.js?v=42"></script>
     <script>
         const webapp = window.Telegram ? window.Telegram.WebApp : null;
         if (webapp) {
