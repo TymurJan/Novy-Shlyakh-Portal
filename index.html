@@ -14,8 +14,8 @@
     <meta property="og:url" content="https://novyshlyakh.ua">
     <meta name="description" content="Координаційний центр реінтеграції ветеранів Черкащини. Юридична, психологічна та кар'єрна підтримка.">
 
-    <link rel="stylesheet" href="style.css?v=33">
-    <link rel="stylesheet" href="accessibility.css?v=33">
+    <link rel="stylesheet" href="style.css?v=34">
+    <link rel="stylesheet" href="accessibility.css?v=34">
     <!-- Telegram Web App Script -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
@@ -24,9 +24,6 @@
             if (tg) {
                 tg.ready();
                 tg.expand();
-                if (tg.requestFullscreen) {
-                    tg.requestFullscreen();
-                }
             }
 
             function detectPlatform() {
@@ -40,6 +37,9 @@
                 }
 
                 if (isDesktop) {
+                    if (tg && tg.requestFullscreen) {
+                        tg.requestFullscreen();
+                    }
                     document.documentElement.classList.add('is-desktop-tg');
                     document.body.classList.add('is-desktop-tg');
                     var vp = document.querySelector('meta[name="viewport"]');
@@ -275,16 +275,13 @@
         </div>
     </footer>
     <!-- Scripts -->
-    <script src="main.js?v=33"></script>
-    <script src="accessibility.js?v=33"></script>
+    <script src="main.js?v=34"></script>
+    <script src="accessibility.js?v=34"></script>
     <script>
         const webapp = window.Telegram ? window.Telegram.WebApp : null;
         if (webapp) {
             webapp.ready();
             webapp.expand();
-            if (webapp.requestFullscreen) {
-                webapp.requestFullscreen();
-            }
             window.handleLogin = function() {
                 webapp.openTelegramLink("https://t.me/Veteran_Novy_Shlyakh_Bot?start=login");
                 webapp.close();

@@ -680,3 +680,33 @@ body.is-tg-app .section-subtitle {
 body.is-tg-app .tg-floating-btn {
     display: none; /* Ховаємо в самому боті, щоб не дублювати */
 }
+
+/* --- Mobile Responsiveness --- */
+@media (max-width: 768px) {
+    .header {
+        height: auto;
+        padding: 10px 0;
+    }
+    .header .container {
+        flex-direction: column;
+        justify-content: center;
+        gap: 10px;
+    }
+    .nav {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+    }
+    .nav a {
+        margin-left: 0;
+        margin: 5px 10px;
+        font-size: 13px;
+    }
+    .hero-content h2 {
+        font-size: 40px !important;
+    }
+    .btn-main, .btn-secondary {
+        padding: 12px 25px;
+        margin-bottom: 10px;
+    }
+}
