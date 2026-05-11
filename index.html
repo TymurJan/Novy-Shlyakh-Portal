@@ -3,7 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ветеранський портал "Новий Шлях" (v37) — Координаційний центр реінтеграції ветеранів</title>
+    <title>Ветеранський портал "Новий Шлях" (v38) — Координаційний центр реінтеграції ветеранів</title>
+    <style>
+        /* Примусові стилі для обходу кешу CSS на мобільних */
+        @media (max-width: 768px) {
+            body.is-tg-app main, 
+            body.is-tg-app .hero {
+                padding-top: 110px !important;
+            }
+            .accessibility-trigger {
+                top: auto !important;
+                bottom: 30px !important;
+                right: 20px !important;
+                width: 55px !important;
+                height: 55px !important;
+                z-index: 9999 !important;
+                display: flex !important;
+                visibility: visible !important;
+            }
+        }
+    </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Outfit:wght@300;400;700&display=swap" rel="stylesheet">
@@ -14,8 +33,8 @@
     <meta property="og:url" content="https://novyshlyakh.ua">
     <meta name="description" content="Координаційний центр реінтеграції ветеранів Черкащини. Юридична, психологічна та кар'єрна підтримка.">
 
-    <link rel="stylesheet" href="style.css?v=37">
-    <link rel="stylesheet" href="accessibility.css?v=37">
+    <link rel="stylesheet" href="style.css?v=38">
+    <link rel="stylesheet" href="accessibility.css?v=38">
     <!-- Telegram Web App Script -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
@@ -272,12 +291,12 @@
                 </div>
             </div>
             <p style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">&copy; 2026 Новий Шлях | Всі права захищені. Проєкт ГО «Талан ЮА»</p>
-            <div style="text-align: center; margin-top: 20px; opacity: 0.3; font-size: 10px;">Версія: 37</div>
+            <div style="text-align: center; margin-top: 20px; opacity: 0.3; font-size: 10px;">Версія: 38</div>
         </div>
     </footer>
     <!-- Scripts -->
-    <script src="main.js?v=37"></script>
-    <script src="accessibility.js?v=37"></script>
+    <script src="main.js?v=38"></script>
+    <script src="accessibility.js?v=38"></script>
     <script>
         const webapp = window.Telegram ? window.Telegram.WebApp : null;
         if (webapp) {
