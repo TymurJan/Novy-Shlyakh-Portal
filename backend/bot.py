@@ -129,7 +129,7 @@ async def cmd_start(message: types.Message):
     else:
         kb.append([KeyboardButton(text="💼 Я Спеціаліст (Реєстрація)")])
         
-    kb.append([KeyboardButton(text="🌐 Перейти на Портал", web_app=WebAppInfo(url=f"{PORTAL_URL}?v=29"))])
+    kb.append([KeyboardButton(text="🌐 Перейти на Портал", web_app=WebAppInfo(url=f"{PORTAL_URL}?v=31"))])
     
     if str(message.from_user.id).strip() == str(ADMIN_ID).strip():
         kb.append([KeyboardButton(text="🛡️ Адмін-панель")])
@@ -1021,7 +1021,7 @@ async def main():
     await bot.set_chat_menu_button(
         menu_button=MenuButtonWebApp(
             text="Запустити бота",
-            web_app=WebAppInfo(url=f"{PORTAL_URL}?v=29")
+            web_app=WebAppInfo(url=f"{PORTAL_URL}?v=31")
         )
     )
     await dp.start_polling(bot)

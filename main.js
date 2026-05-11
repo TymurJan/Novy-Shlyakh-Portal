@@ -55,6 +55,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const tg = window.Telegram.WebApp;
         tg.expand();
         tg.ready();
+        if (tg.requestFullscreen) {
+            tg.requestFullscreen();
+        }
         
         const desktopPlatforms = ['tdesktop', 'macos', 'weba', 'webk', 'web'];
         if (desktopPlatforms.includes(tg.platform)) {
