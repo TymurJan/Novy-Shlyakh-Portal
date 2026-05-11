@@ -611,10 +611,11 @@ body.is-desktop-tg .logo h1 {
 /* Спеціальні стилі для Telegram Mini App */
 body.is-tg-app .header {
     display: flex;
-    position: fixed; /* Повертаємо fixed для стабільності */
+    position: fixed;
     top: 0;
     width: 100%;
-    background: rgba(26, 28, 26, 0.95); /* Більш щільний фон для усунення смуг */
+    background: rgba(26, 28, 26, 0.7); /* Набагато прозоріше */
+    backdrop-filter: blur(15px); /* Сильніше розмиття */
 }
 body.is-tg-app .hero {
     margin-top: 0;
@@ -625,7 +626,7 @@ body.is-tg-app {
 }
 
 body.is-tg-app .container {
-    padding-top: 10px; /* Менший відступ зверху */
+    padding-top: 0 !important; /* Прибираємо відступ зовсім */
 }
 
 body.is-tg-app .section-title {
