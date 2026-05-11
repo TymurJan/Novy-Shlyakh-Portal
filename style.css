@@ -610,9 +610,11 @@ body.is-desktop-tg .logo h1 {
 /* --- Telegram Mini App Mode --- */
 /* Спеціальні стилі для Telegram Mini App */
 body.is-tg-app .header {
-    display: flex; /* Показуємо хедер навіть у Telegram */
-    position: sticky;
+    display: flex;
+    position: fixed; /* Повертаємо fixed для стабільності */
     top: 0;
+    width: 100%;
+    background: rgba(26, 28, 26, 0.95); /* Більш щільний фон для усунення смуг */
 }
 body.is-tg-app .hero {
     margin-top: 0;
@@ -623,7 +625,7 @@ body.is-tg-app {
 }
 
 body.is-tg-app .container {
-    padding-top: 20px;
+    padding-top: 10px; /* Менший відступ зверху */
 }
 
 body.is-tg-app .section-title {
@@ -703,10 +705,23 @@ body.is-tg-app .tg-floating-btn {
         font-size: 13px;
     }
     .hero-content h2 {
-        font-size: 40px !important;
+        font-size: 32px !important; /* Трохи менше для вузьких екранів */
     }
     .btn-main, .btn-secondary {
         padding: 12px 25px;
         margin-bottom: 10px;
+        width: 100%; /* Кнопки на всю ширину на мобілці */
+        margin-right: 0;
+    }
+    /* Виправлення кнопки доступності на мобілці */
+    .accessibility-trigger {
+        width: 45px !important;
+        height: 45px !important;
+        bottom: 20px !important;
+        right: 15px !important;
+    }
+    .accessibility-trigger svg {
+        width: 20px !important;
+        height: 20px !important;
     }
 }
