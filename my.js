@@ -174,6 +174,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
     closeBtn.addEventListener('click', () => modal.classList.remove('active'));
 
+    // --- Модальні вікна Юридичного протоколу ---
+    const verifyModal = document.getElementById('legal-verify-modal');
+    const ndaModal = document.getElementById('legal-nda-modal');
+    const linkVerify = document.getElementById('linkVerification');
+    const linkNDA = document.getElementById('linkNDA');
+    const closeVerifyBtn = document.getElementById('close-verify-modal');
+    const closeNdaBtn = document.getElementById('close-nda-modal');
+
+    if (linkVerify) {
+        linkVerify.addEventListener('click', (e) => {
+            e.preventDefault();
+            verifyModal.classList.add('active');
+        });
+    }
+    if (linkNDA) {
+        linkNDA.addEventListener('click', (e) => {
+            e.preventDefault();
+            ndaModal.classList.add('active');
+        });
+    }
+    if (closeVerifyBtn) {
+        closeVerifyBtn.addEventListener('click', () => verifyModal.classList.remove('active'));
+    }
+    if (closeNdaBtn) {
+        closeNdaBtn.addEventListener('click', () => ndaModal.classList.remove('active'));
+    }
+
+    // Закриття модалок при кліку поза вікном
+    window.addEventListener('click', (e) => {
+        if (e.target === verifyModal) verifyModal.classList.remove('active');
+        if (e.target === ndaModal) ndaModal.classList.remove('active');
+    });
+
     recForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const db = getDB();

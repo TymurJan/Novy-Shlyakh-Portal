@@ -85,11 +85,11 @@
                     <h4 style="margin-bottom: 10px; color: var(--danger); font-size: 14px;">Юридичний протокол</h4>
                     <label style="display: flex; gap: 10px; align-items: flex-start; margin-bottom: 10px; cursor: pointer; font-size: 13px; line-height: 1.4;">
                         <input type="checkbox" id="reg-verify" required style="margin-top: 2px; width: 16px; height: 16px;">
-                        <span>Я підтверджую свою особу та зобов'язуюсь надати відповідні документи (УБД/Паспорт) для верифікації на вимогу спеціаліста.</span>
+                        <span>Я підтверджую свою особу та зобов'язуюсь надати <a href="#" id="linkVerification" style="text-decoration: underline;">відповідні документи (УБД/Паспорт) для верифікації</a> на вимогу спеціаліста.</span>
                     </label>
                     <label style="display: flex; gap: 10px; align-items: flex-start; cursor: pointer; font-size: 13px; line-height: 1.4;">
                         <input type="checkbox" id="reg-nda" required style="margin-top: 2px; width: 16px; height: 16px;">
-                        <span>Я приймаю умови <a href="#" style="text-decoration: underline;">Договору про нерозголошення (NDA)</a> та даю згоду на обробку моїх персональних даних.</span>
+                        <span>Я приймаю умови <a href="#" id="linkNDA" style="text-decoration: underline;">Договору про нерозголошення (NDA)</a> та даю згоду на обробку моїх персональних даних.</span>
                     </label>
                 </div>
 
@@ -256,7 +256,40 @@
         </div>
     </div>
 
+    <!-- Модалка верифікації особи -->
+    <div id="legal-verify-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <span class="close-btn" id="close-verify-modal">&times;</span>
+            <h2 style="color: var(--primary-color); margin-bottom: 15px; font-family: 'Outfit';">Протокол верифікації ветерана</h2>
+            <div style="font-size: 14px; line-height: 1.6; color: var(--text-secondary);">
+                <p style="margin-bottom: 12px;">Проєкт «Новий Шлях» та ГО «ТАЛАН ЮА» ставлять безпеку отримувачів допомоги та спеціалістів на перше місце.</p>
+                <p style="margin-bottom: 12px;"><strong>Чому потрібна верифікація?</strong><br>
+                Ми надаємо безкоштовні професійні консультації психологів, юристів та спеціалістів з реабілітації. Для підтвердження права на пільгове обслуговування ви зобов'язуєтесь надати посвідчення УБД, паспорт або інший офіційний документ безпосередньо фахівцю під час першої зустрічі.</p>
+                <p style="margin-bottom: 12px;"><strong>Конфіденційність документів:</strong><br>
+                Організація не збирає та не передає ваші копії документів третім особам. Усі завантаження файлів у захищений Сейф на порталі шифруються за допомогою алгоритму AES-256 (Fernet) та доступні виключно вашому призначеному спеціалісту.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модалка NDA -->
+    <div id="legal-nda-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <span class="close-btn" id="close-nda-modal">&times;</span>
+            <h2 style="color: var(--primary-color); margin-bottom: 15px; font-family: 'Outfit';">Договір про нерозголошення (NDA)</h2>
+            <div style="font-size: 14px; line-height: 1.6; color: var(--text-secondary);">
+                <p style="margin-bottom: 12px;">Цей Договір про нерозголошення (NDA) укладається між вами та ГО «ТАЛАН ЮА».</p>
+                <p style="margin-bottom: 12px;"><strong>1. Конфіденційність інформації:</strong><br>
+                Ви зобов'язуєтесь не розголошувати, не публікувати у відкритих джерелах та не передавати третім особам деталі консультацій, методики роботи, особисті дані та робочі контакти спеціалістів, отримані під час роботи на порталі.</p>
+                <p style="margin-bottom: 12px;"><strong>2. Персональні дані спеціалістів:</strong><br>
+                Адреси кабінетів, прямі номери телефонів та розклади спеціалістів є конфіденційними та призначені виключно для вашого індивідуального супроводу.</p>
+                <p style="margin-bottom: 12px;"><strong>3. Обробка даних:</strong><br>
+                Ви надаєте згоду ГО «ТАЛАН ЮА» на збір та безпечну обробку ваших персональних даних (ПІБ, телефон, контакти) з метою координації та надання допомоги.</p>
+            </div>
+        </div>
+    </div>
+
     <script src="my.js"></script>
     <script src="accessibility.js"></script>
 </body>
 </html>
+
