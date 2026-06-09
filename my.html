@@ -145,17 +145,57 @@
                         <input type="file" id="spec-doc" accept="application/pdf">
                     </div>
 
-                    <!-- КЕП підпис — опційно, але рекомендовано -->
-                    <div class="form-group kep-section" style="margin-bottom: 20px; padding: 15px; border: 1px dashed rgba(46, 139, 87, 0.4); border-radius: 8px; background: rgba(46, 139, 87, 0.02);">
-                        <label style="display:flex;align-items:center;gap:8px;font-weight: 600;font-size:14px;color:var(--primary-color);">
-                            🔐 КЕП-файл для підписання угоди
-                            <span class="kep-badge" style="background: rgba(46, 139, 87, 0.15); color: var(--primary-color); font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; text-transform: uppercase;">Рекомендовано</span>
+                    <!-- Підписання угоди: вибір методу -->
+                    <div class="form-group" style="margin-bottom: 20px; padding: 18px; border: 1px solid rgba(46,139,87,0.25); border-radius: 12px; background: rgba(46,139,87,0.03);">
+                        <label style="font-weight: 600; font-size: 14px; color: var(--primary-color); display: block; margin-bottom: 14px;">
+                            🔐 Підписання Угоди про співпрацю
+                            <span style="background: rgba(46,139,87,0.15); color: var(--primary-color); font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; margin-left: 8px;">Обов'язково</span>
                         </label>
-                        <p class="kep-hint" style="font-size: 12px; color: var(--text-secondary); margin: 6px 0 10px;">
-                            Якщо ви маєте КЕП (ПриватБанк, АЦСК ДПС) — завантажте файл .p12. Це надасть угоді юридичну силу відповідно до ЗУ №852-IV. Пароль не зберігається.
-                        </p>
-                        <input type="file" id="spec-kep" accept=".p12,.pfx,.jks" style="margin-bottom:8px; width: 100%;">
-                        <input type="password" id="spec-kep-password" placeholder="Пароль від КЕП-файлу" autocomplete="off" style="width: 100%;">
+
+                        <!-- Перемикачі методу -->
+                        <div style="display: flex; gap: 10px; margin-bottom: 16px;">
+                            <label id="kep-method-file-label" style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 8px; border: 2px solid var(--primary-color); border-radius: 10px; cursor: pointer; background: rgba(46,139,87,0.06); text-align: center; transition: 0.2s;">
+                                <input type="radio" name="sign-method" id="sign-method-file" value="file" checked style="display:none;">
+                                <span style="font-size: 22px;">💾</span>
+                                <span style="font-weight: 600; font-size: 13px; color: var(--primary-color);">Файловий КЕП</span>
+                                <span style="font-size: 11px; color: var(--text-secondary); line-height: 1.4;">Для всіх спеціалістів<br>(.p12 / .pfx / .jks)</span>
+                            </label>
+                            <label id="kep-method-diia-label" style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 8px; border: 2px solid var(--border-color); border-radius: 10px; cursor: pointer; text-align: center; transition: 0.2s;">
+                                <input type="radio" name="sign-method" id="sign-method-diia" value="diia" style="display:none;">
+                                <span style="font-size: 22px;">📱</span>
+                                <span style="font-weight: 600; font-size: 13px; color: #111;">Дія.Підпис</span>
+                                <span style="font-size: 11px; color: var(--text-secondary); line-height: 1.4;">Тільки для ФОП<br>(підтвердження через ЄДРПОУ)</span>
+                            </label>
+                        </div>
+
+                        <!-- Панель: Файловий КЕП -->
+                        <div id="panel-sign-file">
+                            <p style="font-size: 12px; color: var(--text-secondary); margin: 0 0 10px;">
+                                Завантажте файл КЕП (ПриватБанк Key, АЦСК ДПС тощо). Угода підписується локально — пароль не зберігається на сервері. Документ набуває юридичної сили відповідно до <strong>ЗУ №852-IV</strong>.
+                            </p>
+                            <input type="file" id="spec-kep" accept=".p12,.pfx,.jks" style="margin-bottom: 8px; width: 100%;">
+                            <input type="password" id="spec-kep-password" placeholder="Пароль від КЕП-файлу" autocomplete="off" style="width: 100%;">
+                        </div>
+
+                        <!-- Панель: Дія.Підпис (тільки для ФОП) -->
+                        <div id="panel-sign-diia" style="display: none;">
+                            <div style="background: #fffbe6; border: 1px solid #ffe58f; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+                                <p style="font-size: 12px; color: #7a5c00; margin: 0; line-height: 1.5;">
+                                    <strong>📋 Тільки для офіційно зареєстрованих ФОП (Фізична Особа-Підприємець)</strong><br>
+                                    Дія.Підпис підтверджує вашу реєстрацію в <strong>ЄДРПОУ</strong> та надає угоді статус кваліфікованого підпису без необхідності файлового КЕП. Для фізичних осіб без статусу ФОП цей метод недоступний.
+                                </p>
+                            </div>
+                            <div id="spec-edrpou-group" style="margin-bottom: 10px;">
+                                <label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">ЄДРПОУ / ІПН ФОП</label>
+                                <input type="text" id="spec-edrpou" placeholder="12345678" maxlength="10" style="width: 100%;" pattern="[0-9]{8,10}">
+                            </div>
+                            <button type="button" id="diia-sign-btn" class="btn-primary-auth" style="background: #111; color: #fff; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 14px;">
+                                <span style="font-weight: 900; font-family: 'Outfit', sans-serif; font-size: 16px; letter-spacing: 1px;">Дія</span>
+                                Підписати через Дія.Підпис
+                            </button>
+                            <input type="hidden" id="diia-sign-token">
+                            <p id="diia-sign-status" style="font-size: 12px; color: var(--danger); margin-top: 8px; font-weight: 600;">⚠️ Підпис ще не отримано</p>
+                        </div>
                     </div>
 
                     <!-- Галочки згоди спеціаліста -->

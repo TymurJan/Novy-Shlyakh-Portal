@@ -133,7 +133,85 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleRoleFields();
     }
 
-    // --- Реєстрація ---
+    // --- Перемикач методу підписання (Файловий КЕП ↔ Дія.Підпис для ФОП) ---
+    const signMethodFile = document.getElementById('sign-method-file');
+    const signMethodDiia = document.getElementById('sign-method-diia');
+    const panelFile = document.getElementById('panel-sign-file');
+    const panelDiia = document.getElementById('panel-sign-diia');
+    const labelFile = document.getElementById('kep-method-file-label');
+    const labelDiia = document.getElementById('kep-method-diia-label');
+
+    function switchSignMethod(method) {
+        const isFile = method === 'file';
+        // Показати/сховати панелі
+        if (panelFile) panelFile.style.display = isFile ? 'block' : 'none';
+        if (panelDiia) panelDiia.style.display = isFile ? 'none' : 'block';
+        // Підсвітка активної кнопки
+        if (labelFile) {
+            labelFile.style.border = isFile ? '2px solid var(--primary-color)' : '2px solid var(--border-color)';
+            labelFile.style.background = isFile ? 'rgba(46,139,87,0.06)' : 'transparent';
+        }
+        if (labelDiia) {
+            labelDiia.style.border = isFile ? '2px solid var(--border-color)' : '2px solid #111';
+            labelDiia.style.background = isFile ? 'transparent' : 'rgba(0,0,0,0.03)';
+        }
+    }
+
+    if (signMethodFile) {
+        signMethodFile.addEventListener('change', () => switchSignMethod('file'));
+    }
+    if (signMethodDiia) {
+        signMethodDiia.addEventListener('change', () => switchSignMethod('diia'));
+    }
+    // Ініціалізація
+    switchSignMethod('file');
+
+    // --- Дія.Підпис для ФОП (Mock) ---
+    const diiaSignBtn = document.getElementById('diia-sign-btn');
+    const diiaSignToken = document.getElementById('diia-sign-token');
+    const diiaSignStatus = document.getElementById('diia-sign-status');
+    const edrpouInput = document.getElementById('spec-edrpou');
+
+    if (diiaSignBtn) {
+        diiaSignBtn.addEventListener('click', () => {
+            const edrpou = edrpouInput ? edrpouInput.value.trim() : '';
+            // Валідація ЄДРПОУ — 8-10 цифр
+            if (!/^\d{8,10}$/.test(edrpou)) {
+                if (edrpouInput) {
+                    edrpouInput.style.border = '2px solid var(--danger)';
+                    edrpouInput.focus();
+                }
+                if (diiaSignStatus) {
+                    diiaSignStatus.style.color = 'var(--danger)';
+                    diiaSignStatus.textContent = '❌ Введіть коректний ЄДРПОУ / ІПН (8–10 цифр)';
+                }
+                return;
+            }
+            if (edrpouInput) edrpouInput.style.border = '';
+
+            diiaSignBtn.disabled = true;
+            diiaSignBtn.style.background = '#ffc107';
+            diiaSignBtn.style.color = '#000';
+            diiaSignBtn.innerHTML = '⏳ Перевірка реєстрації ФОП в ЄДРПОУ...';
+
+            // Mock: імітація запиту до Дія API
+            setTimeout(() => {
+                // В реальності: window.location.href = `https://diia.gov.ua/api/sign?edrpou=${edrpou}&callback=...`
+                diiaSignToken.value = `DIIA_FOP_SIGN_MOCK_${edrpou}_OK`;
+
+                diiaSignBtn.style.background = '#28a745';
+                diiaSignBtn.style.color = '#fff';
+                diiaSignBtn.innerHTML = '✅ ФОП верифіковано. Підпис отримано';
+
+                if (diiaSignStatus) {
+                    diiaSignStatus.style.color = 'var(--success, #28a745)';
+                    diiaSignStatus.textContent = `✅ ФОП (ЄДРПОУ: ${edrpou}) підтверджено в державному реєстрі. Угода підписана.`;
+                }
+            }, 3000);
+        });
+    }
+
+
     formRegister.addEventListener('submit', async (e) => {
         e.preventDefault();
         
@@ -206,16 +284,35 @@ document.addEventListener('DOMContentLoaded', () => {
             formData.append('photo', document.getElementById('spec-photo').files[0]);
             formData.append('document', document.getElementById('spec-doc').files[0]);
 
-            // КЕП підпис — опційно
-            const kepInput = document.getElementById('spec-kep');
-            const kepPwd = document.getElementById('spec-kep-password');
-            if (kepInput && kepInput.files.length > 0) {
+            // Визначаємо метод підписання
+            const chosenMethod = document.querySelector('input[name="sign-method"]:checked')?.value || 'file';
+            formData.append('sign_method', chosenMethod);
+
+            if (chosenMethod === 'file') {
+                // Файловий КЕП — обов'язковий файл
+                const kepInput = document.getElementById('spec-kep');
+                const kepPwd = document.getElementById('spec-kep-password');
+                if (!kepInput || kepInput.files.length === 0) {
+                    alert('⚠️ Для реєстрації спеціаліста необхідно завантажити файл КЕП (.p12/.pfx/.jks).\n\nЯкщо у вас немає файлового КЕП — оберіть метод "Дія.Підпис" (тільки для ФОП).');
+                    return;
+                }
                 formData.append('kep_file', kepInput.files[0]);
                 formData.append('kep_password', kepPwd ? kepPwd.value : '');
+            } else {
+                // Дія.Підпис для ФОП — обов'язковий токен підпису
+                const signToken = document.getElementById('diia-sign-token')?.value;
+                const edrpou = document.getElementById('spec-edrpou')?.value.trim();
+                if (!signToken) {
+                    alert('⚠️ Будь ласка, натисніть "Підписати через Дія.Підпис" та дочекайтеся підтвердження вашого статусу ФОП в ЄДРПОУ.');
+                    return;
+                }
+                formData.append('diia_sign_token', signToken);
+                formData.append('edrpou', edrpou || '');
             }
 
             const submitBtn = formRegister.querySelector('button[type="submit"]');
             const origBtnText = submitBtn ? submitBtn.textContent : '';
+
             if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Надсилаємо...'; }
 
             try {
