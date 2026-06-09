@@ -336,20 +336,58 @@ body.is-tg-app .hero {
                     <input type="file" id="regDoc" accept="application/pdf" required>
                 </div>
 
-                <!-- КЕП підпис — опційно, але рекомендовано (ЗУ №852-IV) -->
-                <div class="form-group kep-section">
-                    <label style="display:flex;align-items:center;gap:8px;">
-                        🔐 КЕП-файл для підписання угоди
-                        <span class="kep-badge">Рекомендовано</span>
+                <!-- Підписання угоди: вибір методу -->
+                <div class="form-group" style="margin-bottom: 20px; padding: 18px; border: 1px solid rgba(46,139,87,0.25); border-radius: 12px; background: rgba(46,139,87,0.03);">
+                    <label style="font-weight: 600; font-size: 14px; color: #2e8b57; display: block; margin-bottom: 6px;">
+                        🔐 Підписання Угоди про співпрацю
+                        <span style="background: rgba(46,139,87,0.15); color: #2e8b57; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; margin-left: 8px;">Обов'язково</span>
                     </label>
-                    <p class="kep-hint">
-                        Якщо ви маєте КЕП (ПриватБанк, Мін'юст, АЦСК ДПС) — завантажте .p12 файл.
-                        Це надасть вашій угоді повну юридичну силу відповідно до ЗУ №852-IV.
-                        Пароль <strong>не зберігається</strong> — використовується лише для підписання.
-                    </p>
-                    <input type="file" id="regKep" accept=".p12,.pfx,.jks" style="margin-bottom:8px;">
-                    <input type="password" id="regKepPassword" placeholder="Пароль від КЕП-файлу (не зберігається)" autocomplete="off">
+                    <p style="font-size: 12px; color: #5f6b75; margin: 0 0 12px; font-weight: 500;">Оберіть один метод підписання угоди:</p>
+
+                    <!-- Картки вибору методу -->
+                    <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+                        <label id="idx-kep-method-file-label" style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px 8px; border: 2px solid #2e8b57; border-radius: 12px; cursor: pointer; background: rgba(46,139,87,0.08); text-align: center; transition: 0.2s; box-shadow: 0 2px 8px rgba(46,139,87,0.15);">
+                            <input type="radio" name="idx-sign-method" id="idx-sign-method-file" value="file" checked style="display:none;">
+                            <span style="font-size: 28px;">💾</span>
+                            <span style="font-weight: 700; font-size: 13px; color: #2e8b57;">Файловий КЕП</span>
+                            <span style="font-size: 11px; color: #5f6b75; line-height: 1.4;">Для всіх спеціалістів<br><code style="background:#f0f0f0;padding:1px 4px;border-radius:3px;font-size:10px;">.p12 / .pfx / .jks</code></span>
+                        </label>
+                        <label id="idx-kep-method-diia-label" style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px 8px; border: 2px solid #ddd; border-radius: 12px; cursor: pointer; text-align: center; transition: 0.2s; background: #fff;">
+                            <input type="radio" name="idx-sign-method" id="idx-sign-method-diia" value="diia" style="display:none;">
+                            <span style="font-size: 28px;">📱</span>
+                            <span style="font-weight: 700; font-size: 13px; color: #111;">Дія.Підпис</span>
+                            <span style="font-size: 11px; color: #5f6b75; line-height: 1.4;">Тільки для <strong>ФОП</strong><br>(підтвердження через ЄДРПОУ)</span>
+                        </label>
+                    </div>
+
+                    <!-- Панель: Файловий КЕП -->
+                    <div id="idx-panel-sign-file">
+                        <p style="font-size: 12px; color: #5f6b75; margin: 0 0 8px;">
+                            Завантажте файл КЕП. Угода підписується локально — пароль не зберігається. Юридична сила відповідно до <strong>ЗУ №852-IV</strong>.
+                        </p>
+                        <input type="file" id="regKep" accept=".p12,.pfx,.jks" style="margin-bottom: 8px; width: 100%;">
+                        <input type="password" id="regKepPassword" placeholder="Пароль від КЕП-файлу (не зберігається)" autocomplete="off" style="width: 100%;">
+                    </div>
+
+                    <!-- Панель: Дія.Підпис (тільки для ФОП) -->
+                    <div id="idx-panel-sign-diia" style="display: none;">
+                        <div style="background: #fffbe6; border: 1px solid #ffe58f; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+                            <p style="font-size: 12px; color: #7a5c00; margin: 0; line-height: 1.5;">
+                                <strong>📋 Тільки для офіційно зареєстрованих ФОП</strong><br>
+                                Дія.Підпис підтверджує вашу реєстрацію в <strong>ЄДРПОУ</strong>. Для фізичних осіб без статусу ФОП цей метод недоступний.
+                            </p>
+                        </div>
+                        <label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">ЄДРПОУ / ІПН ФОП</label>
+                        <input type="text" id="idx-spec-edrpou" placeholder="12345678" maxlength="10" style="width: 100%; margin-bottom: 10px;" pattern="[0-9]{8,10}">
+                        <button type="button" id="idx-diia-sign-btn" class="btn-primary" style="background: #111; color: #fff; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 14px; width: 100%; padding: 12px;">
+                            <span style="font-weight: 900; font-family: 'Outfit', sans-serif; font-size: 16px; letter-spacing: 1px;">Дія</span>
+                            Підписати через Дія.Підпис
+                        </button>
+                        <input type="hidden" id="idx-diia-sign-token">
+                        <p id="idx-diia-sign-status" style="font-size: 12px; color: #dc3545; margin-top: 8px; font-weight: 600;">⚠️ Підпис ще не отримано</p>
+                    </div>
                 </div>
+
 
                 <div class="legal-consents">
                     <label class="consent-checkbox">

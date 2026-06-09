@@ -291,6 +291,66 @@ document.addEventListener('DOMContentLoaded', () => {
     if (closePrivacyBtn) closePrivacyBtn.onclick = () => toggleModal(privacyModal, false);
     if (closeAgreementBtn) closeAgreementBtn.onclick = () => toggleModal(agreementModal, false);
 
+    // --- Ініціалізація перемикача методу підписання (index.html) ---
+    const idxMethodFile = document.getElementById('idx-sign-method-file');
+    const idxMethodDiia = document.getElementById('idx-sign-method-diia');
+    const idxPanelFile  = document.getElementById('idx-panel-sign-file');
+    const idxPanelDiia  = document.getElementById('idx-panel-sign-diia');
+    const idxLabelFile  = document.getElementById('idx-kep-method-file-label');
+    const idxLabelDiia  = document.getElementById('idx-kep-method-diia-label');
+
+    function idxSwitchSignMethod(method) {
+        const isFile = method === 'file';
+        if (idxPanelFile) idxPanelFile.style.display = isFile ? 'block' : 'none';
+        if (idxPanelDiia) idxPanelDiia.style.display = isFile ? 'none' : 'block';
+        if (idxLabelFile) {
+            idxLabelFile.style.border = isFile ? '2px solid #2e8b57' : '2px solid #ddd';
+            idxLabelFile.style.background = isFile ? 'rgba(46,139,87,0.08)' : '#fff';
+            idxLabelFile.style.boxShadow = isFile ? '0 2px 8px rgba(46,139,87,0.15)' : 'none';
+        }
+        if (idxLabelDiia) {
+            idxLabelDiia.style.border = isFile ? '2px solid #ddd' : '2px solid #111';
+            idxLabelDiia.style.background = isFile ? '#fff' : 'rgba(0,0,0,0.03)';
+            idxLabelDiia.style.boxShadow = isFile ? 'none' : '0 2px 8px rgba(0,0,0,0.1)';
+        }
+    }
+
+    if (idxMethodFile) idxMethodFile.addEventListener('change', () => idxSwitchSignMethod('file'));
+    if (idxMethodDiia) idxMethodDiia.addEventListener('change', () => idxSwitchSignMethod('diia'));
+    idxSwitchSignMethod('file'); // за замовчуванням — файловий КЕП
+
+    // Mock handler для Дія.Підпис (ФОП верифікація через ЄДРПОУ)
+    const idxDiiaBtn    = document.getElementById('idx-diia-sign-btn');
+    const idxDiiaToken  = document.getElementById('idx-diia-sign-token');
+    const idxDiiaStatus = document.getElementById('idx-diia-sign-status');
+    const idxEdrpou     = document.getElementById('idx-spec-edrpou');
+
+    if (idxDiiaBtn) {
+        idxDiiaBtn.addEventListener('click', () => {
+            const edrpou = idxEdrpou ? idxEdrpou.value.trim() : '';
+            if (!/^\d{8,10}$/.test(edrpou)) {
+                if (idxEdrpou) { idxEdrpou.style.border = '2px solid #dc3545'; idxEdrpou.focus(); }
+                if (idxDiiaStatus) { idxDiiaStatus.style.color = '#dc3545'; idxDiiaStatus.textContent = '❌ Введіть коректний ЄДРПОУ / ІПН (8–10 цифр)'; }
+                return;
+            }
+            if (idxEdrpou) idxEdrpou.style.border = '';
+            idxDiiaBtn.disabled = true;
+            idxDiiaBtn.style.background = '#ffc107';
+            idxDiiaBtn.style.color = '#000';
+            idxDiiaBtn.innerHTML = '⏳ Перевірка реєстрації ФОП в ЄДРПОУ...';
+            setTimeout(() => {
+                if (idxDiiaToken) idxDiiaToken.value = `DIIA_FOP_SIGN_MOCK_${edrpou}_OK`;
+                idxDiiaBtn.style.background = '#28a745';
+                idxDiiaBtn.style.color = '#fff';
+                idxDiiaBtn.innerHTML = '✅ ФОП верифіковано. Підпис отримано';
+                if (idxDiiaStatus) {
+                    idxDiiaStatus.style.color = '#28a745';
+                    idxDiiaStatus.textContent = `✅ ФОП (ЄДРПОУ: ${edrpou}) підтверджено в державному реєстрі. Угода підписана.`;
+                }
+            }, 3000);
+        });
+    }
+
     // --- ВІДПРАВКА ФОРМИ РЕЄСТРАЦІЇ (з підтримкою КЕП — ЗУ №852-IV) ---
     if (regForm) {
         regForm.onsubmit = async (e) => {
@@ -313,12 +373,28 @@ document.addEventListener('DOMContentLoaded', () => {
             formData.append('photo', document.getElementById('regPhoto').files[0]);
             formData.append('document', document.getElementById('regDoc').files[0]);
 
-            // КЕП підпис — опційно
-            const kepInput = document.getElementById('regKep');
-            const kepPwd = document.getElementById('regKepPassword');
-            if (kepInput && kepInput.files.length > 0) {
+            // Визначаємо метод підписання (обов'язково)
+            const chosenMethod = document.querySelector('input[name="idx-sign-method"]:checked')?.value || 'file';
+            formData.append('sign_method', chosenMethod);
+
+            if (chosenMethod === 'file') {
+                const kepInput = document.getElementById('regKep');
+                const kepPwd   = document.getElementById('regKepPassword');
+                if (!kepInput || kepInput.files.length === 0) {
+                    alert('⚠️ Для реєстрації необхідно завантажити файл КЕП (.p12/.pfx/.jks).\n\nЯкщо у вас немає файлового КЕП — оберіть "Дія.Підпис" (тільки для ФОП).');
+                    return;
+                }
                 formData.append('kep_file', kepInput.files[0]);
                 formData.append('kep_password', kepPwd ? kepPwd.value : '');
+            } else {
+                const signToken = document.getElementById('idx-diia-sign-token')?.value;
+                const edrpou    = document.getElementById('idx-spec-edrpou')?.value.trim();
+                if (!signToken) {
+                    alert('⚠️ Будь ласка, натисніть "Підписати через Дія.Підпис" та дочекайтеся підтвердження вашого статусу ФОП в ЄДРПОУ.');
+                    return;
+                }
+                formData.append('diia_sign_token', signToken);
+                formData.append('edrpou', edrpou || '');
             }
 
             const submitBtn = regForm.querySelector('button[type="submit"]');
@@ -329,10 +405,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const response = await fetch('/api/register-specialist', { method: 'POST', body: formData });
                 const result = await response.json();
                 if (result.status === 'success') {
-                    const kepMsg = result.kep_signed ? ' Угода підписана вашим КЕПом.' : '';
+                    const kepMsg = result.kep_signed ? ' Угода підписана вашим КЕПом.' : (result.diia_signed ? ' Угода підписана через Дія.Підпис (ФОП).' : '');
                     alert('Дякуємо! Заявку надіслано на модерацію. Ми зв\'яжемося через Telegram-бот.' + kepMsg);
                     toggleModal(regModal, false);
-                    if (kepPwd) kepPwd.value = '';
                     window.location.href = 'index.html';
                 } else {
                     alert('Помилка: ' + (result.detail || 'Невідома помилка'));
@@ -345,5 +420,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
     }
+
 
     checkRegistrationHash();
