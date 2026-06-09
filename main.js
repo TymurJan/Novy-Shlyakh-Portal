@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 info.style.textAlign = "center";
                 info.style.padding = "20px";
                 info.style.color = "var(--primary-green)";
-                info.innerHTML = `💡 Це список ТОП-фахівців. Відкрийте <a href="https://t.me/Veteran_Novy_Shlyakh_Bot" style="color:white; text-decoration:underline;">Telegram-бота</a>, щоб побачити повний перелік (${specialists.length}+)`;
+                info.innerHTML = `💡 Це список ТОП-фахівців. Відкрийте <a href="https://t.me/Veteran_NovyShlyakh_Bot" style="color:white; text-decoration:underline;">Telegram-бота</a>, щоб побачити повний перелік (${specialists.length}+)`;
                 specialistGrid.appendChild(info);
             }
         }
@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Глобальна функція обробки запису
     window.handleBooking = (specName) => {
-        window.location.href = 'https://t.me/Veteran_Novy_Shlyakh_Bot';
+        window.location.href = 'https://t.me/Veteran_NovyShlyakh_Bot';
     };
 
     // Обробка кліків по табам
@@ -145,7 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnJoin) {
         btnJoin.addEventListener('click', () => {
             alert('Дякуємо за ваш інтерес! Форма реєстрації для спеціалістів буде відкрита найближчим часом. Будь ласка, залиште заявку в нашому Telegram-боті.');
-            window.location.href = "https://t.me/Veteran_Novy_Shlyakh_Bot";
+            window.location.href = "https://t.me/Veteran_NovyShlyakh_Bot";
         });
     }
 
@@ -250,9 +250,100 @@ document.addEventListener('DOMContentLoaded', () => {
             responseArea.innerHTML = `
                 <div style="border-left: 3px solid var(--primary-green); padding-left: 15px; margin-bottom: 15px;">
                     <p style="color: #ccc; font-style: italic; margin-bottom: 10px;">Ваш запит: "${text}"</p>
-                    <p style="color: white; line-height: 1.6;">Наразі мій серверний RAG-модуль знаходиться в стадії розгортання, тому я не маю доступу до законодавчої бази. <br><br> Будь ласка, скористайтеся <a href="https://t.me/Veteran_Novy_Shlyakh_Bot" style="color: var(--primary-green); font-weight: bold; text-decoration: none;">нашим Telegram-ботом</a> для отримання допомоги просто зараз.</p>
+                    <p style="color: white; line-height: 1.6;">Наразі мій серверний RAG-модуль знаходиться в стадії розгортання, тому я не маю доступу до законодавчої бази. <br><br> Будь ласка, скористайтеся <a href="https://t.me/Veteran_NovyShlyakh_Bot" style="color: var(--primary-green); font-weight: bold; text-decoration: none;">нашим Telegram-ботом</a> для отримання допомоги просто зараз.</p>
                 </div>
             `;
         }, 1500);
     }
 });
+
+    // --- ЛОГІКА РЕЄСТРАЦІЇ СПЕЦІАЛІСТА (Крок 2) ---
+    const regModal = document.getElementById('registration-modal');
+    const closeRegBtn = document.getElementById('closeRegModal');
+    const regForm = document.getElementById('specRegistrationForm');
+
+    const privacyModal = document.getElementById('legal-privacy-modal');
+    const agreementModal = document.getElementById('legal-agreement-modal');
+    const linkPrivacy = document.getElementById('linkPrivacy');
+    const linkAgreement = document.getElementById('linkAgreement');
+
+    function toggleModal(modal, show) {
+        if (!modal) return;
+        if (show) modal.classList.add('active');
+        else modal.classList.remove('active');
+    }
+
+    function checkRegistrationHash() {
+        if (window.location.hash === '#registration') {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('name') || params.get('cat') || params.get('phone')) {
+                toggleModal(regModal, true);
+            }
+        }
+    }
+
+    if (closeRegBtn) closeRegBtn.onclick = () => toggleModal(regModal, false);
+    if (linkPrivacy) linkPrivacy.onclick = (e) => { e.preventDefault(); toggleModal(privacyModal, true); };
+    if (linkAgreement) linkAgreement.onclick = (e) => { e.preventDefault(); toggleModal(agreementModal, true); };
+
+    const closePrivacyBtn = document.getElementById('closePrivacyModal');
+    const closeAgreementBtn = document.getElementById('closeAgreementModal');
+    if (closePrivacyBtn) closePrivacyBtn.onclick = () => toggleModal(privacyModal, false);
+    if (closeAgreementBtn) closeAgreementBtn.onclick = () => toggleModal(agreementModal, false);
+
+    // --- ВІДПРАВКА ФОРМИ РЕЄСТРАЦІЇ (з підтримкою КЕП — ЗУ №852-IV) ---
+    if (regForm) {
+        regForm.onsubmit = async (e) => {
+            e.preventDefault();
+
+            if (!document.getElementById('consentPrivacy').checked ||
+                !document.getElementById('consentAgreement').checked) {
+                alert('Будь ласка, погодьтеся з Політикою конфіденційності та Угодою про співпрацю.');
+                return;
+            }
+
+            const params = new URLSearchParams(window.location.search);
+            const formData = new FormData();
+            formData.append('name', params.get('name') || 'Не вказано');
+            formData.append('category', params.get('cat') || 'other');
+            formData.append('phone', params.get('phone') || '');
+            formData.append('tg_id', params.get('tg_id') || '');
+            formData.append('address', document.getElementById('regAddress').value);
+            formData.append('bio', document.getElementById('regBio').value);
+            formData.append('photo', document.getElementById('regPhoto').files[0]);
+            formData.append('document', document.getElementById('regDoc').files[0]);
+
+            // КЕП підпис — опційно
+            const kepInput = document.getElementById('regKep');
+            const kepPwd = document.getElementById('regKepPassword');
+            if (kepInput && kepInput.files.length > 0) {
+                formData.append('kep_file', kepInput.files[0]);
+                formData.append('kep_password', kepPwd ? kepPwd.value : '');
+            }
+
+            const submitBtn = regForm.querySelector('button[type="submit"]');
+            const origBtnText = submitBtn ? submitBtn.textContent : '';
+            if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Надсилаємо...'; }
+
+            try {
+                const response = await fetch('/api/register-specialist', { method: 'POST', body: formData });
+                const result = await response.json();
+                if (result.status === 'success') {
+                    const kepMsg = result.kep_signed ? ' Угода підписана вашим КЕПом.' : '';
+                    alert('Дякуємо! Заявку надіслано на модерацію. Ми зв\'яжемося через Telegram-бот.' + kepMsg);
+                    toggleModal(regModal, false);
+                    if (kepPwd) kepPwd.value = '';
+                    window.location.href = 'index.html';
+                } else {
+                    alert('Помилка: ' + (result.detail || 'Невідома помилка'));
+                }
+            } catch (err) {
+                console.error('Помилка відправки:', err);
+                alert('Помилка з\'єднання з сервером. Спробуйте пізніше.');
+            } finally {
+                if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = origBtnText; }
+            }
+        };
+    }
+
+    checkRegistrationHash();
