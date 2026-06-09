@@ -42,58 +42,136 @@
 
             <!-- Форма Реєстрації -->
             <form id="register-form" class="auth-form">
+                <!-- Вибір ролі -->
+                <div class="input-group" style="margin-bottom: 25px; padding: 15px; background: rgba(46, 139, 87, 0.03); border-radius: 8px; border: 1px solid rgba(46, 139, 87, 0.15);">
+                    <label style="font-weight: 600; color: var(--primary-color); margin-bottom: 8px;">Я реєструюся як:</label>
+                    <div style="display: flex; gap: 20px; margin-top: 5px;">
+                        <label style="display: flex; align-items: center; gap: 8px; font-weight: 500; font-size: 15px; cursor: pointer;">
+                            <input type="radio" name="user-role" value="veteran" checked style="width: auto; margin: 0; accent-color: var(--primary-color);">
+                            🛡️ Ветеран / Член родини
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; font-weight: 500; font-size: 15px; cursor: pointer;">
+                            <input type="radio" name="user-role" value="specialist" style="width: auto; margin: 0; accent-color: var(--primary-color);">
+                            🩺 Спеціаліст
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Спільні поля -->
                 <div class="input-group">
                     <label for="reg-name">ПІБ</label>
                     <input type="text" id="reg-name" placeholder="Іваненко Іван Іванович" required>
                 </div>
-                <div class="input-group">
-                    <label for="reg-email">Логін (Email або телефон)</label>
-                    <input type="text" id="reg-email" placeholder="ivan@example.com" required>
-                </div>
-                <div class="input-group">
-                    <label for="reg-password">Створіть пароль</label>
-                    <input type="password" id="reg-password" placeholder="••••••••" required>
-                </div>
-                <div class="input-group">
-                    <label for="reg-question">Секретне питання (для відновлення доступу)</label>
-                    <select id="reg-question" required>
-                        <option value="" disabled selected>Оберіть питання...</option>
-                        <option value="1">Дівоче прізвище матері</option>
-                        <option value="2">Позивний вашого першого командира</option>
-                        <option value="3">Назва вулиці, де ви виросли</option>
-                    </select>
-                </div>
-                <div class="input-group">
-                    <label for="reg-answer">Відповідь на секретне питання</label>
-                    <input type="text" id="reg-answer" placeholder="Ваша відповідь" required>
-                </div>
-                
-                <!-- Офіційна верифікація через ДІЮ -->
-                <div class="diia-auth-block" style="margin: 25px 0; text-align: center; border-top: 1px solid var(--border-color); padding-top: 25px; border-bottom: 1px solid var(--border-color); padding-bottom: 25px;">
-                    <p style="font-size: 14px; margin-bottom: 15px; color: var(--text-primary); font-weight: 500;">Відповідно до законодавства України, створення профілю вимагає підтвердження особи через державні реєстри.</p>
-                    <button type="button" id="diia-verify-btn" class="btn-primary-auth" style="background: #111; color: #fff; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px; transition: 0.3s;">
-                        <span style="font-weight: 900; font-family: 'Outfit', sans-serif; font-size: 18px; letter-spacing: 1px;">Дія.Підпис</span> 
-                        Пройти верифікацію
-                    </button>
-                    <!-- Приховане поле, яке заповнюється бекендом після успішної верифікації -->
-                    <input type="hidden" id="diia-verified-token" required>
-                    <p id="diia-status-text" style="font-size: 13px; color: var(--danger); font-weight: 600;">⚠️ Очікування верифікації...</p>
-                </div>
-                
-                <!-- Протокол підтвердження особи та NDA -->
-                <div class="legal-protocol" style="margin: 25px 0; padding: 15px; background: rgba(220, 53, 69, 0.05); border-left: 4px solid var(--danger); border-radius: 4px;">
-                    <h4 style="margin-bottom: 10px; color: var(--danger); font-size: 14px;">Юридичний протокол</h4>
-                    <label style="display: flex; gap: 10px; align-items: flex-start; margin-bottom: 10px; cursor: pointer; font-size: 13px; line-height: 1.4;">
-                        <input type="checkbox" id="reg-verify" required style="margin-top: 2px; width: 16px; height: 16px;">
-                        <span>Я підтверджую свою особу та зобов'язуюсь надати <a href="#" id="linkVerification" style="text-decoration: underline;">відповідні документи (УБД/Паспорт) для верифікації</a> на вимогу спеціаліста.</span>
-                    </label>
-                    <label style="display: flex; gap: 10px; align-items: flex-start; cursor: pointer; font-size: 13px; line-height: 1.4;">
-                        <input type="checkbox" id="reg-nda" required style="margin-top: 2px; width: 16px; height: 16px;">
-                        <span>Я приймаю умови <a href="#" id="linkNDA" style="text-decoration: underline;">Договору про нерозголошення (NDA)</a> та даю згоду на обробку моїх персональних даних.</span>
-                    </label>
+
+                <!-- БЛОК ПОЛІВ ВЕТЕРАНА -->
+                <div id="veteran-fields">
+                    <div class="input-group">
+                        <label for="reg-email">Логін (Email або телефон)</label>
+                        <input type="text" id="reg-email" placeholder="ivan@example.com" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="reg-password">Створіть пароль</label>
+                        <input type="password" id="reg-password" placeholder="••••••••" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="reg-question">Секретне питання (для відновлення доступу)</label>
+                        <select id="reg-question" required>
+                            <option value="" disabled selected>Оберіть питання...</option>
+                            <option value="1">Дівоче прізвище матері</option>
+                            <option value="2">Позивний вашого першого командира</option>
+                            <option value="3">Назва вулиці, де ви виросли</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="reg-answer">Відповідь на секретне питання</label>
+                        <input type="text" id="reg-answer" placeholder="Ваша відповідь" required>
+                    </div>
+                    
+                    <!-- Офіційна верифікація через ДІЮ -->
+                    <div class="diia-auth-block" style="margin: 25px 0; text-align: center; border-top: 1px solid var(--border-color); padding-top: 25px; border-bottom: 1px solid var(--border-color); padding-bottom: 25px;">
+                        <p style="font-size: 14px; margin-bottom: 15px; color: var(--text-primary); font-weight: 500;">Відповідно до законодавства України, створення профілю вимагає підтвердження особи через державні реєстри.</p>
+                        <button type="button" id="diia-verify-btn" class="btn-primary-auth" style="background: #111; color: #fff; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px; transition: 0.3s;">
+                            <span style="font-weight: 900; font-family: 'Outfit', sans-serif; font-size: 18px; letter-spacing: 1px;">Дія.Підпис</span> 
+                            Пройти верифікацію
+                        </button>
+                        <!-- Приховане поле, яке заповнюється бекендом після успішної верифікації -->
+                        <input type="hidden" id="diia-verified-token" required>
+                        <p id="diia-status-text" style="font-size: 13px; color: var(--danger); font-weight: 600;">⚠️ Очікування верифікації...</p>
+                    </div>
+                    
+                    <!-- Протокол підтвердження особи та NDA -->
+                    <div class="legal-protocol" style="margin: 25px 0; padding: 15px; background: rgba(220, 53, 69, 0.05); border-left: 4px solid var(--danger); border-radius: 4px;">
+                        <h4 style="margin-bottom: 10px; color: var(--danger); font-size: 14px;">Юридичний протокол</h4>
+                        <label style="display: flex; gap: 10px; align-items: flex-start; margin-bottom: 10px; cursor: pointer; font-size: 13px; line-height: 1.4;">
+                            <input type="checkbox" id="reg-verify" required style="margin-top: 2px; width: 16px; height: 16px;">
+                            <span>Я підтверджую свою особу та зобов'язуюсь надати <a href="#" id="linkVerification" style="text-decoration: underline;">відповідні документи (УБД/Паспорт) для верифікації</a> на вимогу спеціаліста.</span>
+                        </label>
+                        <label style="display: flex; gap: 10px; align-items: flex-start; cursor: pointer; font-size: 13px; line-height: 1.4;">
+                            <input type="checkbox" id="reg-nda" required style="margin-top: 2px; width: 16px; height: 16px;">
+                            <span>Я приймаю умови <a href="#" id="linkNDA" style="text-decoration: underline;">Договору про нерозголошення (NDA)</a> та даю згоду на обробку моїх персональних даних.</span>
+                        </label>
+                    </div>
                 </div>
 
-                <button type="submit" class="btn-primary-auth">Зареєструватися</button>
+                <!-- БЛОК ПОЛІВ СПЕЦІАЛІСТА -->
+                <div id="specialist-fields" style="display: none;">
+                    <div class="input-group">
+                        <label for="spec-category">Спеціалізація (Напрямок)</label>
+                        <select id="spec-category">
+                            <option value="Психотерапія">Психотерапія (Психолог)</option>
+                            <option value="Юриспруденція">Юриспруденція (Юрист)</option>
+                            <option value="Реабілітація">Фізична реабілітація</option>
+                            <option value="Кар'єра">Кар'єра та працевлаштування</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="spec-phone">Номер телефону</label>
+                        <input type="text" id="spec-phone" placeholder="+38 (063) 123-45-67">
+                    </div>
+                    <div class="input-group">
+                        <label for="spec-address">📍 Адреса кабінету (або "Онлайн")</label>
+                        <input type="text" id="spec-address" placeholder="м. Черкаси, вул. Центральна, 12">
+                    </div>
+                    <div class="input-group">
+                        <label for="spec-bio">📝 Про професійний досвід (Біо)</label>
+                        <textarea id="spec-bio" rows="4" placeholder="Розкажіть про ваш досвід роботи з ветеранами..."></textarea>
+                    </div>
+                    <div class="input-group">
+                        <label for="spec-photo">📸 Фото для профілю (PNG/JPG)</label>
+                        <input type="file" id="spec-photo" accept="image/*">
+                    </div>
+                    <div class="input-group">
+                        <label for="spec-doc">📄 Диплом або Ліцензія (PDF)</label>
+                        <input type="file" id="spec-doc" accept="application/pdf">
+                    </div>
+
+                    <!-- КЕП підпис — опційно, але рекомендовано -->
+                    <div class="form-group kep-section" style="margin-bottom: 20px; padding: 15px; border: 1px dashed rgba(46, 139, 87, 0.4); border-radius: 8px; background: rgba(46, 139, 87, 0.02);">
+                        <label style="display:flex;align-items:center;gap:8px;font-weight: 600;font-size:14px;color:var(--primary-color);">
+                            🔐 КЕП-файл для підписання угоди
+                            <span class="kep-badge" style="background: rgba(46, 139, 87, 0.15); color: var(--primary-color); font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; text-transform: uppercase;">Рекомендовано</span>
+                        </label>
+                        <p class="kep-hint" style="font-size: 12px; color: var(--text-secondary); margin: 6px 0 10px;">
+                            Якщо ви маєте КЕП (ПриватБанк, АЦСК ДПС) — завантажте файл .p12. Це надасть угоді юридичну силу відповідно до ЗУ №852-IV. Пароль не зберігається.
+                        </p>
+                        <input type="file" id="spec-kep" accept=".p12,.pfx,.jks" style="margin-bottom:8px; width: 100%;">
+                        <input type="password" id="spec-kep-password" placeholder="Пароль від КЕП-файлу" autocomplete="off" style="width: 100%;">
+                    </div>
+
+                    <!-- Галочки згоди спеціаліста -->
+                    <div class="legal-consents" style="display: flex; flex-direction: column; gap: 15px; margin: 25px 0;">
+                        <label style="display: flex; gap: 10px; align-items: flex-start; cursor: pointer; font-size: 13px; line-height: 1.4;">
+                            <input type="checkbox" id="spec-consent-privacy">
+                            <span>Я даю згоду на обробку персональних даних відповідно до <a href="#" id="spec-linkPrivacy" style="text-decoration: underline;">Політики конфіденційності</a></span>
+                        </label>
+                        <label style="display: flex; gap: 10px; align-items: flex-start; cursor: pointer; font-size: 13px; line-height: 1.4;">
+                            <input type="checkbox" id="spec-consent-agreement">
+                            <span>Я приймаю умови <a href="#" id="spec-linkAgreement" style="text-decoration: underline;">Угоди про співпрацю</a> (включаючи внесок на статутну діяльність)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary-auth" style="margin-top: 15px;">Зареєструватися</button>
             </form>
 
             <!-- Форма Спеціаліста -->
@@ -284,6 +362,31 @@
                 Адреси кабінетів, прямі номери телефонів та розклади спеціалістів є конфіденційними та призначені виключно для вашого індивідуального супроводу.</p>
                 <p style="margin-bottom: 12px;"><strong>3. Обробка даних:</strong><br>
                 Ви надаєте згоду ГО «ТАЛАН ЮА» на збір та безпечну обробку ваших персональних даних (ПІБ, телефон, контакти) з метою координації та надання допомоги.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модалка політики конфіденційності для спеціалістів -->
+    <div id="spec-legal-privacy-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <span class="close-btn" id="close-spec-privacy-modal">&times;</span>
+            <h2 style="color: var(--primary-color); margin-bottom: 15px; font-family: 'Outfit';">Політика конфіденційності</h2>
+            <div style="font-size: 14px; line-height: 1.6; color: var(--text-secondary);">
+                <p><strong>ГО «ТАЛАН ЮА» / Проєкт «Новий Шлях»</strong></p>
+                <p>Ми збираємо ПІБ, контакти, адресу кабінету, опис досвіду, фото та копії документів про освіту (ліцензії, дипломи). Чутливі документи шифруються за алгоритмом Fernet (AES-128) та зберігаються у закритому контурі.</p>
+                <p>Дані використовуються виключно для верифікації спеціаліста, адміністрування доступу та координації з ветеранами.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модалка договору про співпрацю для спеціалістів -->
+    <div id="spec-legal-agreement-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <span class="close-btn" id="close-spec-agreement-modal">&times;</span>
+            <h2 style="color: var(--primary-color); margin-bottom: 15px; font-family: 'Outfit';">Угода про співпрацю</h2>
+            <div style="font-size: 14px; line-height: 1.6; color: var(--text-secondary);">
+                <p>Спеціаліст погоджується розмістити анкету на порталі «Новий Шлях» для безкоштовного або пільгового обслуговування ветеранів та їхніх сімей.</p>
+                <p><strong>Статутна діяльність:</strong> Спеціаліст погоджується на добровільний внесок на статутну діяльність ГО «ТАЛАН ЮА» від суми платних послуг, наданих користувачам порталу. Кошти йдуть на адміністрування платформи.</p>
             </div>
         </div>
     </div>

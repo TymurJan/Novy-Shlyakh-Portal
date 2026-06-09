@@ -75,54 +75,168 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3000);
     });
 
+    // --- Перемикання полів ролей ---
+    const roleRadios = document.getElementsByName('user-role');
+    const vetFields = document.getElementById('veteran-fields');
+    const specFields = document.getElementById('specialist-fields');
+
+    const vetInputs = [
+        document.getElementById('reg-email'),
+        document.getElementById('reg-password'),
+        document.getElementById('reg-question'),
+        document.getElementById('reg-answer')
+    ];
+
+    const specInputs = [
+        document.getElementById('spec-phone'),
+        document.getElementById('spec-address'),
+        document.getElementById('spec-bio'),
+        document.getElementById('spec-photo'),
+        document.getElementById('spec-doc'),
+        document.getElementById('spec-consent-privacy'),
+        document.getElementById('spec-consent-agreement')
+    ];
+
+    function toggleRoleFields() {
+        let isVet = true;
+        for (const radio of roleRadios) {
+            if (radio.checked && radio.value === 'specialist') {
+                isVet = false;
+            }
+        }
+
+        if (isVet) {
+            if (vetFields) vetFields.style.display = 'block';
+            if (specFields) specFields.style.display = 'none';
+            vetInputs.forEach(input => {
+                if (input) input.required = true;
+            });
+            specInputs.forEach(input => {
+                if (input) input.required = false;
+            });
+        } else {
+            if (vetFields) vetFields.style.display = 'none';
+            if (specFields) specFields.style.display = 'block';
+            vetInputs.forEach(input => {
+                if (input) input.required = false;
+            });
+            specInputs.forEach(input => {
+                if (input && input.id !== 'spec-kep' && input.id !== 'spec-kep-password') {
+                    input.required = true;
+                }
+            });
+        }
+    }
+
+    roleRadios.forEach(radio => radio.addEventListener('change', toggleRoleFields));
+    if (vetFields && specFields) {
+        toggleRoleFields();
+    }
+
     // --- Реєстрація ---
-    formRegister.addEventListener('submit', (e) => {
+    formRegister.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        // Отримуємо чекбокси (html5 required вже перевірив їх, але для надійності)
-        const checkVerify = document.getElementById('reg-verify').checked;
-        const checkNda = document.getElementById('reg-nda').checked;
-        const diiaToken = diiaTokenInput.value;
-        
-        if (!diiaToken) {
-            alert('Будь ласка, пройдіть верифікацію особи через Дію перед реєстрацією.');
-            return;
-        }
-        
-        if (!checkVerify || !checkNda) return;
-
-        const name = document.getElementById('reg-name').value;
-        const email = document.getElementById('reg-email').value;
-        const password = document.getElementById('reg-password').value;
-        const questionId = document.getElementById('reg-question').value;
-        const answer = document.getElementById('reg-answer').value;
-
-        const db = getDB();
-        if (db[email]) {
-            alert('Користувач з таким логіном вже існує!');
-            return;
+        let isVet = true;
+        for (const radio of roleRadios) {
+            if (radio.checked && radio.value === 'specialist') {
+                isVet = false;
+            }
         }
 
-        // Зберігаємо юзера (В реальності сервер перевірить JWT токен)
-        db[email] = { 
-            name, 
-            password, 
-            questionId, 
-            answer: answer.toLowerCase(),
-            verified_by: 'DIIA_REGISTRY',
-            token: diiaToken
-        };
-        saveDB(db);
+        if (isVet) {
+            // Реєстрація ВЕТЕРАНА
+            const checkVerify = document.getElementById('reg-verify').checked;
+            const checkNda = document.getElementById('reg-nda').checked;
+            const diiaToken = diiaTokenInput.value;
+            
+            if (!diiaToken) {
+                alert('Будь ласка, пройдіть верифікацію особи через Дію перед реєстрацією.');
+                return;
+            }
+            
+            if (!checkVerify || !checkNda) return;
 
-        alert('✅ Профіль створено! Усі дані захищені та підтверджені. Тепер ви можете увійти.');
-        tabLogin.click(); // Перемикаємо на логін
-        formRegister.reset();
-        diiaBtn.disabled = false;
-        diiaBtn.style.background = '#111';
-        diiaBtn.innerHTML = '<span style="font-weight: 900; font-family: Outfit; font-size: 18px; letter-spacing: 1px;">Дія.Підпис</span> Пройти верифікацію';
-        diiaStatusText.textContent = '⚠️ Очікування верифікації...';
-        diiaStatusText.style.color = 'var(--danger)';
-        diiaTokenInput.value = '';
+            const name = document.getElementById('reg-name').value;
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+            const questionId = document.getElementById('reg-question').value;
+            const answer = document.getElementById('reg-answer').value;
+
+            const db = getDB();
+            if (db[email]) {
+                alert('Користувач з таким логіном вже існує!');
+                return;
+            }
+
+            db[email] = { 
+                name, 
+                password, 
+                questionId, 
+                answer: answer.toLowerCase(),
+                verified_by: 'DIIA_REGISTRY',
+                token: diiaToken
+            };
+            saveDB(db);
+
+            alert('✅ Профіль ветерана створено! Усі дані захищені та підтверджені. Тепер ви можете увійти.');
+            tabLogin.click(); // Перемикаємо на логін
+            formRegister.reset();
+            diiaBtn.disabled = false;
+            diiaBtn.style.background = '#111';
+            diiaBtn.innerHTML = '<span style="font-weight: 900; font-family: Outfit; font-size: 18px; letter-spacing: 1px;">Дія.Підпис</span> Пройти верифікацію';
+            diiaStatusText.textContent = '⚠️ Очікування верифікації...';
+            diiaStatusText.style.color = 'var(--danger)';
+            diiaTokenInput.value = '';
+            toggleRoleFields();
+        } else {
+            // Реєстрація СПЕЦІАЛІСТА
+            if (!document.getElementById('spec-consent-privacy').checked ||
+                !document.getElementById('spec-consent-agreement').checked) {
+                alert('Будь ласка, погодьтеся з Політикою конфіденційності та Угодою про співпрацю.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('name', document.getElementById('reg-name').value);
+            formData.append('category', document.getElementById('spec-category').value);
+            formData.append('phone', document.getElementById('spec-phone').value);
+            formData.append('address', document.getElementById('spec-address').value);
+            formData.append('bio', document.getElementById('spec-bio').value);
+            formData.append('photo', document.getElementById('spec-photo').files[0]);
+            formData.append('document', document.getElementById('spec-doc').files[0]);
+
+            // КЕП підпис — опційно
+            const kepInput = document.getElementById('spec-kep');
+            const kepPwd = document.getElementById('spec-kep-password');
+            if (kepInput && kepInput.files.length > 0) {
+                formData.append('kep_file', kepInput.files[0]);
+                formData.append('kep_password', kepPwd ? kepPwd.value : '');
+            }
+
+            const submitBtn = formRegister.querySelector('button[type="submit"]');
+            const origBtnText = submitBtn ? submitBtn.textContent : '';
+            if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Надсилаємо...'; }
+
+            try {
+                const response = await fetch('/api/register-specialist', { method: 'POST', body: formData });
+                const result = await response.json();
+                if (result.status === 'success') {
+                    const kepMsg = result.kep_signed ? ' Угода підписана вашим КЕПом.' : '';
+                    alert('Дякуємо! Заявку спеціаліста надіслано на модерацію. Ми зв\'яжемося через Telegram-бот.' + kepMsg);
+                    formRegister.reset();
+                    if (kepPwd) kepPwd.value = '';
+                    window.location.href = 'index.html';
+                } else {
+                    alert('Помилка: ' + (result.detail || 'Невідома помилка'));
+                }
+            } catch (err) {
+                console.error('Помилка відправки:', err);
+                alert('Помилка з\'єднання з сервером. Спробуйте пізніше.');
+            } finally {
+                if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = origBtnText; }
+            }
+        }
     });
 
     // --- Вхід ---
@@ -182,6 +296,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeVerifyBtn = document.getElementById('close-verify-modal');
     const closeNdaBtn = document.getElementById('close-nda-modal');
 
+    const specPrivacyModal = document.getElementById('spec-legal-privacy-modal');
+    const specAgreementModal = document.getElementById('spec-legal-agreement-modal');
+    const linkSpecPrivacy = document.getElementById('spec-linkPrivacy');
+    const linkSpecAgreement = document.getElementById('spec-linkAgreement');
+    const closeSpecPrivacyBtn = document.getElementById('close-spec-privacy-modal');
+    const closeSpecAgreementBtn = document.getElementById('close-spec-agreement-modal');
+
     if (linkVerify) {
         linkVerify.addEventListener('click', (e) => {
             e.preventDefault();
@@ -201,10 +322,31 @@ document.addEventListener('DOMContentLoaded', () => {
         closeNdaBtn.addEventListener('click', () => ndaModal.classList.remove('active'));
     }
 
+    if (linkSpecPrivacy) {
+        linkSpecPrivacy.addEventListener('click', (e) => {
+            e.preventDefault();
+            specPrivacyModal.classList.add('active');
+        });
+    }
+    if (linkSpecAgreement) {
+        linkSpecAgreement.addEventListener('click', (e) => {
+            e.preventDefault();
+            specAgreementModal.classList.add('active');
+        });
+    }
+    if (closeSpecPrivacyBtn) {
+        closeSpecPrivacyBtn.addEventListener('click', () => specPrivacyModal.classList.remove('active'));
+    }
+    if (closeSpecAgreementBtn) {
+        closeSpecAgreementBtn.addEventListener('click', () => specAgreementModal.classList.remove('active'));
+    }
+
     // Закриття модалок при кліку поза вікном
     window.addEventListener('click', (e) => {
         if (e.target === verifyModal) verifyModal.classList.remove('active');
         if (e.target === ndaModal) ndaModal.classList.remove('active');
+        if (e.target === specPrivacyModal) specPrivacyModal.classList.remove('active');
+        if (e.target === specAgreementModal) specAgreementModal.classList.remove('active');
     });
 
     recForm.addEventListener('submit', (e) => {
