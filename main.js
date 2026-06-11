@@ -326,9 +326,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('Будь ласка, оберіть тарифний план.');
                 return false;
             }
+            // Дата гранту обовязкова для ВСІХ Зони 1 на грантовому тарифі
             const specField = document.getElementById('regSpecialistField')?.value || '';
-            const isPsychRelated = ['psychologist', 'rehabilitation', 'narcologist'].includes(specField);
-            if (tariff.value === 'grant_standard' && isPsychRelated) {
+            const isZone1 = ['psychologist', 'rehabilitation', 'narcologist', 'lawyer_consult'].includes(specField);
+            if (tariff.value === 'grant_standard' && isZone1) {
                 const endDate = document.getElementById('regContractEndDate');
                 if (!endDate || !endDate.value) {
                     alert('⚠️ Для психологів та реабілітологів на грантовому тарифі обов’язково вказати кінцеву дату завершення договору.');
@@ -342,35 +343,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateStepFlow() {
         const specField = document.getElementById('regSpecialistField')?.value || '';
-        const isLawyer = ['lawyer_consult', 'lawyer_docs', 'advocate'].includes(specField);
-        const isPsychRelated = ['psychologist', 'rehabilitation', 'narcologist'].includes(specField);
+
+        // Зона 1: приватні фахівці (сесійна модель) — БЕЗ анкети юриста
+        const isZone1 = ['psychologist', 'rehabilitation', 'narcologist', 'lawyer_consult'].includes(specField);
+        // Зона 2 юристи (потребують анкети)
+        const isLawyerZone2 = ['lawyer_docs', 'advocate'].includes(specField);
+        // Зона 2 протезист (фіксована підписка, без анкети)
+        const isProsthetist = specField === 'prosthetist';
 
         const lawyerQuestions = document.getElementById('lawyer-questions-block');
         const recommendedBox = document.getElementById('lawyer-tariff-recommendation');
         const grantDateContainer = document.getElementById('grant-date-container');
         const tariffSelect = document.getElementById('regTariffPlan');
 
-        // Оновлюємо видимість анкетних запитань
-        if (lawyerQuestions) {
-            lawyerQuestions.style.display = isLawyer ? 'block' : 'none';
-        }
+        // Анкета тільки для lawyer_docs та advocate (Зона 2)
+        if (lawyerQuestions) lawyerQuestions.style.display = isLawyerZone2 ? 'block' : 'none';
+        if (recommendedBox) recommendedBox.style.display = isLawyerZone2 ? 'block' : 'none';
 
-        // Оновлюємо видимість рекомендації тарифу
-        if (recommendedBox) {
-            recommendedBox.style.display = isLawyer ? 'block' : 'none';
-        }
-
-        if (isLawyer) {
-            updateLawyerTariffRecommendation();
-        } else {
-            if (tariffSelect) {
+        // Передвибір тарифу залежно від зони
+        if (tariffSelect) {
+            if (isZone1) {
                 tariffSelect.value = 'grant_standard';
+            } else if (isLawyerZone2) {
+                updateLawyerTariffRecommendation();
+            } else if (isProsthetist) {
+                // Протезист = Зона 2в (адвокатське бюро / протезний центр)
+                tariffSelect.value = 'zone2c_bureau';
             }
         }
 
-        // Показуємо вибір кінцевої дати для Zone 1 (психолог/реабілітолог/нарколог)
+        // Дата завершення договору — тільки для всіх Зони 1 (грантовий тариф)
         if (grantDateContainer) {
-            grantDateContainer.style.display = isPsychRelated ? 'block' : 'none';
+            grantDateContainer.style.display = isZone1 ? 'block' : 'none';
         }
     }
 
@@ -403,27 +407,26 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateLawyerTariffRecommendation() {
         const courtCasesVal = document.querySelector('input[name="court-cases"]:checked')?.value;
         const teamWorkVal = document.querySelector('input[name="team-work"]:checked')?.value;
-        
-        let recommendedId = "zone2a_consultant";
-        let recommendedText = "Зона 2а: Юрист-консультант ($30/міс перехідний, $60/міс постійний)";
-        
-        if (teamWorkVal === "1") {
-            recommendedId = "zone2c_bureau";
-            recommendedText = "Зона 2в: Адвокатське бюро / Установа ($100/міс)";
-        } else if (courtCasesVal === "1") {
-            recommendedId = "zone2b_practitioner";
-            recommendedText = "Зона 2б: Адвокат-практик ($60/міс)";
+
+        // Зона 2в: працює в команді (бюро/установа)
+        // Зона 2б: веде судові справи (адвокат-практик)
+        // Зона 2а: базовий юрист-консультант
+        let recommendedId = 'zone2a_consultant';
+        let recommendedText = '2а: Юрист-консультант — $0 грант → $50/міс → $100/міс';
+
+        if (teamWorkVal === '1') {
+            recommendedId = 'zone2c_bureau';
+            recommendedText = '2в: Адвокатське бюро / Протезний центр — $0 грант → $100/міс → $150/міс';
+        } else if (courtCasesVal === '1') {
+            recommendedId = 'zone2b_practitioner';
+            recommendedText = '2б: Адвокат-практик (судовий супровід) — $0 грант → $50/міс → $100/міс';
         }
-        
+
         const recTextEl = document.getElementById('recommended-tariff-text');
-        if (recTextEl) {
-            recTextEl.textContent = recommendedText;
-        }
-        
+        if (recTextEl) recTextEl.textContent = recommendedText;
+
         const tariffSelect = document.getElementById('regTariffPlan');
-        if (tariffSelect) {
-            tariffSelect.value = recommendedId;
-        }
+        if (tariffSelect) tariffSelect.value = recommendedId;
     }
 
     // Додамо прослуховування змін в анкеті юриста
