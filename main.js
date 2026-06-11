@@ -144,8 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Обробка кнопки приєднання
     if (btnJoin) {
         btnJoin.addEventListener('click', () => {
-            alert('Дякуємо за ваш інтерес! Форма реєстрації для спеціалістів буде відкрита найближчим часом. Будь ласка, залиште заявку в нашому Telegram-боті.');
-            window.location.href = "https://t.me/Veteran_NovyShlyakh_Bot";
+            window.location.href = "my.html#register?role=specialist";
         });
     }
 

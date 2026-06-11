@@ -526,6 +526,48 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // --- Обробка параметрів URL та хешу (pre-select tab/role) ---
+    function applyUrlParams() {
+        const hash = window.location.hash;
+        const search = window.location.search;
+        
+        let path = hash || '';
+        let paramsStr = search || '';
+        
+        if (path.includes('?')) {
+            const parts = path.split('?');
+            path = parts[0];
+            paramsStr = '?' + parts[1];
+        }
+        
+        if (path === '#register') {
+            resetTabs();
+            tabRegister.classList.add('active');
+            formRegister.classList.add('active');
+        } else if (path === '#specialist') {
+            resetTabs();
+            tabSpecialist.classList.add('active');
+            formSpecialist.classList.add('active');
+        } else if (path === '#login') {
+            resetTabs();
+            tabLogin.classList.add('active');
+            formLogin.classList.add('active');
+        }
+        
+        const urlParams = new URLSearchParams(paramsStr);
+        const role = urlParams.get('role');
+        if (role) {
+            const radio = Array.from(roleRadios).find(r => r.value === role);
+            if (radio) {
+                radio.checked = true;
+                toggleRoleFields();
+            }
+        }
+    }
+    
+    applyUrlParams();
+    window.addEventListener('hashchange', applyUrlParams);
+
     // --- Навігація в Дашборді ---
     const navItems = document.querySelectorAll('.sidebar-nav .nav-item');
     const viewSections = document.querySelectorAll('.view-section');
