@@ -38,6 +38,18 @@ def init_db():
             consent_doc_path TEXT,   -- Шлях до consent_YYYY-MM-DD.md у папці спеціаліста
             consent_at TEXT,         -- Timestamp підпису (UTC) — незмінний після запису
             kep_signature_path TEXT, -- Шлях до .p7s (або .sig fallback) КЕП-підпису
+            
+            -- Нові тарифні та договірні поля
+            court_cases INTEGER DEFAULT 0,
+            team_work INTEGER DEFAULT 0,
+            avg_service_price TEXT,
+            tariff_stage TEXT DEFAULT 'stage_1',
+            tariff_plan TEXT DEFAULT 'grant_standard',
+            tariff_fixed_fee REAL DEFAULT 0.0,
+            tariff_commission_pct REAL DEFAULT 0.0,
+            contract_signed_date TEXT,
+            contract_end_date TEXT,
+            
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
@@ -61,6 +73,23 @@ def init_db():
         if "kep_signature_path" not in columns:
             cursor.execute("ALTER TABLE specialists ADD COLUMN kep_signature_path TEXT")
             print("🔧 Додано колонку kep_signature_path в таблицю specialists")
+            
+        # Міграція для нових тарифних колонок
+        new_cols = {
+            "court_cases": "INTEGER DEFAULT 0",
+            "team_work": "INTEGER DEFAULT 0",
+            "avg_service_price": "TEXT",
+            "tariff_stage": "TEXT DEFAULT 'stage_1'",
+            "tariff_plan": "TEXT DEFAULT 'grant_standard'",
+            "tariff_fixed_fee": "REAL DEFAULT 0.0",
+            "tariff_commission_pct": "REAL DEFAULT 0.0",
+            "contract_signed_date": "TEXT",
+            "contract_end_date": "TEXT"
+        }
+        for col_name, col_type in new_cols.items():
+            if col_name not in columns:
+                cursor.execute(f"ALTER TABLE specialists ADD COLUMN {col_name} {col_type}")
+                print(f"🔧 Додано тарифну колонку {col_name} в таблицю specialists")
     except Exception as e:
         print(f"Попередження міграції: {e}")
 

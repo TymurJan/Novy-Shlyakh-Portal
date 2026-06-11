@@ -102,14 +102,106 @@ def _generate_consent_doc(
     address: str,
     ip_address: str,
     consent_at: str,
+    tariff_plan: str,
+    contract_end_date: Optional[str] = None,
+    court_cases: int = 0,
+    team_work: int = 0,
+    avg_service_price: Optional[str] = None,
 ) -> str:
     """
     Генерує текст Consent Receipt (підтвердження згоди) за стандартом GDPR.
     Повертає рядок Markdown для збереження у файл.
     """
+    
+    # 1. Формуємо фінансові умови та тарифний опис відповідно до обраного плану (3 Зони)
+    financial_terms = ""
+    
+    # Зона 1 — Приватні фахівці
+    if tariff_plan == "grant_standard":
+        end_date_str = contract_end_date if contract_end_date else "протягом 12 місяців з моменту підписання"
+        financial_terms = f"""### ТАРИФНИЙ ПЛАН: «Грантовий (Єдиний)» (Етап: Грантовий період)
+- **Фіксована плата**: $0 / місяць
+- **Комісія платформи**: 0%
+- **Знижка ветерану**: 10% (обов'язкова знижка, яку фахівець надає ветерану з власного тарифу)
+- **Опис**: Участь у платформі є безкоштовною. Фахівець безкоштовно будує рейтинг та репутацію без фінансових відрахувань.
+- **Дата закінчення договору**: {end_date_str}"""
+
+    elif tariff_plan == "zone1_flexible":
+        financial_terms = """### ТАРИФНИЙ ПЛАН: «Гнучкий» (Етап: Постійна співпраця)
+- **Фіксована плата**: $0 / місяць
+- **Комісія з сесій через портал**: 10%
+- **Знижка ветерану**: 10% (обов'язкова умова)
+- **Точка беззбитковості**: відсутня (комісія сплачується тільки з фактичних транзакцій)
+- **Відповідальність за облік сесій**: Платформа відстежує транзакції та нараховує комісію.
+- **Порядок оплати**: Оплата здійснюється тільки після проведення сесій — якщо сесій немає, платіж відсутній.
+- **Повернення коштів**: Немає коштів до повернення у разі відсутності сесій.
+- **Мінімальний платіж**: $0"""
+
+    # Зона 2 — Юристи та Установи (Підписка)
+    elif tariff_plan == "zone2a_consultant":
+        financial_terms = """### ТАРИФНИЙ ПЛАН: «Зона 2а: Юрист-консультант»
+- **Фіксована плата**: $30 / місяць (перехідний період), $60 / місяць (постійна співпраця)
+- **Комісія з сесій через портал**: 5%
+- **Знижка ветерану**: 10% (обов'язкова умова)
+- **Точка беззбитковості**: 20 сесій (перехідний) / 40 сесій (постійний)
+- **Відповідальність за облік сесій**: Платформа відстежує транзакції, проте базою є фіксована плата.
+- **Порядок оплати**: Фіксована частина сплачується до 5-го числа кожного місяця незалежно від рівня активності.
+- **Повернення коштів**: При достроковому розірванні договору фіксована частина за поточний місяць поверненню не підлягає.
+- **Мінімальний платіж**: $30 або $60 залежно від етапу співпраці."""
+
+    elif tariff_plan == "zone2b_practitioner":
+        financial_terms = """### ТАРИФНИЙ ПЛАН: «Зона 2б: Адвокат-практик»
+- **Фіксована плата**: $60 / місяць
+- **Комісія з сесій через портал**: 0%
+- **Знижка ветерану**: 10% (рекомендовано / на власний розсуд для судового супроводу)
+- **Опис**: Розширена сторінка спеціаліста з переліком судових справ.
+- **Порядок оплати**: Фіксована частина сплачується до 5-го числа кожного місяця незалежно від кількості справ.
+- **Повернення коштів**: При достроковому розірванні договору фіксована частина за поточний місяць поверненню не підлягає.
+- **Мінімальний платіж**: $60"""
+
+    elif tariff_plan == "zone2c_bureau":
+        financial_terms = """### ТАРИФНИЙ ПЛАН: «Зона 2в: Адвокатське бюро / Установа»
+- **Фіксована плата**: $100 / місяць
+- **Комісія з сесій через портал**: 0%
+- **Знижка ветерану**: Надається на власний розсуд установи.
+- **Опис**: Розширений рекламний профіль установи з описом, логотипом та переліком команди.
+- **Порядок оплати**: Фіксована частина сплачується до 5-го числа кожного місяця.
+- **Мінімальний платіж**: $100"""
+
+    # Зона 3 — Державні структури
+    elif tariff_plan == "zone3_state":
+        financial_terms = """### ТАРИФНИЙ ПЛАН: «Зона 3: Державна структура / ОМС»
+- **Фіксована плата**: $0
+- **Комісія платформи**: 0%
+- **Знижка ветерану**: Не застосовується (послуги надаються безкоштовно в межах державного фінансування)
+- **Опис**: Безкоштовне розміщення інформаційного профілю установи (ТЦК, ЦНАП, соцслужби тощо) за рішенням Координаційної Ради."""
+        
+    else:
+        financial_terms = "### ТАРИФНИЙ ПЛАН: Невизначений\nУмови згідно з регламентом платформи."
+
+    # 2. Намагаємося завантажити шаблон договору
+    backend_dir = os.path.dirname(os.path.abspath(__file__))
+    template_path = os.path.join(os.path.dirname(backend_dir), "talan", "autobot", "templates", "contract_specialist.md")
+    
+    agreement_text = ""
+    if os.path.exists(template_path):
+        try:
+            with open(template_path, "r", encoding="utf-8") as tf:
+                agreement_text = tf.read()
+            # Заміна плейсхолдерів
+            end_date_str = contract_end_date if contract_end_date else "протягом 12 місяців з моменту підписання (або до зміни етапу)"
+            agreement_text = agreement_text.replace("[ДАТА_ЗАВЕРШЕННЯ]", end_date_str)
+            agreement_text = agreement_text.replace("[ФІНАНСОВІ_УМОВИ]", financial_terms)
+        except Exception as te:
+            agreement_text = f"Помилка завантаження шаблону договору: {te}"
+    
+    # Якщо шаблон порожній — використовуємо fallback
+    if not agreement_text:
+        agreement_text = f"Угода про співпрацю для тарифного плану {tariff_plan}.\n\n{financial_terms}"
+
     # Хеш тексту угод — дозволяє довести, що саме цей текст підписали
     privacy_hash = hashlib.sha256(CONSENT_PRIVACY_TEXT.encode()).hexdigest()[:16]
-    agreement_hash = hashlib.sha256(CONSENT_AGREEMENT_TEXT.encode()).hexdigest()[:16]
+    agreement_hash = hashlib.sha256(agreement_text.encode()).hexdigest()[:16]
 
     return f"""# ПІДТВЕРДЖЕННЯ ЗГОДИ (Consent Receipt)
 ## Портал «Новий Шлях» | ГО «ТАЛАН ЮА»
@@ -134,6 +226,8 @@ def _generate_consent_doc(
 | IP-адреса         | {ip_address}                      |
 | Версія документів | {CONSENT_VERSION}                 |
 | Метод підтвердження | Checkbox (WebApp Telegram)      |
+| Тарифний план     | {tariff_plan}                     |
+| Дата закінчення   | {contract_end_date or "Не вказано"} |
 
 ## ДОКУМЕНТИ, З ЯКИМИ ПОГОДИВСЯ СПЕЦІАЛІСТ
 
@@ -145,14 +239,14 @@ def _generate_consent_doc(
 
 ### [✓] 2. Угода про співпрацю (SHA-256: {agreement_hash}...)
 
-{CONSENT_AGREEMENT_TEXT}
+{agreement_text}
 
 ---
 
 *Цей документ згенеровано автоматично системою порталу «Новий Шлях».*
 *Зберігається як юридичний доказ згоди відповідно до ст. 7 Регламенту ЄС 2016/679 (GDPR)*
 *та Закону України «Про захист персональних даних» № 2297-VI.*
-"""
+""", agreement_text
 
 
 @app.post("/api/register-specialist")
@@ -168,6 +262,13 @@ async def register_specialist(
     document: UploadFile = File(...),
     kep_file: Optional[UploadFile] = File(None),
     kep_password: Optional[str] = Form(None),
+    
+    # Нові тарифні та анкетні поля
+    court_cases: Optional[int] = Form(0),
+    team_work: Optional[int] = Form(0),
+    avg_service_price: Optional[str] = Form(None),
+    tariff_plan: Optional[str] = Form("grant_standard"),
+    contract_end_date: Optional[str] = Form(None),
 ):
     """
     Ендпоінт для фінальної реєстрації спеціаліста (Крок 2).
@@ -180,7 +281,6 @@ async def register_specialist(
         spec_id = tg_id or f"anon_{abs(hash(phone))}"
 
         # 2. Створюємо per-specialist папку
-        #    Структура: uploads/specialists/{tg_id}/
         spec_dir = os.path.join("uploads", "specialists", spec_id)
         os.makedirs(spec_dir, exist_ok=True)
 
@@ -196,12 +296,42 @@ async def register_specialist(
         with open(doc_path, "wb") as buffer:
             shutil.copyfileobj(document.file, buffer)
 
-        # 5. Генеруємо Consent Receipt і зберігаємо в папку спеціаліста
+        # 5. Розраховуємо параметри тарифу
+        tariff_stage = "stage_1"
+        tariff_fixed_fee = 0.0
+        tariff_commission_pct = 0.0
+        
+        if tariff_plan == "grant_standard":
+            tariff_stage = "stage_1"
+            tariff_fixed_fee = 0.0
+            tariff_commission_pct = 0.0
+        elif tariff_plan == "zone1_flexible":
+            tariff_stage = "stage_3"
+            tariff_fixed_fee = 0.0
+            tariff_commission_pct = 10.0
+        elif tariff_plan == "zone2a_consultant":
+            tariff_stage = "stage_3"
+            tariff_fixed_fee = 60.0
+            tariff_commission_pct = 5.0
+        elif tariff_plan == "zone2b_practitioner":
+            tariff_stage = "stage_3"
+            tariff_fixed_fee = 60.0
+            tariff_commission_pct = 0.0
+        elif tariff_plan == "zone2c_bureau":
+            tariff_stage = "stage_3"
+            tariff_fixed_fee = 100.0
+            tariff_commission_pct = 0.0
+        elif tariff_plan == "zone3_state":
+            tariff_stage = "stage_3"
+            tariff_fixed_fee = 0.0
+            tariff_commission_pct = 0.0
+
+        # 6. Генеруємо Consent Receipt і зберігаємо в папку спеціаліста
         consent_at = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
         consent_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
         ip_address = request.client.host if request.client else "unknown"
 
-        consent_text = _generate_consent_doc(
+        consent_text, agreement_text = _generate_consent_doc(
             name=name,
             tg_id=spec_id,
             phone=phone,
@@ -209,13 +339,18 @@ async def register_specialist(
             address=address,
             ip_address=ip_address,
             consent_at=consent_at,
+            tariff_plan=tariff_plan,
+            contract_end_date=contract_end_date,
+            court_cases=court_cases,
+            team_work=team_work,
+            avg_service_price=avg_service_price,
         )
         consent_filename = f"consent_{consent_date}.md"
         consent_path = os.path.join(spec_dir, consent_filename)
         with open(consent_path, "w", encoding="utf-8") as f:
             f.write(consent_text)
 
-        # 6. (Опційно) КЕП-підпис consent-документа
+        # 7. (Опційно) КЕП-підпис consent-документа
         kep_signature_path = None
         kep_signed = False
         if kep_file and kep_file.filename:
@@ -231,12 +366,10 @@ async def register_specialist(
                     password=kep_pwd,
                 )
                 kep_signed = True
-                logger.info("✅ КЕП підпис збережено: %s", kep_signature_path)
             except Exception as kep_err:
-                logger.warning("⚠️ КЕП підпис не вдався (non-critical): %s", kep_err)
                 kep_signature_path = None
 
-        # 7. Зберігаємо в SQLite через db_manager
+        # 8. Зберігаємо в SQLite через db_manager
         try:
             import sys
             sys.path.insert(0, os.path.dirname(__file__))
