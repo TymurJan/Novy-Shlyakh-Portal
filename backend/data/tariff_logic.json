@@ -1,0 +1,533 @@
+{
+  "platform": "Новий Шлях / Novyi Shlyakh",
+  "organization": "ГО «ТАЛАН ЮА»",
+  "version": "4.0",
+  "updated": "2026-06-10",
+  "description": "Фінальна архітектура платформи: тарифи, верифікація, реєстрація ветеранів, фінансова модель",
+
+  "core_principles": [
+    "Один вхід — три ролі: ветеран, фахівець, партнер",
+    "Динамічна реєстраційна анкета: меню змінюється залежно від вибору",
+    "Self-selection: фахівець сам визначає категорію, система підтягує тариф",
+    "Ветеран реєструється за 1 хвилину без документів — миттєвий доступ",
+    "П'ять зон з різною логікою: приватні фахівці, юристи, установи, ГО/БФ, держструктури",
+    "Під час гранту: нульова комерція + 10% знижка ветерану. Монетизація після (міс. 13+)",
+    "Механізм скарг для платних зон: попередження → розрив → штрафний тариф +20%"
+  ],
+
+  "registration_system": {
+    "description": "Єдина точка входу з динамічною маршрутизацією по ролям",
+    "first_choice": {
+      "id": "user_type",
+      "question": "Ви прийшли як...",
+      "type": "single_select",
+      "options": [
+        {
+          "id": "veteran",
+          "label": "🎖️ Ветеран / член родини (шукаю допомогу)",
+          "flow": "veteran_registration"
+        },
+        {
+          "id": "specialist",
+          "label": "👨‍⚕️ Приватний фахівець (психолог, юрист, реабілітолог)",
+          "flow": "specialist_registration"
+        },
+        {
+          "id": "partner",
+          "label": "🏢 Організація / установа / бюро",
+          "flow": "partner_registration"
+        },
+        {
+          "id": "ngo",
+          "label": "💚 Громадська організація / благодійний фонд",
+          "flow": "ngo_registration"
+        },
+        {
+          "id": "state",
+          "label": "🏛️ Державна структура / орган влади",
+          "flow": "state_registration"
+        }
+      ]
+    },
+
+    "veteran_registration": {
+      "description": "Спрощена анкета. Максимум 1 хвилина. Без верифікації — миттєвий доступ.",
+      "fields": [
+        {
+          "id": "first_name",
+          "label": "Ваше ім'я",
+          "type": "text",
+          "required": true,
+          "placeholder": "Сергій"
+        },
+        {
+          "id": "contact",
+          "label": "Телефон або Telegram (@username)",
+          "type": "contact",
+          "required": true,
+          "placeholder": "+38 (063) 123-45-67 або @username"
+        },
+        {
+          "id": "status",
+          "label": "Ваш статус",
+          "type": "single_select",
+          "required": true,
+          "options": [
+            "Ветеран, учасник/учасниця бойових дій",
+            "Член родини ветерана",
+            "Близький до ветеранської спільноти"
+          ]
+        },
+        {
+          "id": "needs",
+          "label": "Що вам потрібно? (можна кілька)",
+          "type": "multi_select",
+          "required": true,
+          "options": [
+            "Психологічна допомога / консультація психолога",
+            "Юридична допомога / консультація адвоката",
+            "Фізична реабілітація",
+            "Протезування / ортопедичні послуги",
+            "Працевлаштування / пошук роботи",
+            "Державні дотації / соціальні виплати",
+            "Інше"
+          ]
+        },
+        {
+          "id": "district",
+          "label": "Де ви проживаєте? (район Черкаської обл.)",
+          "type": "single_select",
+          "required": true,
+          "note": "Система покажить спеціалістів вашого району",
+          "options": "66 ОТГ Черкаської області (список з координатами)"
+        },
+        {
+          "id": "data_consent",
+          "label": "Я згоден/згодна на обробку персональних даних",
+          "type": "checkbox",
+          "required": true
+        }
+      ],
+      "after_registration": {
+        "immediate_action": "Миттєвий доступ до порталу",
+        "display": [
+          "Підбірка фахівців за обраними категоріями та районом",
+          "Позначки: 💚 Безкоштовно | 🔵 Зі знижкою 10%",
+          "Кнопка «Залишити запит» — система автоматично направить запит фахівцям"
+        ],
+        "contact_method": "Фахівець звертається в межах 24 годин. Ветеран вирішує вітчизняним каналом (Telegram, дзвінок, особиста зустріч)"
+      }
+    },
+
+    "specialist_registration": {
+      "description": "Повна верифікаційна анкета з динамічним звуженням. Система сама визначає Зону.",
+      "step_1_specialization": {
+        "id": "specialist_field",
+        "question": "Ваша спеціалізація:",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          {
+            "id": "psychologist",
+            "label": "Психолог / психотерапевт",
+            "zone": 1,
+            "next_fields": ["session_price", "schedule", "experience_years", "veteran_experience"]
+          },
+          {
+            "id": "rehabilitation",
+            "label": "Реабілітолог / кінезіолог / остеопат",
+            "zone": 1,
+            "next_fields": ["session_price", "schedule", "experience_years", "veteran_experience"]
+          },
+          {
+            "id": "narcologist",
+            "label": "Нарколог / психіатр",
+            "zone": 1,
+            "next_fields": ["session_price", "schedule", "experience_years", "veteran_experience"]
+          },
+          {
+            "id": "lawyer_consult",
+            "label": "Юрист (разові консультації, правові питання)",
+            "zone": 1,
+            "next_fields": ["session_price", "specialization_detail", "experience_years"]
+          },
+          {
+            "id": "lawyer_docs",
+            "label": "Юрист (збір документів, підготовка справ)",
+            "zone": 2,
+            "next_fields": ["specialization_detail", "avg_case_price", "veteran_discount_format"]
+          },
+          {
+            "id": "advocate",
+            "label": "Адвокат (представництво в суді, повний супровід)",
+            "zone": 2,
+            "next_fields": ["bar_number", "specialization_detail", "avg_case_price", "veteran_discount_format"]
+          },
+          {
+            "id": "prosthetist",
+            "label": "Протезист (підбір протезів, ортопедичні послуги)",
+            "zone": 2,
+            "next_fields": ["specialization_detail", "avg_case_price", "veteran_discount_format"]
+          }
+        ]
+      },
+      "base_fields": {
+        "full_name": { "label": "ПІБ", "type": "text", "required": true },
+        "phone": { "label": "Телефон", "type": "phone", "required": true },
+        "email": { "label": "Email", "type": "email", "required": true },
+        "city": { "label": "Місто / район", "type": "text", "required": true },
+        "work_format": { "label": "Формат роботи", "type": "multi_select", "options": ["Онлайн", "Офлайн", "Виїзд"], "required": true },
+        "session_price": { "label": "Вартість однієї сесії (грн)", "type": "number", "required": "zone=1", "help": "Система автоматично розраховує знижку 10% для ветеранів" },
+        "schedule": { "label": "Графік прийому (наприклад, пн-пт 10:00-18:00)", "type": "text", "required": "zone=1" },
+        "experience_years": { "label": "Досвід роботи (років)", "type": "number", "required": true },
+        "veteran_experience": { "label": "Чи маєте досвід роботи з ветеранами?", "type": "boolean", "required": "zone=1", "help": "Допомагає при рейтингуванні" },
+        "specialization_detail": { "label": "Напрямки (наприклад: земельні спори, кримінальні справи, ПТСР)", "type": "textarea", "required": "zone=2" },
+        "avg_case_price": { "label": "Середня вартість послуги (грн)", "type": "number", "required": "zone=2" },
+        "bar_number": { "label": "Номер у реєстрі адвокатів України (НААУ)", "type": "text", "required": "advocate", "help": "Для адвокатів — обов'язково" },
+        "veteran_discount_format": { "label": "Форма знижки для ветеранів (мін. 10%)", "type": "textarea", "required": "zone=2", "placeholder": "Наприклад: перша консультація безкоштовно / 10% знижка на всі послуги / перші 30 хв безплатно" }
+      },
+      "documents_required": {
+        "zone_1": [
+          { "id": "diploma", "label": "Диплом про освіту (фото/скан)", "required": true },
+          { "id": "certificate", "label": "Сертифікати підвищення кваліфікації (якщо є)", "required": false },
+          { "id": "id_doc", "label": "Паспорт або ID-картка (для верифікації особи)", "required": true }
+        ],
+        "zone_2": [
+          { "id": "diploma_or_license", "label": "Диплом / свідоцтво про право на адвокатську діяльність", "required": true },
+          { "id": "bar_cert", "label": "Виписка з реєстру НААУ (за необхідністю)", "required": false },
+          { "id": "id_doc", "label": "Паспорт або ID-картка", "required": true }
+        ]
+      },
+      "verification": {
+        "who": "Адміністратор платформи",
+        "timeline_days": 5,
+        "steps": [
+          "Перевірка документів",
+          "Перевірка у реєстрах (НААУ для адвокатів)",
+          "Підтвердження або запит додаткових матеріалів",
+          "Активація профілю + надсилання договору"
+        ]
+      },
+      "auto_tariff_assignment": {
+        "logic": "Система автоматично визначає Зону на основі спеціалізації. Фахівець бачить: «Ваша категорія: [Зона]. Обраний тариф: [...]». Для Зони 1 — пропозиція вибору «Стабільний» або «Гнучкий».",
+        "zone_1_choice": {
+          "stable": "$30/міс (перехід) → $50/міс (постійно) + 5% комісія",
+          "flexible": "$0 фіксовано, 10% (перехід) / 15% (постійно) комісія"
+        }
+      }
+    },
+
+    "partner_registration": {
+      "description": "Організація / установа / бюро. Розширена анкета + документи. Зона 3.",
+      "organization_types": [
+        "Адвокатське бюро",
+        "Реабілітаційний центр",
+        "Протезний центр",
+        "Психологічний центр",
+        "Наркологічна клініка",
+        "HR-агенція / центр перекваліфікації"
+      ],
+      "fields": [
+        { "id": "org_name", "label": "Назва організації", "type": "text", "required": true },
+        { "id": "org_type", "label": "Тип організації", "type": "single_select", "required": true, "options": "список вище" },
+        { "id": "edrpou", "label": "ЄДРПОУ", "type": "text", "required": true },
+        { "id": "address", "label": "Юридична адреса", "type": "text", "required": true },
+        { "id": "contact_person", "label": "Відповідальна особа (ПІБ, посада)", "type": "text", "required": true },
+        { "id": "phone", "label": "Телефон", "type": "phone", "required": true },
+        { "id": "email", "label": "Email", "type": "email", "required": true },
+        { "id": "website", "label": "Веб-сайт (якщо є)", "type": "url", "required": false },
+        { "id": "logo", "label": "Логотип організації (для сторінки)", "type": "file", "required": true },
+        { "id": "services_list", "label": "Перелік послуг для ветеранів", "type": "textarea", "required": true },
+        { "id": "team_size", "label": "Кількість фахівців у команді", "type": "number", "required": true },
+        { "id": "veteran_discount_format", "label": "Форма знижки для ветеранів (мін. 10%)", "type": "textarea", "required": true },
+        { "id": "complaint_acknowledgment", "label": "Я ознайомлений/а з механізмом скарг: попередження → розрив договору → перезаключення з тарифом +20% через 30 днів", "type": "checkbox", "required": true }
+      ],
+      "documents_required": [
+        { "id": "registration_cert", "label": "Свідоцтво про державну реєстрацію", "required": true },
+        { "id": "license", "label": "Ліцензія на медичну / юридичну діяльність (якщо є)", "required": false }
+      ],
+      "verification": {
+        "who": "Адміністратор платформи",
+        "timeline_days": 7,
+        "steps": [
+          "Перевірка ЄДРПОУ та реєстраційних документів",
+          "Перевірка ліцензій",
+          "Підтвердження знижки у договорі",
+          "Активація розширеної сторінки"
+        ]
+      },
+      "auto_tariff_assignment": "Зона 3. Тариф: $100/міс (перехід) → $150/міс (постійно). Система відразу демонструє умови скарг у договорі."
+    },
+
+    "ngo_registration": {
+      "description": "Громадська організація або благодійний фонд. Зона 4. Верифікація Координаційною Радою.",
+      "fields": [
+        { "id": "org_name", "label": "Назва організації", "type": "text", "required": true },
+        { "id": "edrpou", "label": "ЄДРПОУ", "type": "text", "required": true },
+        { "id": "contact_person", "label": "Контактна особа (ПІБ)", "type": "text", "required": true },
+        { "id": "phone", "label": "Телефон", "type": "phone", "required": true },
+        { "id": "email", "label": "Email", "type": "email", "required": true },
+        { "id": "free_services", "label": "Перелік безкоштовних послуг для ветеранів", "type": "textarea", "required": true },
+        { "id": "programs", "label": "Програми / гранти в рамках яких надаються послуги", "type": "textarea", "required": true },
+        { "id": "financial_report_url", "label": "Посилання на публічну фінансову звітність", "type": "url", "required": true }
+      ],
+      "documents_required": [
+        { "id": "statute", "label": "Статут організації", "type": "file", "required": true },
+        { "id": "activity_proof", "label": "Підтвердження діяльності у ветеранській сфері (звіт, медіа, листи)", "type": "file", "required": true }
+      ],
+      "verification": {
+        "who": "Координаційна Рада платформи",
+        "timeline_days": 14,
+        "steps": [
+          "Перевірка реєстрації та звітності",
+          "Підтвердження реальної діяльності у ветеранській сфері",
+          "Голосування Ради",
+          "Активація профілю з позначкою 💚 «Безкоштовна допомога»"
+        ],
+        "criteria": [
+          "Офіційна реєстрація юридичної особи",
+          "Публічна фінансова звітність",
+          "Підтверджена діяльність у ветеранській сфері",
+          "Відсутність підтверджених скарг від ветеранів"
+        ]
+      },
+      "auto_tariff_assignment": "Зона 4. Безкоштовно після верифікації. Окремий фільтр у пошуку: ветеран може шукати саме безкоштовні послуги."
+    },
+
+    "state_registration": {
+      "description": "Державна структура / орган влади. Зона 5. Інформаційна сторінка. Рішення Ради.",
+      "fields": [
+        { "id": "org_name", "label": "Назва установи", "type": "text", "required": true },
+        { "id": "address", "label": "Адреса", "type": "text", "required": true },
+        { "id": "contact_person", "label": "Відповідальна особа", "type": "text", "required": true },
+        { "id": "phone", "label": "Телефон", "type": "phone", "required": true },
+        { "id": "services_list", "label": "Перелік послуг для ветеранів", "type": "textarea", "required": true },
+        { "id": "schedule", "label": "Графік роботи", "type": "text", "required": true }
+      ],
+      "verification": {
+        "who": "Координаційна Рада платформи",
+        "timeline_days": 7,
+        "steps": [
+          "Підтвердження офіційного статусу установи",
+          "Рішення Ради",
+          "Активація інформаційної сторінки"
+        ]
+      },
+      "auto_tariff_assignment": "Зона 5. Безкоштовно. За рішенням Ради."
+    }
+  },
+
+  "tariff_zones": {
+    "zone_1": {
+      "name": "Приватні фахівці (сесійна модель)",
+      "categories": ["Психолог", "Реабілітолог", "Нарколог", "Юрист-консультант"],
+      "stages": [
+        {
+          "stage": "Грант (1–12 місяці)",
+          "contract": "Договір верифікації, 12 міс.",
+          "tariff": { "fixed": 0, "commission": 0, "veteran_discount": 10 }
+        },
+        {
+          "stage": "Перехідний (13–15 місяці)",
+          "contract": "3 месяці",
+          "tariffs": [
+            { "name": "Стабільний", "fixed": 30, "commission": 5, "veteran_discount": 10 },
+            { "name": "Гнучкий", "fixed": 0, "commission": 10, "veteran_discount": 10 }
+          ],
+          "breakeven": { "turnover_usd": 600, "sessions_at_avg30": 20 }
+        },
+        {
+          "stage": "Постійний (16+ місяці)",
+          "contract": "6 або 12 місяців",
+          "tariffs": [
+            { "name": "Стабільний", "fixed": 50, "commission": 5, "veteran_discount": 10 },
+            { "name": "Гнучкий", "fixed": 0, "commission": 15, "veteran_discount": 10 }
+          ],
+          "breakeven": { "turnover_usd": 500, "sessions_at_avg30": 17 }
+        }
+      ]
+    },
+    "zone_2": {
+      "name": "Юристи, адвокати, протезисти",
+      "model": "fixed_subscription",
+      "stages": [
+        {
+          "stage": "Грант (1–12)",
+          "fee_usd": 0
+        },
+        {
+          "stage": "Перехідний (13–15)",
+          "contract_months": 3,
+          "fee_usd": 50
+        },
+        {
+          "stage": "Постійний (16+)",
+          "contract_months": [6, 12],
+          "fee_usd": 100
+        }
+      ],
+      "veteran_discount": "Мін. 10%, формат визначає фахівець"
+    },
+    "zone_3": {
+      "name": "Бюро, установи, центри",
+      "model": "fixed_subscription_with_complaint_mechanism",
+      "stages": [
+        { "stage": "Грант (1–12)", "fee_usd": 0 },
+        { "stage": "Перехідний (13–15)", "contract_months": 3, "fee_usd": 100 },
+        { "stage": "Постійний (16+)", "contract_months": [6, 12], "fee_usd": 150 }
+      ],
+      "veteran_discount": "Мін. 10%, обов'язково прописується у договорі",
+      "complaint_mechanism": {
+        "level_1": "Перша скарга → письмове попередження, 7 днів на пояснення",
+        "level_2": "Друга скарга / відсутність відповіді → розрив договору, видалення з бази, кошти за місяць не повертаються",
+        "reinstatement": "Через 30 днів: перезаключення на тариф +20% на 6 місяців, потім повернення до норми"
+      }
+    },
+    "zone_4": {
+      "name": "ГО та благодійні фонди",
+      "model": "free_after_verification",
+      "fee_usd": 0,
+      "marker": "💚 Безкоштовна допомога",
+      "complaint_mechanism": "Аналогічно Зоні 3"
+    },
+    "zone_5": {
+      "name": "Державні структури",
+      "model": "free",
+      "fee_usd": 0,
+      "activation": "За рішенням Ради"
+    }
+  },
+
+  "financial_projections": {
+    "description": "Три сценарії: песимістичний, реалістичний (середній), оптимістичний",
+    "monthly_platform_costs_usd": 1300,
+    "stage": "Постійний (місяць 16+, при стабілізації)",
+
+    "scenario_pessimistic": {
+      "name": "Песимістичний",
+      "assumption": "30% від потенціалу перейде на платну модель. Малий обіг.",
+      "zone_1": {
+        "active_specialists": 20,
+        "model": "100% Гнучкий 15%",
+        "avg_sessions_per_month": 10,
+        "avg_price_usd": 30,
+        "revenue": 900
+      },
+      "zone_2": { "count": 6, "fee": 100, "revenue": 600 },
+      "zone_3": { "count": 2, "fee": 150, "revenue": 300 },
+      "zone_4_5": 0,
+      "total_revenue_usd": 1800,
+      "costs_usd": 1300,
+      "net_profit_usd": 500,
+      "note": "Kritychno: близко до точки беззбитковості, потрібно активну розробку"
+    },
+
+    "scenario_realistic": {
+      "name": "Реалістичний (середній) — БАЗОВИЙ СЦЕНАРІЙ",
+      "assumption": "50% від потенціалу переходить на платну модель. Стабільне функціонування. Практична оцінка на місяць 18–20.",
+      "zone_1": {
+        "active_specialists": 38,
+        "split": "50% Гнучкий 15% + 50% Стабільний $50+5%",
+        "avg_sessions_per_month": 15,
+        "avg_price_usd": 30,
+        "revenue_flexible": 1710,
+        "revenue_stable": 1710,
+        "revenue_total": 1900
+      },
+      "zone_2": { "count": 13, "fee": 100, "revenue": 1300 },
+      "zone_3": { "count": 4, "fee": 150, "revenue": 600 },
+      "zone_4": { "free_traffic": "підвищує цінність платних зон без прямого доходу" },
+      "zone_5": { "free_legitimacy": "державна підтримка, довіра ветеранів" },
+      "total_revenue_usd": 3800,
+      "costs_usd": 1300,
+      "net_profit_usd": 2500,
+      "note": "Здоровий запас міцності. Дозволяє інвестувати в розвиток і маркетинг."
+    },
+
+    "scenario_optimistic": {
+      "name": "Оптимістичний",
+      "assumption": "70% від потенціалу. Активна база, висока якість послуг, багато відгуків.",
+      "zone_1": {
+        "active_specialists": 55,
+        "split": "40% Гнучкий 15% + 60% Стабільний $50+5%",
+        "avg_sessions_per_month": 20,
+        "avg_price_usd": 30,
+        "revenue_flexible": 1980,
+        "revenue_stable": 3300,
+        "revenue_total": 5280
+      },
+      "zone_2": { "count": 18, "fee": 100, "revenue": 1800 },
+      "zone_3": { "count": 6, "fee": 150, "revenue": 900 },
+      "total_revenue_usd": 7980,
+      "costs_usd": 1300,
+      "net_profit_usd": 6680,
+      "note": "Можливість розширення на сусідні області, інвестиція в АШРАМ"
+    },
+
+    "breakeven_analysis": {
+      "monthly_costs": 1300,
+      "zone_1_only": {
+        "flexible_15pct": {
+          "specialists_needed": 45,
+          "sessions_each": 10,
+          "avg_price_usd": 30,
+          "monthly_revenue": 1350
+        }
+      }
+    }
+  },
+
+  "retention_and_growth": {
+    "risks": [
+      {
+        "risk": "Відтік після монетизації (грант → платна модель)",
+        "typical_rate": "30–50%",
+        "mitigation": "За 12 місяців гранту фахівець накопичує рейтинг і базу клієнтів через портал → sunk cost + репутація утримують"
+      },
+      {
+        "risk": "Сезонність (літо, свята)",
+        "drop": "20–30%",
+        "mitigation": "Планування резерву коштів, ambassador-програма для компенсації"
+      },
+      {
+        "risk": "Запізніле підписання договорів",
+        "impact": "Касовий розрив",
+        "mitigation": "Агресивна комунікація за 2–3 місяці до закінчення кожного етапу"
+      }
+    ],
+    "growth_drivers": [
+      {
+        "driver": "Накопичена база відгуків (12 місяців гранту)",
+        "effect": "Психологічний стимул залишитися на платформі"
+      },
+      {
+        "driver": "Зона 4 (ГО/БФ) безкоштовно",
+        "effect": "Збільшує трафік на портал. Платні зони отримують більше видимості."
+      },
+      {
+        "driver": "Зона 5 (держструктури)",
+        "effect": "Легітимізація платформи. Довіра ветеранів до портала зростає."
+      },
+      {
+        "driver": "Ambassador-програма серед ветеранів",
+        "effect": "Органічне зростання без витрат на маркетинг. Ветеран приводить ветерана."
+      },
+      {
+        "driver": "Аналітика як ексклюзив для партнерів",
+        "effect": "Фахівець бачить: скільки ветеранів шукали його профіль, які запити топові по регіону. Це цінна бізнес-інформація."
+      }
+    ]
+  },
+
+  "summary": {
+    "key_metrics": {
+      "platform_launch_costs_usd": 0,
+      "monthly_operational_costs": 1300,
+      "months_to_breakeven": 16,
+      "net_profit_month_16_realistic": 2500,
+      "annual_profit_year_2_realistic": 30000,
+      "annual_profit_year_2_optimistic": 80000
+    },
+    "strategic_outcome": "Платформа стає фінансово стійкою після місяця 16. При реалістичному сценарії генерує $30,000/рік прибутку на розвиток АШРАМ та розширення в сусідні області."
+  }
+}

@@ -47,8 +47,22 @@ def init_db():
             tariff_plan TEXT DEFAULT 'grant_standard',
             tariff_fixed_fee REAL DEFAULT 0.0,
             tariff_commission_pct REAL DEFAULT 0.0,
-            contract_signed_date TEXT,
+contract_signed_date TEXT,
             contract_end_date TEXT,
+            
+            -- Додаткові партнерські поля (Фаза 2)
+            edrpou TEXT,
+            contact_person TEXT,
+            email TEXT,
+            website TEXT,
+            services_list TEXT,
+            team_size INTEGER,
+            discount_format TEXT,
+            programs TEXT,
+            financial_report_url TEXT,
+            schedule TEXT,
+            sign_method TEXT,
+            diia_sign_token TEXT,
             
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
@@ -84,7 +98,21 @@ def init_db():
             "tariff_fixed_fee": "REAL DEFAULT 0.0",
             "tariff_commission_pct": "REAL DEFAULT 0.0",
             "contract_signed_date": "TEXT",
-            "contract_end_date": "TEXT"
+            "contract_end_date": "TEXT",
+            
+            # Додаткові партнерські поля (Фаза 2)
+            "edrpou": "TEXT",
+            "contact_person": "TEXT",
+            "email": "TEXT",
+            "website": "TEXT",
+            "services_list": "TEXT",
+            "team_size": "INTEGER",
+            "discount_format": "TEXT",
+            "programs": "TEXT",
+            "financial_report_url": "TEXT",
+            "schedule": "TEXT",
+            "sign_method": "TEXT",
+            "diia_sign_token": "TEXT"
         }
         for col_name, col_type in new_cols.items():
             if col_name not in columns:

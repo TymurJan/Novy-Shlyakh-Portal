@@ -66,9 +66,12 @@ def add_specialist(data):
                 photo_path, document_path, consent_doc_path, consent_at,
                 court_cases, team_work, avg_service_price,
                 tariff_stage, tariff_plan, tariff_fixed_fee, tariff_commission_pct,
-                contract_signed_date, contract_end_date
+                contract_signed_date, contract_end_date,
+                edrpou, contact_person, email, website, services_list, team_size,
+                discount_format, programs, financial_report_url, schedule,
+                sign_method, diia_sign_token
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             data.get('name'),
             data.get('category'),
@@ -95,7 +98,19 @@ def add_specialist(data):
             data.get('tariff_fixed_fee', 0.0),
             data.get('tariff_commission_pct', 0.0),
             data.get('contract_signed_date'),
-            data.get('contract_end_date')
+            data.get('contract_end_date'),
+            data.get('edrpou'),
+            data.get('contact_person'),
+            data.get('email'),
+            data.get('website'),
+            data.get('services_list'),
+            data.get('team_size'),
+            data.get('discount_format'),
+            data.get('programs'),
+            data.get('financial_report_url'),
+            data.get('schedule'),
+            data.get('sign_method'),
+            data.get('diia_sign_token')
         ))
         conn.commit()
         last_id = cursor.lastrowid
@@ -137,7 +152,10 @@ def update_specialist_documents(spec_id, doc_data):
         "photo_path", "document_path", "status", "consent_doc_path", "consent_at", "kep_signature_path",
         "court_cases", "team_work", "avg_service_price",
         "tariff_stage", "tariff_plan", "tariff_fixed_fee", "tariff_commission_pct",
-        "contract_signed_date", "contract_end_date"
+        "contract_signed_date", "contract_end_date",
+        "edrpou", "contact_person", "email", "website", "services_list", "team_size",
+        "discount_format", "programs", "financial_report_url", "schedule",
+        "sign_method", "diia_sign_token"
     ]
     
     for col in doc_cols:
@@ -260,7 +278,21 @@ def sync_to_json():
             "tariff_fixed_fee": s.get('tariff_fixed_fee'),
             "tariff_commission_pct": s.get('tariff_commission_pct'),
             "contract_signed_date": s.get('contract_signed_date'),
-            "contract_end_date": s.get('contract_end_date')
+            "contract_end_date": s.get('contract_end_date'),
+            
+            # Додаткові партнерські поля
+            "edrpou": s.get('edrpou'),
+            "contact_person": s.get('contact_person'),
+            "email": s.get('email'),
+            "website": s.get('website'),
+            "services_list": s.get('services_list'),
+            "team_size": s.get('team_size'),
+            "discount_format": s.get('discount_format'),
+            "programs": s.get('programs'),
+            "financial_report_url": s.get('financial_report_url'),
+            "schedule": s.get('schedule'),
+            "sign_method": s.get('sign_method'),
+            "diia_sign_token": s.get('diia_sign_token')
         })
         
     with open(JSON_BACKUP_PATH, "w", encoding="utf-8") as f:
