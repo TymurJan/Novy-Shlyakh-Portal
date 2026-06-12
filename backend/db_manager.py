@@ -66,12 +66,9 @@ def add_specialist(data):
                 photo_path, document_path, consent_doc_path, consent_at,
                 court_cases, team_work, avg_service_price,
                 tariff_stage, tariff_plan, tariff_fixed_fee, tariff_commission_pct,
-                contract_signed_date, contract_end_date,
-                edrpou, contact_person, email, website, services_list, team_size,
-                discount_format, programs, financial_report_url, schedule,
-                sign_method, diia_sign_token
+                contract_signed_date, contract_end_date
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             data.get('name'),
             data.get('category'),
@@ -98,19 +95,7 @@ def add_specialist(data):
             data.get('tariff_fixed_fee', 0.0),
             data.get('tariff_commission_pct', 0.0),
             data.get('contract_signed_date'),
-            data.get('contract_end_date'),
-            data.get('edrpou'),
-            data.get('contact_person'),
-            data.get('email'),
-            data.get('website'),
-            data.get('services_list'),
-            data.get('team_size'),
-            data.get('discount_format'),
-            data.get('programs'),
-            data.get('financial_report_url'),
-            data.get('schedule'),
-            data.get('sign_method'),
-            data.get('diia_sign_token')
+            data.get('contract_end_date')
         ))
         conn.commit()
         last_id = cursor.lastrowid
@@ -152,10 +137,7 @@ def update_specialist_documents(spec_id, doc_data):
         "photo_path", "document_path", "status", "consent_doc_path", "consent_at", "kep_signature_path",
         "court_cases", "team_work", "avg_service_price",
         "tariff_stage", "tariff_plan", "tariff_fixed_fee", "tariff_commission_pct",
-        "contract_signed_date", "contract_end_date",
-        "edrpou", "contact_person", "email", "website", "services_list", "team_size",
-        "discount_format", "programs", "financial_report_url", "schedule",
-        "sign_method", "diia_sign_token"
+        "contract_signed_date", "contract_end_date"
     ]
     
     for col in doc_cols:
@@ -203,19 +185,41 @@ def update_specialist_documents(spec_id, doc_data):
 
 # --- РОБОТА З ВЕТЕРАНАМИ ТА ЛОГАМИ ---
 
-def add_veteran(tg_id, name=None, phone=None):
+def add_veteran(tg_id, name=None, phone=None, status=None, needs=None, district=None, data_consent=None):
     """Реєструє ветерана або оновлює дані."""
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute('''
-        INSERT INTO veterans (tg_id, name, phone)
-        VALUES (?, ?, ?)
+        INSERT INTO veterans (tg_id, name, phone, status, needs, district, data_consent)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(tg_id) DO UPDATE SET
             name = COALESCE(excluded.name, veterans.name),
-            phone = COALESCE(excluded.phone, veterans.phone)
-    ''', (tg_id, name, phone))
+            phone = COALESCE(excluded.phone, veterans.phone),
+            status = COALESCE(excluded.status, veterans.status),
+            needs = COALESCE(excluded.needs, veterans.needs),
+            district = COALESCE(excluded.district, veterans.district),
+            data_consent = COALESCE(excluded.data_consent, veterans.data_consent)
+    ''', (str(tg_id), name, phone, status, needs, district, data_consent))
     conn.commit()
     conn.close()
+
+def get_veteran(tg_id):
+    """Отримує ветерана за Telegram ID."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM veterans WHERE tg_id = ?", (str(tg_id),))
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+def delete_veteran(tg_id):
+    """Видаляє ветерана за Telegram ID (GDPR "Right to be Forgotten")."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM veterans WHERE tg_id = ?", (str(tg_id),))
+    conn.commit()
+    conn.close()
+
 
 def log_intake(tg_id, spec_id, status='requested'):
     """Записує факт звернення ветерана до спеціаліста."""
@@ -278,21 +282,7 @@ def sync_to_json():
             "tariff_fixed_fee": s.get('tariff_fixed_fee'),
             "tariff_commission_pct": s.get('tariff_commission_pct'),
             "contract_signed_date": s.get('contract_signed_date'),
-            "contract_end_date": s.get('contract_end_date'),
-            
-            # Додаткові партнерські поля
-            "edrpou": s.get('edrpou'),
-            "contact_person": s.get('contact_person'),
-            "email": s.get('email'),
-            "website": s.get('website'),
-            "services_list": s.get('services_list'),
-            "team_size": s.get('team_size'),
-            "discount_format": s.get('discount_format'),
-            "programs": s.get('programs'),
-            "financial_report_url": s.get('financial_report_url'),
-            "schedule": s.get('schedule'),
-            "sign_method": s.get('sign_method'),
-            "diia_sign_token": s.get('diia_sign_token')
+            "contract_end_date": s.get('contract_end_date')
         })
         
     with open(JSON_BACKUP_PATH, "w", encoding="utf-8") as f:

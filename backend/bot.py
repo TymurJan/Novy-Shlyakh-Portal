@@ -75,6 +75,15 @@ class Registration(StatesGroup):
     edit_field = State()
     edit_value = State()
 
+# СТАНИ FSM (Для реєстрації ветерана)
+class VeteranRegistration(StatesGroup):
+    first_name = State()
+    phone = State()
+    status = State()
+    needs = State()
+    district = State()
+    data_consent = State()
+
 class AIMatchmaking(StatesGroup):
     waiting_for_query = State()
 
@@ -173,11 +182,17 @@ def validate_text(text, min_words=1, min_len=2, allow_latin=False):
 
 # --- ГОРОВНЕ МЕНЮ ---
 @dp.message(Command("start"))
-async def cmd_start(message: types.Message):
+async def cmd_start(message: types.Message, state: FSMContext = None):
     logging.info(f"DEBUG: /start command received from {message.from_user.id}")
     # Обробка параметрів старту (наприклад, ?start=login з сайту)
     args = message.text.split()
     is_login_redirect = len(args) > 1 and args[1] == "login"
+    is_reg_vet_redirect = len(args) > 1 and args[1] == "reg_vet"
+    
+    if is_reg_vet_redirect:
+        if state:
+            await start_veteran_registration_flow(message, state)
+            return
     
     db = await load_db_async()
     # Перевіряємо, чи є цей користувач серед спеціалістів (шукаємо tg_id або префікс в id)
@@ -188,8 +203,17 @@ async def cmd_start(message: types.Message):
         for s in db
     )
     
+    vet = db_manager.get_veteran(message.from_user.id)
+    is_veteran = vet is not None and vet.get("name") is not None
+    
     kb = [[KeyboardButton(text="🎖️ Я Ветеран / Родина")]]
     
+    state_data = await state.get_data() if state else {}
+    if not is_veteran and state_data.get("skipped_reg"):
+        kb.append([KeyboardButton(text="🎖️ Реєстрація ветерана (знижка 10%)")])
+    elif is_veteran:
+        kb.append([KeyboardButton(text="👤 Мій профіль / 📋 Мої запити")])
+        
     if is_specialist:
         kb.append([KeyboardButton(text="👤 Мій Кабінет")])
     else:
@@ -205,6 +229,9 @@ async def cmd_start(message: types.Message):
     reply_markup = ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
     
     welcome_text = "Вітаємо у координаційному центрі **'Новий Шлях'**!\n\nЦей бот допоможе вам знайти фахівця або долучитися до нашої мережі підтримки."
+    if is_veteran:
+        welcome_text = f"Вітаємо, {vet.get('name')}! Раді бачити вас у координаційному центрі **'Новий Шлях'**!\n\nЦей бот допоможе вам знайти фахівця або долучитися до нашої мережі підтримки."
+        
     if is_login_redirect:
         welcome_text = "🔐 **Ви успішно авторизувалися через портал!**\n\nВаше меню керування активоване нижче 👇"
         # Примусове оновлення UI: видаляємо і повертаємо клавіатуру
@@ -238,16 +265,28 @@ async def veteran_menu(message: types.Message, state: FSMContext = None):
     ]
     markup = InlineKeyboardMarkup(inline_keyboard=kb)
     
+    vet = db_manager.get_veteran(message.from_user.id)
+    is_veteran = vet is not None and vet.get("name") is not None
+    state_data = await state.get_data() if state else {}
+    
     # Створюємо нижню клавіатуру для навігації
-    nav_kb = [
-        [KeyboardButton(text="⬅️ Повернутися до вибору ролі")],
-        [KeyboardButton(text="🌐 Перейти на Портал", web_app=WebAppInfo(url=f"{PORTAL_URL}?v=24"))]
-    ]
+    nav_kb = []
+    if not is_veteran and state_data.get("skipped_reg"):
+        nav_kb.append([KeyboardButton(text="🎖️ Реєстрація ветерана (знижка 10%)")])
+    elif is_veteran:
+        nav_kb.append([KeyboardButton(text="👤 Мій профіль / 📋 Мої запити")])
+        
+    nav_kb.append([KeyboardButton(text="⬅️ Повернутися до вибору ролі")])
+    import time
+    timestamp = int(time.time())
+    nav_kb.append([KeyboardButton(text="🌐 Перейти на Портал", web_app=WebAppInfo(url=f"{PORTAL_URL}?v={timestamp}"))])
+    
     nav_markup = ReplyKeyboardMarkup(keyboard=nav_kb, resize_keyboard=True)
     
     # Зберігаємо ID повідомлення з меню, щоб видалити його потім
     msg = await message.answer("Яка допомога вам потрібна зараз?", reply_markup=markup)
-    await state.update_data(last_menu_id=msg.message_id)
+    if state:
+        await state.update_data(last_menu_id=msg.message_id)
     await message.answer("Ви можете повернутися або перейти на портал кнопками внизу 👇", reply_markup=nav_markup)
 
 @dp.message(F.text == "⬅️ Повернутися до вибору ролі")
@@ -278,9 +317,29 @@ async def back_to_main(callback: types.CallbackQuery, state: FSMContext):
     await callback.answer()
 
 @dp.callback_query(F.data.startswith("find_"))
-async def show_specialists(callback: types.CallbackQuery):
+async def show_specialists(callback: types.CallbackQuery, state: FSMContext = None):
+    parts = callback.data.split("_")
+    category = parts[1]
+    filter_by_district = None
+    if len(parts) > 2:
+        filter_by_district = parts[2]
+        
+    vet = db_manager.get_veteran(callback.from_user.id)
+    
+    if vet and vet.get("district") and len(parts) <= 2:
+        kb = [
+            [InlineKeyboardButton(text="✅ Так, у моєму районі", callback_data=f"find_{category}_yes")],
+            [InlineKeyboardButton(text="❌ Ні, показати всіх", callback_data=f"find_{category}_no")]
+        ]
+        await callback.message.delete()
+        await callback.message.answer(
+            f"📍 Бажаєте відфільтрувати фахівців за вашим районом проживання ({vet['district']})?",
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=kb)
+        )
+        await callback.answer()
+        return
+
     await callback.message.delete() # Видаляємо меню вибору, щоб не захаращувати чат
-    category = callback.data.split("_")[1]
     
     # Миттєво оновлюємо клавіатуру (прибираємо кнопку порталу)
     nav_kb = [[KeyboardButton(text="⬅️ Повернутися до вибору послуг")]]
@@ -291,31 +350,60 @@ async def show_specialists(callback: types.CallbackQuery):
     # Показуємо тільки верифікованих
     specialists = [s for s in db if s.get("category") == category and s.get("status") == "verified"]
     
+    filtered = False
+    if filter_by_district == "yes" and vet and vet.get("district"):
+        district_keyword = vet["district"].split(" ")[0][:6].lower()
+        matching_specs = [s for s in specialists if district_keyword in s.get("address", "").lower()]
+        if matching_specs:
+            specialists = matching_specs
+            filtered = True
+        else:
+            await callback.message.answer(f"⚠️ У вашому районі ({vet['district']}) наразі немає фахівців цієї категорії. Показуємо список для всієї області:")
+
     if not specialists:
         await callback.message.answer(
             "Наразі у цій категорії немає активних фахівців. Ми працюємо над розширенням мережі!"
         )
-        return
+    else:
+        def get_cat_name(cat):
+            names = {"legal": "Юрист", "psychology": "Психолог", "rehab": "Реабілітолог", "career": "Кар'єра/Бізнес"}
+            return names.get(cat, cat)
 
-    def get_cat_name(cat):
-        names = {"legal": "Юрист", "psychology": "Психолог", "rehab": "Реабілітолог", "career": "Кар'єра/Бізнес"}
-        return names.get(cat, cat)
-
-    for s in specialists:
-        text = (
-            f"👤 **{s.get('name', 'Без імені')}**\n"
-            f"🎓 {get_cat_name(s.get('category'))}\n"
-            f"📍 {s.get('address', 'Черкаси')}\n"
-            f"🎁 Пільги: {s.get('discount', 'Уточнюйте')}\n\n"
-            f"📝 {s.get('bio', '')}"
-        )
-        
-        await callback.message.answer(
-            text, 
-            reply_markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="📞 Отримати контакти", callback_data=f"contact_{s['id']}")]]),
-            parse_mode="Markdown"
-        )
-    
+        for s in specialists:
+            text = (
+                f"👤 **{s.get('name', 'Без імені')}**\n"
+                f"🎓 {get_cat_name(s.get('category'))}\n"
+                f"📍 {s.get('address', 'Черкаси')}\n"
+                f"🎁 Пільги: {s.get('discount', 'Уточнюйте')}\n\n"
+                f"📝 {s.get('bio', '')}"
+            )
+            
+            await callback.message.answer(
+                text, 
+                reply_markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="📞 Отримати контакти", callback_data=f"contact_{s['id']}")]]),
+                parse_mode="Markdown"
+            )
+            
+    # Soft registration offer for unregistered veterans
+    is_registered_vet = vet is not None and vet.get("name") is not None
+    if not is_registered_vet and state:
+        state_data = await state.get_data()
+        if not state_data.get("session_soft_offered"):
+            await state.update_data(session_soft_offered=True)
+            
+            benefits_text = (
+                f"До речі — якщо зареєструєтесь як ветеран (займе 1 хвилину), ви отримаєте:\n\n"
+                f"✅ **10% знижку** на послуги цих фахівців\n"
+                f"✅ **Персональні підбірки** під ваш район і потреби\n"
+                f"✅ Ваші запити (анонімно) допомагають нам бачити, яких фахівців не вистачає в регіоні — і залучати нових"
+            )
+            
+            kb = [
+                [InlineKeyboardButton(text="📝 Зареєструватись", callback_data="vet_start_reg")],
+                [InlineKeyboardButton(text="⏱️ Пізніше", callback_data="vet_skip_reg")]
+            ]
+            await callback.message.answer(benefits_text, reply_markup=InlineKeyboardMarkup(inline_keyboard=kb))
+            
     await callback.answer()
 
 @dp.callback_query(F.data.startswith("contact_"))
@@ -367,6 +455,351 @@ async def back_to_vet_menu_msg(message: types.Message, state: FSMContext):
     except Exception:
         pass
     await veteran_menu(message, state)
+
+
+# --- ШЛЯХ РЕЄСТРАЦІЇ ВЕТЕРАНА (FSM) ---
+
+async def start_veteran_registration_flow(message: types.Message, state: FSMContext):
+    # Check if already registered
+    vet = db_manager.get_veteran(message.from_user.id)
+    if vet and vet.get("name"):
+        await message.answer("Ви вже зареєстровані як ветеран!")
+        return
+        
+    await state.set_state(VeteranRegistration.first_name)
+    kb = [[KeyboardButton(text="❌ Скасувати реєстрацію")]]
+    markup = ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
+    await message.answer(
+        "👋 Розпочнемо швидку реєстрацію ветерана (це займе 1 хвилину).\n\n"
+        "Введіть ваше ім'я (як до вас звертатися):",
+        reply_markup=markup
+    )
+
+@dp.message(F.text == "🎖️ Реєстрація ветерана (знижка 10%)")
+async def cmd_register_veteran(message: types.Message, state: FSMContext):
+    await start_veteran_registration_flow(message, state)
+
+@dp.callback_query(F.data == "vet_start_reg")
+async def callback_register_veteran(callback: types.CallbackQuery, state: FSMContext):
+    await callback.message.delete()
+    await start_veteran_registration_flow(callback.message, state)
+    await callback.answer()
+
+@dp.callback_query(F.data == "vet_skip_reg")
+async def skip_vet_reg(callback: types.CallbackQuery, state: FSMContext):
+    await state.update_data(skipped_reg=True)
+    await callback.message.edit_text("Добре, ви можете зареєструватися пізніше за допомогою кнопки в меню. 👍")
+    await veteran_menu(callback.message, state)
+    await callback.answer()
+
+@dp.message(VeteranRegistration.first_name, F.text == "❌ Скасувати реєстрацію")
+@dp.message(VeteranRegistration.phone, F.text == "❌ Скасувати реєстрацію")
+async def cancel_vet_reg_msg(message: types.Message, state: FSMContext):
+    await state.clear()
+    await message.answer("Реєстрацію скасовано.", reply_markup=ReplyKeyboardRemove())
+    await cmd_start(message, state)
+
+@dp.callback_query(F.data == "vet_cancel_reg")
+async def cancel_vet_reg_cb(callback: types.CallbackQuery, state: FSMContext):
+    await state.clear()
+    await callback.message.delete()
+    await callback.message.answer("Реєстрацію скасовано.")
+    await cmd_start(callback.message, state)
+    await callback.answer()
+
+@dp.message(VeteranRegistration.first_name)
+async def process_vet_first_name(message: types.Message, state: FSMContext):
+    is_valid, error_msg = validate_text(message.text, min_words=1, min_len=2)
+    if not is_valid:
+        await message.answer(error_msg)
+        return
+        
+    await state.update_data(first_name=message.text)
+    await state.set_state(VeteranRegistration.phone)
+    
+    kb = [
+        [KeyboardButton(text="📱 Поділитися номером", request_contact=True)],
+        [KeyboardButton(text="❌ Скасувати реєстрацію")]
+    ]
+    markup = ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True, one_time_keyboard=True)
+    await message.answer(
+        "📞 Поділіться, будь ласка, своїм номером телефону для авторизації, натиснувши кнопку нижче 👇",
+        reply_markup=markup
+    )
+
+@dp.message(VeteranRegistration.phone, F.contact)
+async def process_vet_phone_contact(message: types.Message, state: FSMContext):
+    contact = message.contact
+    if contact.user_id != message.from_user.id:
+        await message.answer("❌ З метою безпеки ви можете поділитися лише власним контактом. Будь ласка, натисніть кнопку '📱 Поділитися номером'.")
+        return
+        
+    phone = contact.phone_number
+    if not phone.startswith("+"):
+        phone = "+" + phone
+        
+    await state.update_data(phone=phone)
+    await state.set_state(VeteranRegistration.status)
+    
+    kb = [
+        [InlineKeyboardButton(text="🎖️ Ветеран / УБД", callback_data="vet_status:veteran")],
+        [InlineKeyboardButton(text="👥 Член родини ветерана", callback_data="vet_status:family")],
+        [InlineKeyboardButton(text="🤝 Близький до ветеранської спільноти", callback_data="vet_status:close")]
+    ]
+    await message.answer("Оберіть ваш статус:", reply_markup=InlineKeyboardMarkup(inline_keyboard=kb))
+
+@dp.message(VeteranRegistration.phone)
+async def process_vet_phone_invalid(message: types.Message):
+    await message.answer("❌ Будь ласка, скористайтеся кнопкою '📱 Поділитися номером' внизу екрану для верифікації вашого контакту.")
+
+@dp.callback_query(F.data.startswith("vet_status:"))
+async def process_vet_status(callback: types.CallbackQuery, state: FSMContext):
+    status_key = callback.data.split(":")[1]
+    status_map = {
+        "veteran": "Ветеран, учасник/учасниця бойових дій",
+        "family": "Член родини ветерана",
+        "close": "Близький до ветеранської спільноти"
+    }
+    status_text = status_map.get(status_key, "Ветеран")
+    await state.update_data(status=status_text)
+    
+    await state.update_data(needs_selected=[])
+    await state.set_state(VeteranRegistration.needs)
+    
+    await callback.message.delete()
+    await show_needs_keyboard(callback.message, [])
+    await callback.answer()
+
+NEEDS_OPTIONS = [
+    "Психологічна допомога",
+    "Юридична допомога",
+    "Фізична реабілітація",
+    "Протезування",
+    "Працевлаштування",
+    "Державні дотації / виплати",
+    "Інше"
+]
+
+async def show_needs_keyboard(message: types.Message, selected_indices: list, edit=False):
+    kb = []
+    for idx, option in enumerate(NEEDS_OPTIONS):
+        checkbox = "✅" if idx in selected_indices else "⬜"
+        kb.append([InlineKeyboardButton(text=f"{checkbox} {option}", callback_data=f"vet_need_toggle:{idx}")])
+        
+    kb.append([
+        InlineKeyboardButton(text="💾 Зберегти вибір", callback_data="vet_needs_save"),
+        InlineKeyboardButton(text="❌ Скасувати", callback_data="vet_cancel_reg")
+    ])
+    
+    text = "Що вам потрібно? (можна обрати кілька варіантів, після чого натиснуть «Зберегти вибір»):"
+    
+    if edit:
+        await message.edit_text(text, reply_markup=InlineKeyboardMarkup(inline_keyboard=kb))
+    else:
+        await message.answer(text, reply_markup=InlineKeyboardMarkup(inline_keyboard=kb))
+
+@dp.callback_query(F.data.startswith("vet_need_toggle:"))
+async def process_vet_need_toggle(callback: types.CallbackQuery, state: FSMContext):
+    idx = int(callback.data.split(":")[1])
+    data = await state.get_data()
+    selected = data.get("needs_selected", [])
+    
+    if idx in selected:
+        selected.remove(idx)
+    else:
+        selected.append(idx)
+        
+    await state.update_data(needs_selected=selected)
+    
+    try:
+        await show_needs_keyboard(callback.message, selected, edit=True)
+    except Exception:
+        pass
+    await callback.answer()
+
+@dp.callback_query(F.data == "vet_needs_save")
+async def process_vet_needs_save(callback: types.CallbackQuery, state: FSMContext):
+    data = await state.get_data()
+    selected_indices = data.get("needs_selected", [])
+    
+    if not selected_indices:
+        await callback.answer("⚠️ Будь ласка, оберіть хоча б один пункт!", show_alert=True)
+        return
+        
+    selected_needs = [NEEDS_OPTIONS[i] for i in selected_indices]
+    await state.update_data(needs=", ".join(selected_needs))
+    await state.set_state(VeteranRegistration.district)
+    
+    kb = [
+        [InlineKeyboardButton(text="Черкаський район", callback_data="vet_dist:Черкаський район")],
+        [InlineKeyboardButton(text="Уманський район", callback_data="vet_dist:Уманський район")],
+        [InlineKeyboardButton(text="Золотоніський район", callback_data="vet_dist:Золотоніський район")],
+        [InlineKeyboardButton(text="Звенигородський район", callback_data="vet_dist:Звенигородський район")],
+        [InlineKeyboardButton(text="❌ Скасувати", callback_data="vet_cancel_reg")]
+    ]
+    
+    await callback.message.delete()
+    await callback.message.answer("Оберіть ваш район проживання (Черкаська область):", reply_markup=InlineKeyboardMarkup(inline_keyboard=kb))
+    await callback.answer()
+
+@dp.callback_query(F.data.startswith("vet_dist:"))
+async def process_vet_district(callback: types.CallbackQuery, state: FSMContext):
+    district = callback.data.split(":")[1]
+    await state.update_data(district=district)
+    await state.set_state(VeteranRegistration.data_consent)
+    
+    kb = [
+        [InlineKeyboardButton(text="✅ Згоден / Згодна", callback_data="vet_consent:yes")],
+        [InlineKeyboardButton(text="❌ Не згоден / Скасувати", callback_data="vet_consent:no")]
+    ]
+    
+    consent_text = (
+        "⚖️ **Згода на обробку персональних даних**:\n\n"
+        "Я згоден/згодна на обробку персональних даних (анонімізована аналітика).\n\n"
+        "ℹ️ *Примітка:* Аналітичні звіти використовують ТІЛЬКИ категорію запиту + район, без імені/контакту. "
+        "Персональні дані не передаються третім особам."
+    )
+    
+    await callback.message.delete()
+    await callback.message.answer(consent_text, reply_markup=InlineKeyboardMarkup(inline_keyboard=kb), parse_mode="Markdown")
+    await callback.answer()
+
+@dp.callback_query(F.data.startswith("vet_consent:"))
+async def process_vet_consent(callback: types.CallbackQuery, state: FSMContext):
+    decision = callback.data.split(":")[1]
+    if decision == "no":
+        await state.clear()
+        await callback.message.delete()
+        await callback.message.answer("Реєстрацію скасовано.")
+        msg = callback.message
+        msg.from_user = callback.from_user
+        await cmd_start(msg, state)
+        await callback.answer()
+        return
+        
+    data = await state.get_data()
+    try:
+        db_manager.add_veteran(
+            tg_id=callback.from_user.id,
+            name=data.get("first_name"),
+            phone=data.get("phone"),
+            status=data.get("status"),
+            needs=data.get("needs"),
+            district=data.get("district"),
+            data_consent=1
+        )
+        logging.info(f"✅ Veteran registered: {data.get('first_name')} (ID: {callback.from_user.id})")
+        
+        await callback.message.delete()
+        await callback.message.answer(
+            f"🎉 Вітаємо, {data.get('first_name')}!\n\n"
+            "Ви успішно зареєструвалися на порталі 'Новий Шлях'.\n"
+            "Тепер вам доступні персональні підбірки та знижка 10% у партнерів. 🫡"
+        )
+    except Exception as e:
+        logging.error(f"Error registering veteran: {e}")
+        await callback.message.answer("❌ Виникла помилка при реєстрації. Спробуйте пізніше або зверніться до підтримки.")
+        
+    await state.clear()
+    msg = callback.message
+    msg.from_user = callback.from_user
+    await cmd_start(msg, state)
+    await callback.answer()
+
+# --- ОСОБИСТИЙ ПРОФІЛЬ ВЕТЕРАНА ---
+
+@dp.message(F.text == "👤 Мій профіль / 📋 Мої запити")
+async def show_vet_profile(message: types.Message):
+    from datetime import datetime
+    vet = db_manager.get_veteran(message.from_user.id)
+    if not vet:
+        await message.answer("Ваш профіль не знайдено. Будь ласка, зареєструйтесь.")
+        return
+        
+    status_label = vet.get("status")
+    needs_label = vet.get("needs")
+    district_label = vet.get("district")
+    
+    conn = db_manager.get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('''
+        SELECT s.name, s.category, l.created_at, l.status
+        FROM intake_logs l
+        JOIN specialists s ON l.specialist_id = s.id
+        WHERE l.veteran_id = ?
+        ORDER BY l.created_at DESC
+        LIMIT 5
+    ''', (vet['id'],))
+    logs = cursor.fetchall()
+    conn.close()
+    
+    logs_text = ""
+    if logs:
+        logs_text = "\n\n📋 **Останні звернення:**\n"
+        for i, log in enumerate(logs, 1):
+            cat_name = "Спеціаліст"
+            if log['category'] == 'legal': cat_name = "Юрист"
+            elif log['category'] == 'psychology': cat_name = "Психолог"
+            elif log['category'] == 'rehab': cat_name = "Реабілітолог"
+            elif log['category'] == 'career': cat_name = "Кар'єра"
+            
+            date_str = log['created_at']
+            try:
+                dt = datetime.strptime(log['created_at'], "%Y-%m-%d %H:%M:%S")
+                date_str = dt.strftime("%d.%m.%Y")
+            except: pass
+            
+            logs_text += f"{i}. {log['name']} ({cat_name}) — {date_str}\n"
+    else:
+        logs_text = "\n\nℹ️ *Ви ще не зверталися до фахівців через бот.*"
+        
+    text = (
+        f"🎖️ **Ваш профіль ветерана**\n\n"
+        f"👤 **Ім'я:** {vet.get('name')}\n"
+        f"📞 **Телефон:** {vet.get('phone')}\n"
+        f"🏷️ **Статус:** {status_label}\n"
+        f"📍 **Район:** {district_label}\n"
+        f"💡 **Потреби:** {needs_label}"
+        f"{logs_text}\n\n"
+        f"Ви можете видалити свій профіль відповідно до GDPR (Право бути забутим)."
+    )
+    
+    kb = [
+        [InlineKeyboardButton(text="❌ Видалити профіль ветерана", callback_data="vet_delete_profile_confirm")]
+    ]
+    await message.answer(text, reply_markup=InlineKeyboardMarkup(inline_keyboard=kb), parse_mode="Markdown")
+
+@dp.callback_query(F.data == "vet_delete_profile_confirm")
+async def vet_delete_confirm(callback: types.CallbackQuery):
+    kb = [
+        [InlineKeyboardButton(text="✅ Так, видалити", callback_data="vet_delete_profile_final")],
+        [InlineKeyboardButton(text="🔙 Скасувати", callback_data="vet_delete_profile_cancel")]
+    ]
+    await callback.message.edit_text(
+        "⚠️ **Увага!** Ви впевнені, що хочете видалити свій профіль ветерана?\n\n"
+        "Всі ваші дані та історія звернень будуть безповоротно видалені з бази даних.",
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=kb),
+        parse_mode="Markdown"
+    )
+    await callback.answer()
+
+@dp.callback_query(F.data == "vet_delete_profile_final")
+async def vet_delete_final(callback: types.CallbackQuery, state: FSMContext = None):
+    db_manager.delete_veteran(callback.from_user.id)
+    await callback.message.edit_text("🗑️ Ваш профіль ветерана успішно та безповоротно видалено з системи.")
+    msg = callback.message
+    msg.from_user = callback.from_user
+    await cmd_start(msg, state)
+    await callback.answer()
+
+@dp.callback_query(F.data == "vet_delete_profile_cancel")
+async def vet_delete_cancel(callback: types.CallbackQuery):
+    await callback.message.delete()
+    msg = callback.message
+    msg.from_user = callback.from_user
+    await show_vet_profile(msg)
+    await callback.answer()
+
 
 # --- ШЛЯХ СПЕЦІАЛІСТА (FSM) ---
 @dp.message(F.text == "💼 Я Спеціаліст (Реєстрація)")

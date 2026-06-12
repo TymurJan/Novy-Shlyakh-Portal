@@ -47,22 +47,8 @@ def init_db():
             tariff_plan TEXT DEFAULT 'grant_standard',
             tariff_fixed_fee REAL DEFAULT 0.0,
             tariff_commission_pct REAL DEFAULT 0.0,
-contract_signed_date TEXT,
+            contract_signed_date TEXT,
             contract_end_date TEXT,
-            
-            -- Додаткові партнерські поля (Фаза 2)
-            edrpou TEXT,
-            contact_person TEXT,
-            email TEXT,
-            website TEXT,
-            services_list TEXT,
-            team_size INTEGER,
-            discount_format TEXT,
-            programs TEXT,
-            financial_report_url TEXT,
-            schedule TEXT,
-            sign_method TEXT,
-            diia_sign_token TEXT,
             
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
@@ -98,21 +84,7 @@ contract_signed_date TEXT,
             "tariff_fixed_fee": "REAL DEFAULT 0.0",
             "tariff_commission_pct": "REAL DEFAULT 0.0",
             "contract_signed_date": "TEXT",
-            "contract_end_date": "TEXT",
-            
-            # Додаткові партнерські поля (Фаза 2)
-            "edrpou": "TEXT",
-            "contact_person": "TEXT",
-            "email": "TEXT",
-            "website": "TEXT",
-            "services_list": "TEXT",
-            "team_size": "INTEGER",
-            "discount_format": "TEXT",
-            "programs": "TEXT",
-            "financial_report_url": "TEXT",
-            "schedule": "TEXT",
-            "sign_method": "TEXT",
-            "diia_sign_token": "TEXT"
+            "contract_end_date": "TEXT"
         }
         for col_name, col_type in new_cols.items():
             if col_name not in columns:
@@ -132,6 +104,25 @@ contract_signed_date TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
+
+    # Самооновлення схеми ветеранів (Self-healing schema migration for veterans)
+    try:
+        cursor.execute("PRAGMA table_info(veterans)")
+        columns = [row[1] for row in cursor.fetchall()]
+        
+        new_vets_cols = {
+            "status": "TEXT",
+            "needs": "TEXT",
+            "district": "TEXT",
+            "data_consent": "INTEGER DEFAULT 0"
+        }
+        for col_name, col_type in new_vets_cols.items():
+            if col_name not in columns:
+                cursor.execute(f"ALTER TABLE veterans ADD COLUMN {col_name} {col_type}")
+                print(f"🔧 Додано колонку {col_name} в таблицю veterans")
+    except Exception as e:
+        print(f"Попередження міграції ветеранів: {e}")
+
 
     # 3. Журнал координації (Логи диспетчерської)
     cursor.execute('''

@@ -4,6 +4,7 @@ import shutil
 import hashlib
 from datetime import datetime, timezone
 from fastapi import FastAPI, HTTPException, File, UploadFile, Form, Request
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
 
@@ -12,6 +13,14 @@ from typing import Optional
 # Потребує: pip install fastapi uvicorn openai
 
 app = FastAPI(title="Novy Shlyakh AI Backend", version="1.0.0")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class ChatRequest(BaseModel):
     message: str
@@ -283,8 +292,8 @@ async def register_specialist(
     address: str = Form(...),
     bio: str = Form(...),
     tg_id: Optional[str] = Form(None),
-    photo: Optional[UploadFile] = File(None),
-    document: Optional[UploadFile] = File(None),
+    photo: UploadFile = File(...),
+    document: UploadFile = File(...),
     kep_file: Optional[UploadFile] = File(None),
     kep_password: Optional[str] = Form(None),
     
@@ -294,23 +303,12 @@ async def register_specialist(
     avg_service_price: Optional[str] = Form(None),
     tariff_plan: Optional[str] = Form("grant_standard"),
     contract_end_date: Optional[str] = Form(None),
-    
-    # Додаткові партнерські поля (Фаза 2)
-    edrpou: Optional[str] = Form(None),
-    contact_person: Optional[str] = Form(None),
-    email: Optional[str] = Form(None),
-    website: Optional[str] = Form(None),
-    services_list: Optional[str] = Form(None),
-    team_size: Optional[int] = Form(None),
-    discount_format: Optional[str] = Form(None),
-    programs: Optional[str] = Form(None),
-    financial_report_url: Optional[str] = Form(None),
-    schedule: Optional[str] = Form(None),
-    sign_method: Optional[str] = Form(None),
-    diia_sign_token: Optional[str] = Form(None),
 ):
     """
-    Ендпоінт для реєстрації спеціаліста/партнера (Крок 2).
+    Ендпоінт для фінальної реєстрації спеціаліста (Крок 2).
+
+    Створює per-specialist папку, зберігає файли та генерує
+    Consent Receipt (підтвердження згоди) відповідно до GDPR / ЗУ «Про захист ПД».
     """
     try:
         # 1. Визначаємо унікальний ідентифікатор спеціаліста
@@ -320,36 +318,22 @@ async def register_specialist(
         spec_dir = os.path.join("uploads", "specialists", spec_id)
         os.makedirs(spec_dir, exist_ok=True)
 
-        # 3. Зберігаємо фото (якщо є)
-        photo_path = ""
-        if photo and photo.filename:
-            photo_ext = os.path.splitext(photo.filename)[1] or ".jpg"
-            photo_path = os.path.join(spec_dir, f"photo{photo_ext}")
-            with open(photo_path, "wb") as buffer:
-                shutil.copyfileobj(photo.file, buffer)
+        # 3. Зберігаємо фото
+        photo_ext = os.path.splitext(photo.filename or "photo.jpg")[1] or ".jpg"
+        photo_path = os.path.join(spec_dir, f"photo{photo_ext}")
+        with open(photo_path, "wb") as buffer:
+            shutil.copyfileobj(photo.file, buffer)
 
-        # 4. Зберігаємо диплом / ліцензію / статут (якщо є)
-        doc_path = ""
-        if document and document.filename:
-            doc_ext = os.path.splitext(document.filename)[1] or ".pdf"
-            doc_path = os.path.join(spec_dir, f"diploma{doc_ext}")
-            with open(doc_path, "wb") as buffer:
-                shutil.copyfileobj(document.file, buffer)
+        # 4. Зберігаємо диплом / ліцензію
+        doc_ext = os.path.splitext(document.filename or "document.pdf")[1] or ".pdf"
+        doc_path = os.path.join(spec_dir, f"diploma{doc_ext}")
+        with open(doc_path, "wb") as buffer:
+            shutil.copyfileobj(document.file, buffer)
 
-        # 5. Розраховуємо параметри тарифу та коригуємо тарифний план за роллю
+        # 5. Розраховуємо параметри тарифу
         tariff_stage = "stage_1"
         tariff_fixed_fee = 0.0
         tariff_commission_pct = 0.0
-        
-        # Динамічно визначаємо тарифний план
-        if category == "partner":
-            tariff_plan = "zone3_bureau"
-        elif category == "ngo":
-            tariff_plan = "zone4_ngo"
-        elif category == "state":
-            tariff_plan = "zone5_state"
-        elif category == "employer":
-            tariff_plan = "employer"
         
         if tariff_plan == "grant_standard":
             tariff_stage = "stage_1"
@@ -371,12 +355,8 @@ async def register_specialist(
             tariff_stage = "stage_3"
             tariff_fixed_fee = 100.0
             tariff_commission_pct = 0.0
-        elif tariff_plan == "zone3_bureau":
-            tariff_stage = "stage_1"
-            tariff_fixed_fee = 0.0
-            tariff_commission_pct = 0.0
-        elif tariff_plan in ("zone4_ngo", "zone5_state", "employer"):
-            tariff_stage = "stage_1"
+        elif tariff_plan == "zone3_state":
+            tariff_stage = "stage_3"
             tariff_fixed_fee = 0.0
             tariff_commission_pct = 0.0
 
@@ -396,7 +376,7 @@ async def register_specialist(
             tariff_plan=tariff_plan,
             contract_end_date=contract_end_date,
             court_cases=court_cases,
-            team_work=team_work or team_size or 0,
+            team_work=team_work,
             avg_service_price=avg_service_price,
         )
         consent_filename = f"consent_{consent_date}.md"
@@ -442,30 +422,11 @@ async def register_specialist(
                 "consent_doc_path": consent_path,
                 "consent_at": consent_at,
                 "kep_signature_path": kep_signature_path,
-                
-                # Додаткові партнерські поля
-                "edrpou": edrpou,
-                "contact_person": contact_person,
-                "email": email,
-                "website": website,
-                "services_list": services_list,
-                "team_size": team_size,
-                "discount_format": discount_format,
-                "programs": programs,
-                "financial_report_url": financial_report_url,
-                "schedule": schedule,
-                "sign_method": sign_method,
-                "diia_sign_token": diia_sign_token,
-                "avg_service_price": avg_service_price,
-                "court_cases": court_cases,
-                "team_work": team_work or team_size or 0,
-                "tariff_plan": tariff_plan,
-                "contract_end_date": contract_end_date
             })
         except Exception as db_err:
-            print(f"⚠️ DB warning (non-critical): {db_err}")
+            print(f"\u26a0\ufe0f DB warning (non-critical): {db_err}")
 
-        # 9. JSON-бекап (сумісність зі старим фронтендом)
+        # 8. JSON-бекап (сумісність зі старим фронтендом)
         db_path = os.path.join("data", "specialists.json")
         os.makedirs("data", exist_ok=True)
         current_db = []
@@ -487,21 +448,7 @@ async def register_specialist(
             "kep_signed": kep_signed,
             "status": "pending",
             "rating": "5.0",
-            "reviews": [],
-            
-            # Нові поля
-            "edrpou": edrpou,
-            "contact_person": contact_person,
-            "email": email,
-            "website": website,
-            "services_list": services_list,
-            "team_size": team_size,
-            "discount_format": discount_format,
-            "programs": programs,
-            "financial_report_url": financial_report_url,
-            "schedule": schedule,
-            "sign_method": sign_method,
-            "diia_sign_token": diia_sign_token
+            "reviews": []
         })
         with open(db_path, "w", encoding="utf-8") as f:
             json.dump(current_db, f, ensure_ascii=False, indent=2)
@@ -518,25 +465,48 @@ async def register_specialist(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
 @app.get("/health")
 def health_check():
     return {"status": "ok", "system": "Novy Shlyakh AI Ready"}
 
-from fastapi.responses import FileResponse
-# Обробник статичних файлів фронтенду (усуває конфлікт маршрутизації)
-portal_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-@app.get("/{path:path}")
-async def serve_static(path: str):
-    if not path:
-        path = "index.html"
-    file_path = os.path.normpath(os.path.join(portal_dir, path))
-    if not file_path.startswith(portal_dir):
-        raise HTTPException(status_code=403, detail="Access denied")
-    if os.path.isfile(file_path):
-        return FileResponse(file_path)
-    raise HTTPException(status_code=404, detail="File not found")
+@app.get("/api/portal-stats")
+async def get_portal_stats():
+    """
+    Повертає статистику для головної сторінки порталу.
+    """
+    try:
+        import db_manager
+        conn = db_manager.get_db_connection()
+        cursor = conn.cursor()
+        
+        # 1. Верифіковані фахівці
+        cursor.execute("SELECT COUNT(*) FROM specialists WHERE status = 'verified'")
+        verified_specs_count = cursor.fetchone()[0]
+        
+        # 2. Опрацьовані запити
+        cursor.execute("SELECT COUNT(*) FROM intake_logs")
+        intake_logs_count = cursor.fetchone()[0]
+        
+        # 3. Зареєстровані ветерани
+        cursor.execute("SELECT COUNT(*) FROM veterans WHERE name IS NOT NULL")
+        registered_vets_count = cursor.fetchone()[0]
+        
+        conn.close()
+        
+        return {
+            "status": "success",
+            "specialists_count": verified_specs_count,
+            "intake_count": intake_logs_count,
+            "veterans_count": registered_vets_count
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": str(e),
+            "specialists_count": 0,
+            "intake_count": 0,
+            "veterans_count": 0
+        }
 
 if __name__ == "__main__":
     import uvicorn

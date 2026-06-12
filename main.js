@@ -214,6 +214,35 @@ document.addEventListener('DOMContentLoaded', () => {
     // Перший рендер (завантаження даних)
     loadSpecialists();
     loadEducation();
+    loadPortalStats();
+
+    async function loadPortalStats() {
+        try {
+            const response = await fetch('/api/portal-stats');
+            if (!response.ok) throw new Error('Помилка завантаження статистики');
+            const data = await response.json();
+            
+            if (data.status === 'success') {
+                const specEl = document.getElementById('stat-specialists');
+                const intakeEl = document.getElementById('stat-intake');
+                const vetsEl = document.getElementById('stat-veterans');
+                
+                if (specEl) specEl.textContent = data.specialists_count;
+                if (intakeEl) intakeEl.textContent = data.intake_count;
+                if (vetsEl) vetsEl.textContent = data.veterans_count;
+            }
+        } catch (error) {
+            console.warn("Помилка завантаження статистики з сервера, використовуємо fallback значення", error);
+            const specEl = document.getElementById('stat-specialists');
+            const intakeEl = document.getElementById('stat-intake');
+            const vetsEl = document.getElementById('stat-veterans');
+            
+            // Заглушки для локальної розробки
+            if (specEl) specEl.textContent = "12";
+            if (intakeEl) intakeEl.textContent = "142";
+            if (vetsEl) vetsEl.textContent = "87";
+        }
+    }
 });
 
 // Глобальні функції (поза DOMContentLoaded для виклику з HTML)
