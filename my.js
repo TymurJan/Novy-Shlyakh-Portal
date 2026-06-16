@@ -1,42 +1,28 @@
-// my.js - Логіка Кабінету Ветерана
+// my.js - Логіка Кабінету «Новий Шлях»
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- Перемикання табів ---
-    const tabLogin = document.getElementById('tab-login');
+    // --- Перемикання табів: Вхід / Реєстрація ---
+    const tabLogin    = document.getElementById('tab-login');
     const tabRegister = document.getElementById('tab-register');
-    const tabSpecialist = document.getElementById('tab-specialist');
-    
-    const formLogin = document.getElementById('login-form');
+    const formLogin   = document.getElementById('login-form');
     const formRegister = document.getElementById('register-form');
-    const formSpecialist = document.getElementById('specialist-form');
 
     function resetTabs() {
-        [tabLogin, tabRegister, tabSpecialist].forEach(t => t.classList.remove('active'));
-        [formLogin, formRegister, formSpecialist].forEach(f => f.classList.remove('active'));
+        [tabLogin, tabRegister].forEach(t => { if (t) t.classList.remove('active'); });
+        [formLogin, formRegister].forEach(f => { if (f) f.classList.remove('active'); });
     }
 
-    tabLogin.addEventListener('click', () => {
+    if (tabLogin) tabLogin.addEventListener('click', () => {
         resetTabs();
         tabLogin.classList.add('active');
-        formLogin.classList.add('active');
+        if (formLogin) formLogin.classList.add('active');
     });
 
-    tabRegister.addEventListener('click', () => {
+    if (tabRegister) tabRegister.addEventListener('click', () => {
         resetTabs();
         tabRegister.classList.add('active');
-        formRegister.classList.add('active');
-    });
-
-    tabSpecialist.addEventListener('click', () => {
-        resetTabs();
-        tabSpecialist.classList.add('active');
-        formSpecialist.classList.add('active');
-    });
-
-    // Перехід до Back-office спеціаліста
-    document.getElementById('go-to-specialist').addEventListener('click', () => {
-        window.location.href = 'cabinet.html';
+        if (formRegister) formRegister.classList.add('active');
     });
 
     // --- База даних (Mock в localStorage) ---
@@ -75,62 +61,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3000);
     });
 
-    // --- Перемикання полів ролей ---
-    const roleRadios = document.getElementsByName('user-role');
-    const vetFields = document.getElementById('veteran-fields');
-    const specFields = document.getElementById('specialist-fields');
+    // --- Перемикач 5 гілок реєстрації ---
+    const roleSelector = document.getElementById('reg-role-selector');
+    const roleSections = {
+        'veteran':    document.getElementById('reg-veteran-section'),
+        'specialist': document.getElementById('reg-specialist-section'),
+        'partner':    document.getElementById('reg-partner-section'),
+        'ngo':        document.getElementById('reg-ngo-section'),
+        'state':      document.getElementById('reg-state-section'),
+    };
 
-    const vetInputs = [
-        document.getElementById('reg-email'),
-        document.getElementById('reg-password'),
-        document.getElementById('reg-question'),
-        document.getElementById('reg-answer')
-    ];
-
-    const specInputs = [
-        document.getElementById('spec-phone'),
-        document.getElementById('spec-address'),
-        document.getElementById('spec-bio'),
-        document.getElementById('spec-photo'),
-        document.getElementById('spec-doc'),
-        document.getElementById('spec-consent-privacy'),
-        document.getElementById('spec-consent-agreement')
-    ];
-
-    function toggleRoleFields() {
-        let isVet = true;
-        for (const radio of roleRadios) {
-            if (radio.checked && radio.value === 'specialist') {
-                isVet = false;
-            }
-        }
-
-        if (isVet) {
-            if (vetFields) vetFields.style.display = 'block';
-            if (specFields) specFields.style.display = 'none';
-            vetInputs.forEach(input => {
-                if (input) input.required = true;
-            });
-            specInputs.forEach(input => {
-                if (input) input.required = false;
-            });
-        } else {
-            if (vetFields) vetFields.style.display = 'none';
-            if (specFields) specFields.style.display = 'block';
-            vetInputs.forEach(input => {
-                if (input) input.required = false;
-            });
-            specInputs.forEach(input => {
-                if (input && input.id !== 'spec-kep' && input.id !== 'spec-kep-password') {
-                    input.required = true;
-                }
-            });
-        }
+    function showRoleSection(role) {
+        Object.entries(roleSections).forEach(([key, el]) => {
+            if (el) el.style.display = (key === role) ? 'block' : 'none';
+        });
     }
 
-    roleRadios.forEach(radio => radio.addEventListener('change', toggleRoleFields));
-    if (vetFields && specFields) {
-        toggleRoleFields();
+    if (roleSelector) {
+        roleSelector.addEventListener('change', () => showRoleSection(roleSelector.value));
+        // Показуємо секцію за замовчуванням
+        showRoleSection(roleSelector.value || 'veteran');
     }
 
     // --- Перемикач методу підписання (Файловий КЕП ↔ Дія.Підпис для ФОП) ---
@@ -212,117 +162,131 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    formRegister.addEventListener('submit', async (e) => {
+    if (formRegister) formRegister.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
-        let isVet = true;
-        for (const radio of roleRadios) {
-            if (radio.checked && radio.value === 'specialist') {
-                isVet = false;
-            }
-        }
 
-        if (isVet) {
-            // Реєстрація ВЕТЕРАНА
-            const checkVerify = document.getElementById('reg-verify').checked;
-            const checkNda = document.getElementById('reg-nda').checked;
-            const diiaToken = diiaTokenInput.value;
-            
+        const role = roleSelector ? roleSelector.value : 'veteran';
+        const submitBtn = formRegister.querySelector('button[type="submit"]');
+
+        if (role === 'veteran') {
+            // ===================== РЕЄСТРАЦІЯ ВЕТЕРАНА =====================
+            const diiaTokenInput = document.getElementById('diia-verified-token');
+            const diiaToken   = diiaTokenInput ? diiaTokenInput.value : '';
+            const checkVerify = document.getElementById('reg-verify')?.checked;
+            const checkNda    = document.getElementById('reg-nda')?.checked;
+
             if (!diiaToken) {
                 alert('Будь ласка, пройдіть верифікацію особи через Дію перед реєстрацією.');
                 return;
             }
-            
-            if (!checkVerify || !checkNda) return;
+            if (!checkVerify || !checkNda) {
+                alert('Необхідно погодитись із умовами перед реєстрацією.');
+                return;
+            }
 
-            const name = document.getElementById('reg-name').value;
-            const email = document.getElementById('reg-email').value;
-            const password = document.getElementById('reg-password').value;
-            const questionId = document.getElementById('reg-question').value;
-            const answer = document.getElementById('reg-answer').value;
+            const name       = document.getElementById('reg-name')?.value;
+            const email      = document.getElementById('reg-email')?.value;
+            const password   = document.getElementById('reg-password')?.value;
+            const questionId = document.getElementById('reg-question')?.value;
+            const answer     = document.getElementById('reg-answer')?.value;
 
             const db = getDB();
             if (db[email]) {
                 alert('Користувач з таким логіном вже існує!');
                 return;
             }
-
-            db[email] = { 
-                name, 
-                password, 
-                questionId, 
+            db[email] = {
+                name, password, questionId,
                 answer: answer.toLowerCase(),
+                role: 'veteran',
                 verified_by: 'DIIA_REGISTRY',
                 token: diiaToken
             };
             saveDB(db);
 
             alert('✅ Профіль ветерана створено! Усі дані захищені та підтверджені. Тепер ви можете увійти.');
-            tabLogin.click(); // Перемикаємо на логін
+            if (tabLogin) tabLogin.click();
             formRegister.reset();
-            diiaBtn.disabled = false;
-            diiaBtn.style.background = '#111';
-            diiaBtn.innerHTML = '<span style="font-weight: 900; font-family: Outfit; font-size: 18px; letter-spacing: 1px;">Дія.Підпис</span> Пройти верифікацію';
-            diiaStatusText.textContent = '⚠️ Очікування верифікації...';
-            diiaStatusText.style.color = 'var(--danger)';
-            diiaTokenInput.value = '';
-            toggleRoleFields();
-        } else {
-            // Реєстрація СПЕЦІАЛІСТА
-            if (!document.getElementById('spec-consent-privacy').checked ||
-                !document.getElementById('spec-consent-agreement').checked) {
-                alert('Будь ласка, погодьтеся з Політикою конфіденційності та Угодою про співпрацю.');
-                return;
+
+            // Скидання кнопки Дія.Підпис
+            const diiaBtn_v       = document.getElementById('diia-verify-btn');
+            const diiaStatusText_v = document.getElementById('diia-status-text');
+            if (diiaBtn_v) {
+                diiaBtn_v.disabled = false;
+                diiaBtn_v.style.background = '#111';
+                diiaBtn_v.innerHTML = '<span style="font-weight:900;font-family:Outfit;font-size:18px;letter-spacing:1px">Дія.Підпис</span> Пройти верифікацію';
             }
+            if (diiaStatusText_v) {
+                diiaStatusText_v.textContent = '⚠️ Очікування верифікації...';
+                diiaStatusText_v.style.color = 'var(--danger)';
+            }
+            if (diiaTokenInput) diiaTokenInput.value = '';
+            showRoleSection('veteran');
+
+        } else {
+            // ====== РЕЄСТРАЦІЯ: Спеціаліст / Партнер / ГО_БФ / Держструктура ======
+            const endpointMap = {
+                'specialist': '/api/register-specialist',
+                'partner':    '/api/register-partner',
+                'ngo':        '/api/register-ngo',
+                'state':      '/api/register-state',
+            };
+            const endpoint = endpointMap[role] || '/api/register';
 
             const formData = new FormData();
-            formData.append('name', document.getElementById('reg-name').value);
-            formData.append('category', document.getElementById('spec-category').value);
-            formData.append('phone', document.getElementById('spec-phone').value);
-            formData.append('address', document.getElementById('spec-address').value);
-            formData.append('bio', document.getElementById('spec-bio').value);
-            formData.append('photo', document.getElementById('spec-photo').files[0]);
-            formData.append('document', document.getElementById('spec-doc').files[0]);
+            formData.append('role', role);
 
-            // Визначаємо метод підписання
-            const chosenMethod = document.querySelector('input[name="sign-method"]:checked')?.value || 'file';
-            formData.append('sign_method', chosenMethod);
-
-            if (chosenMethod === 'file') {
-                // Файловий КЕП — обов'язковий файл
-                const kepInput = document.getElementById('spec-kep');
-                const kepPwd = document.getElementById('spec-kep-password');
-                if (!kepInput || kepInput.files.length === 0) {
-                    alert('⚠️ Для реєстрації спеціаліста необхідно завантажити файл КЕП (.p12/.pfx/.jks).\n\nЯкщо у вас немає файлового КЕП — оберіть метод "Дія.Підпис" (тільки для ФОП).');
-                    return;
-                }
-                formData.append('kep_file', kepInput.files[0]);
-                formData.append('kep_password', kepPwd ? kepPwd.value : '');
-            } else {
-                // Дія.Підпис для ФОП — обов'язковий токен підпису
-                const signToken = document.getElementById('diia-sign-token')?.value;
-                const edrpou = document.getElementById('spec-edrpou')?.value.trim();
-                if (!signToken) {
-                    alert('⚠️ Будь ласка, натисніть "Підписати через Дія.Підпис" та дочекайтеся підтвердження вашого статусу ФОП в ЄДРПОУ.');
-                    return;
-                }
-                formData.append('diia_sign_token', signToken);
-                formData.append('edrpou', edrpou || '');
+            // Збираємо поля активної секції автоматично
+            const activeSection = roleSections[role];
+            if (activeSection) {
+                activeSection.querySelectorAll('input, select, textarea').forEach(field => {
+                    if (!field.name) return;
+                    if (field.type === 'file') {
+                        if (field.files && field.files[0]) formData.append(field.name, field.files[0]);
+                    } else if (field.type === 'checkbox') {
+                        formData.append(field.name, field.checked ? '1' : '0');
+                    } else {
+                        formData.append(field.name, field.value);
+                    }
+                });
             }
 
-            const submitBtn = formRegister.querySelector('button[type="submit"]');
-            const origBtnText = submitBtn ? submitBtn.textContent : '';
+            // Для спеціаліста — додаткова логіка КЕП / Дія.Підпис
+            if (role === 'specialist') {
+                const chosenMethod = document.querySelector('input[name="sign-method"]:checked')?.value || 'file';
+                formData.append('sign_method', chosenMethod);
 
+                if (chosenMethod === 'file') {
+                    const kepInput = document.getElementById('spec-kep');
+                    const kepPwd   = document.getElementById('spec-kep-password');
+                    if (!kepInput || kepInput.files.length === 0) {
+                        alert('⚠️ Для реєстрації спеціаліста необхідно завантажити файл КЕП (.p12/.pfx/.jks).\n\nЯкщо у вас немає файлового КЕП — оберіть метод "Дія.Підпис" (тільки для ФОП).');
+                        return;
+                    }
+                    formData.append('kep_file', kepInput.files[0]);
+                    formData.append('kep_password', kepPwd ? kepPwd.value : '');
+                } else {
+                    const signToken = document.getElementById('diia-sign-token')?.value;
+                    const edrpou    = document.getElementById('spec-edrpou')?.value.trim();
+                    if (!signToken) {
+                        alert('⚠️ Будь ласка, натисніть "Підписати через Дія.Підпис" та дочекайтеся підтвердження вашого статусу ФОП в ЄДРПОУ.');
+                        return;
+                    }
+                    formData.append('diia_sign_token', signToken);
+                    formData.append('edrpou', edrpou || '');
+                }
+            }
+
+            const origBtnText = submitBtn ? submitBtn.textContent : '';
             if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Надсилаємо...'; }
 
             try {
-                const response = await fetch('/api/register-specialist', { method: 'POST', body: formData });
-                const result = await response.json();
+                const response = await fetch(endpoint, { method: 'POST', body: formData });
+                const result   = await response.json();
                 if (result.status === 'success') {
                     const kepMsg = result.kep_signed ? ' Угода підписана вашим КЕПом.' : '';
-                    alert('Дякуємо! Заявку спеціаліста надіслано на модерацію. Ми зв\'яжемося через Telegram-бот.' + kepMsg);
+                    alert('✅ Заявку надіслано на модерацію. Ми зв\'яжемося через Telegram-бот.' + kepMsg);
                     formRegister.reset();
-                    if (kepPwd) kepPwd.value = '';
                     window.location.href = 'index.html';
                 } else {
                     alert('Помилка: ' + (result.detail || 'Невідома помилка'));
@@ -528,43 +492,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Обробка параметрів URL та хешу (pre-select tab/role) ---
     function applyUrlParams() {
-        const hash = window.location.hash;
+        const hash   = window.location.hash;
         const search = window.location.search;
-        
-        let path = hash || '';
+
+        let path      = hash || '';
         let paramsStr = search || '';
-        
+
         if (path.includes('?')) {
             const parts = path.split('?');
-            path = parts[0];
+            path      = parts[0];
             paramsStr = '?' + parts[1];
         }
-        
+
         if (path === '#register') {
             resetTabs();
-            tabRegister.classList.add('active');
-            formRegister.classList.add('active');
-        } else if (path === '#specialist') {
-            resetTabs();
-            tabSpecialist.classList.add('active');
-            formSpecialist.classList.add('active');
+            if (tabRegister) tabRegister.classList.add('active');
+            if (formRegister) formRegister.classList.add('active');
         } else if (path === '#login') {
             resetTabs();
-            tabLogin.classList.add('active');
-            formLogin.classList.add('active');
+            if (tabLogin) tabLogin.classList.add('active');
+            if (formLogin) formLogin.classList.add('active');
         }
-        
+
         const urlParams = new URLSearchParams(paramsStr);
         const role = urlParams.get('role');
-        if (role) {
-            const radio = Array.from(roleRadios).find(r => r.value === role);
-            if (radio) {
-                radio.checked = true;
-                toggleRoleFields();
-            }
+        if (role && roleSelector) {
+            roleSelector.value = role;
+            showRoleSection(role);
         }
     }
-    
+
     applyUrlParams();
     window.addEventListener('hashchange', applyUrlParams);
 

@@ -185,21 +185,31 @@ def update_specialist_documents(spec_id, doc_data):
 
 # --- РОБОТА З ВЕТЕРАНАМИ ТА ЛОГАМИ ---
 
-def add_veteran(tg_id, name=None, phone=None, status=None, needs=None, district=None, data_consent=None):
+def add_veteran(tg_id, name=None, phone=None, status=None, needs=None, district=None, data_consent=None,
+                region=None, raion=None, otg=None, city_district=None, region_request_only=0):
     """Реєструє ветерана або оновлює дані."""
     conn = get_db_connection()
     cursor = conn.cursor()
+    # Зберігаємо legacy-district з нових полів
+    legacy_district = district or (f"{otg}, {raion}" if otg and raion else raion or otg)
     cursor.execute('''
-        INSERT INTO veterans (tg_id, name, phone, status, needs, district, data_consent)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO veterans (tg_id, name, phone, status, needs, district, data_consent,
+                              region, raion, otg, city_district, region_request_only)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(tg_id) DO UPDATE SET
             name = COALESCE(excluded.name, veterans.name),
             phone = COALESCE(excluded.phone, veterans.phone),
             status = COALESCE(excluded.status, veterans.status),
             needs = COALESCE(excluded.needs, veterans.needs),
             district = COALESCE(excluded.district, veterans.district),
-            data_consent = COALESCE(excluded.data_consent, veterans.data_consent)
-    ''', (str(tg_id), name, phone, status, needs, district, data_consent))
+            data_consent = COALESCE(excluded.data_consent, veterans.data_consent),
+            region = COALESCE(excluded.region, veterans.region),
+            raion = COALESCE(excluded.raion, veterans.raion),
+            otg = COALESCE(excluded.otg, veterans.otg),
+            city_district = COALESCE(excluded.city_district, veterans.city_district),
+            region_request_only = COALESCE(excluded.region_request_only, veterans.region_request_only)
+    ''', (str(tg_id), name, phone, status, needs, legacy_district, data_consent,
+          region, raion, otg, city_district, region_request_only))
     conn.commit()
     conn.close()
 
@@ -219,6 +229,42 @@ def delete_veteran(tg_id):
     cursor.execute("DELETE FROM veterans WHERE tg_id = ?", (str(tg_id),))
     conn.commit()
     conn.close()
+
+
+def log_regional_request(tg_id, region, raion=None, otg=None, needs=None, status=None):
+    """Зберігає запит на послуги з іншого регіону для майбутнього масштабування."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute('''
+            INSERT INTO regional_requests (tg_id, region, raion, otg, needs, status)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (str(tg_id), region, raion, otg, needs, status))
+        conn.commit()
+        print(f"📍 Регіональний запит збережено: {region}, {raion}, {otg}")
+    except Exception as e:
+        print(f"Помилка при збереженні регіонального запиту: {e}")
+    finally:
+        conn.close()
+
+
+def get_regional_stats():
+    """Повертає топ-5 регіонів з найбільшим попитом."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute('''
+            SELECT region, COUNT(*) as cnt
+            FROM regional_requests
+            GROUP BY region
+            ORDER BY cnt DESC
+            LIMIT 10
+        ''')
+        return [dict(row) for row in cursor.fetchall()]
+    except Exception:
+        return []
+    finally:
+        conn.close()
 
 
 def log_intake(tg_id, spec_id, status='requested'):

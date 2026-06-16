@@ -113,8 +113,14 @@ def init_db():
         new_vets_cols = {
             "status": "TEXT",
             "needs": "TEXT",
-            "district": "TEXT",
-            "data_consent": "INTEGER DEFAULT 0"
+            "district": "TEXT",         # Legacy field (kept for backward compat)
+            "data_consent": "INTEGER DEFAULT 0",
+            # Phase 3.5 — Hierarchical geography
+            "region": "TEXT",            # Область (напр. 'Черкаська')
+            "raion": "TEXT",             # Район (напр. 'Черкаський')
+            "otg": "TEXT",              # ОТГ / місто / село
+            "city_district": "TEXT",    # Район міста (якщо ОТГ == місто)
+            "region_request_only": "INTEGER DEFAULT 0"  # 1 = інший регіон, лише запит
         }
         for col_name, col_type in new_vets_cols.items():
             if col_name not in columns:
@@ -150,6 +156,21 @@ def init_db():
             price TEXT,
             link TEXT,
             deadline TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+
+    # 5. Регіональні запити (Phase 3.5)
+    # Зберігає попит на послуги з інших регіонів для аналізу та масштабування
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS regional_requests (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tg_id TEXT,
+            region TEXT NOT NULL,       -- Область
+            raion TEXT,                 -- Район
+            otg TEXT,                   -- ОТГ / місто
+            needs TEXT,                 -- Перелік потреб
+            status TEXT,                -- Статус ветерана
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')

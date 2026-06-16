@@ -81,7 +81,13 @@ class VeteranRegistration(StatesGroup):
     phone = State()
     status = State()
     needs = State()
-    district = State()
+    # Phase 3.5 — Hierarchical geography
+    geo_region = State()       # Вибір області
+    geo_raion = State()        # Вибір району
+    geo_otg = State()          # Вибір ОТГ / міста / села
+    geo_city_district = State() # Вибір району міста (якщо місто)
+    # Legacy
+    district = State()         # Kept for backward compat
     data_consent = State()
 
 class AIMatchmaking(StatesGroup):
@@ -639,30 +645,268 @@ async def process_vet_needs_save(callback: types.CallbackQuery, state: FSMContex
     ]
     
     await callback.message.delete()
-    await callback.message.answer("Оберіть ваш район проживання (Черкаська область):", reply_markup=InlineKeyboardMarkup(inline_keyboard=kb))
+    # Запускаємо ієрархічний вибір регіону
+    await show_region_selector(callback.message, callback.from_user.id)
     await callback.answer()
 
-@dp.callback_query(F.data.startswith("vet_dist:"))
-async def process_vet_district(callback: types.CallbackQuery, state: FSMContext):
-    district = callback.data.split(":")[1]
-    await state.update_data(district=district)
+# ============================================================
+# Phase 3.5 — Ієрархічний географічний вибір
+# ============================================================
+
+# Географічні дані Черкащини
+CHERKASY_RAIONS = [
+    "Черкаський",
+    "Уманський",
+    "Золотоніський",
+    "Звенигородський",
+    "Кам’янський",
+]
+
+CHERKASY_OTG = {
+    "Черкаський": [
+        "Черкаси (місто)",
+        "Сміланська ТГ",
+        "Чорнобаївська ТГ",
+        "Гелехівська ТГ",
+        "Уманська ТГ (Черк.р-н)",
+    ],
+    "Уманський": [
+        "Умань (місто)",
+        "Маньківська ТГ",
+        "Уманська ТГ",
+        "Ладижинська ТГ",
+        "Христинівська ТГ",
+    ],
+    "Золотоніський": [
+        "Золотоноша (місто)",
+        "Драбівська ТГ",
+        "Андрушівська ТГ",
+        "Прохорівська ТГ",
+    ],
+    "Звенигородський": [
+        "Звенигородка (місто)",
+        "Лисянківська ТГ",
+        "Бузьківська ТГ",
+        "Борисівська ТГ",
+    ],
+    "Кам’янський": [
+        "Кам’янка (місто)",
+        "Сміланська ТГ (Кам.р-н)",
+        "Талнівська ТГ",
+        "Хоролівська ТГ",
+    ]
+}
+
+# Райони міста Черкаси
+CHERKASY_CITY_DISTRICTS = [
+    "Бобринський",
+    "Содницький",
+    "Розумівський",
+    "Митницький",
+]
+
+# Всі області України (для вибору з інших регіонів)
+ALL_OBLASTS = [
+    "Черкаська",  # першою! Наш регіон
+    "Вінницька", "Волинська", "Дніпропетровська",
+    "Донецька", "Житомирська", "Закарпатська",
+    "Запорізька", "Івано-Франківська", "Київська",
+    "Кіровоградська", "Луганська", "Львівська",
+    "Миколаївська", "Одеська", "Полтавська",
+    "Рівненська", "Сумська", "Тернопільська",
+    "Харківська", "Херсонська", "Хмельницька"
+]
+
+
+async def show_region_selector(message: types.Message, user_id: int):
+    """Step 1: Вибір області."""
+    # Перша кнопка — Черкаська (наш регіон) з роздільником
+    rows = [[InlineKeyboardButton(
+        text="⭐ Черкаська область",
+        callback_data="geo_region:Черкаська"
+    )]]
+    # Інші області у двох колонках
+    other_oblasts = [o for o in ALL_OBLASTS if o != "Черкаська"]
+    for i in range(0, len(other_oblasts), 2):
+        row = [InlineKeyboardButton(
+            text=other_oblasts[i],
+            callback_data=f"geo_region:{other_oblasts[i]}"
+        )]
+        if i + 1 < len(other_oblasts):
+            row.append(InlineKeyboardButton(
+                text=other_oblasts[i+1],
+                callback_data=f"geo_region:{other_oblasts[i+1]}"
+            ))
+        rows.append(row)
+    rows.append([InlineKeyboardButton(text="❌ Скасувати", callback_data="vet_cancel_reg")])
+
+    await message.answer(
+        "🇺🇦 **Оберіть область проживання:**\n\n"
+        "⭐ Наша платформа вже працює у Черкаській області. \n"
+        "Інші регіони на стадії подключення — запити враховуються при плануванні розширення.",
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=rows),
+        parse_mode="Markdown"
+    )
+
+
+@dp.callback_query(F.data.startswith("geo_region:"))
+async def process_geo_region(callback: types.CallbackQuery, state: FSMContext):
+    region = callback.data.split(":", 1)[1]
+    await state.update_data(geo_region=region)
+    await state.set_state(VeteranRegistration.geo_region)
+
+    await callback.message.delete()
+
+    if region == "Черкаська":
+        # Переходимо до вибору району
+        await show_raion_selector(callback.message)
+    else:
+        # Інший регіон — попросимо ввести місто/район вручну і повідомимо
+        await state.set_state(VeteranRegistration.geo_raion)
+        await callback.message.answer(
+            f"📌 *{region} область* поки не покрита нашою мережею.\n\n"
+            "Ваш запит збережено і допоможе нам планувати підключення фахівців у вашому регіоні. 🙏\n\n"
+            "Введіть, будь ласка, назву вашого району / міста:",
+            parse_mode="Markdown"
+        )
+    await callback.answer()
+
+
+async def show_raion_selector(message: types.Message):
+    """Step 2 (Черкащина): Вибір району."""
+    rows = []
+    for raion in CHERKASY_RAIONS:
+        rows.append([InlineKeyboardButton(
+            text=f"📍 {raion} район",
+            callback_data=f"geo_raion:{raion}"
+        )])
+    rows.append([InlineKeyboardButton(text="❌ Скасувати", callback_data="vet_cancel_reg")])
+    await message.answer(
+        "🏠 **Оберіть район Черкаської області:**",
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=rows),
+        parse_mode="Markdown"
+    )
+
+
+@dp.message(VeteranRegistration.geo_raion)
+async def process_other_region_raion_text(message: types.Message, state: FSMContext):
+    """Handle free-text raion input for non-Cherkasy regions."""
+    data = await state.get_data()
+    region = data.get("geo_region", "")
+    raion_text = message.text.strip()
+
+    is_valid, error_msg = validate_text(raion_text, min_words=1, min_len=2, allow_latin=False)
+    if not is_valid:
+        await message.answer(error_msg)
+        return
+
+    await state.update_data(geo_raion=raion_text)
+    # Переходимо на згоду
     await state.set_state(VeteranRegistration.data_consent)
-    
+    # Зберігаємо як regional_request_only=1 після згоди
+    await state.update_data(region_request_only=1)
+    await show_consent_screen(message)
+
+
+@dp.callback_query(F.data.startswith("geo_raion:"))
+async def process_geo_raion(callback: types.CallbackQuery, state: FSMContext):
+    raion = callback.data.split(":", 1)[1]
+    await state.update_data(geo_raion=raion)
+    await state.set_state(VeteranRegistration.geo_raion)
+    await callback.message.delete()
+    await show_otg_selector(callback.message, raion)
+    await callback.answer()
+
+
+async def show_otg_selector(message: types.Message, raion: str):
+    """Step 3: Вибір ОТГ / міста / села."""
+    otg_list = CHERKASY_OTG.get(raion, [])
+    rows = []
+    for otg in otg_list:
+        rows.append([InlineKeyboardButton(
+            text=otg,
+            callback_data=f"geo_otg:{otg}"
+        )])
+    rows.append([InlineKeyboardButton(text="⬅️ Назад", callback_data="geo_back_raion")])
+    rows.append([InlineKeyboardButton(text="❌ Скасувати", callback_data="vet_cancel_reg")])
+    await message.answer(
+        f"🏡 **Оберіть вашу ТГ / місто / село ({raion} р-н):**",
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=rows),
+        parse_mode="Markdown"
+    )
+
+
+@dp.callback_query(F.data == "geo_back_raion")
+async def geo_back_to_raion(callback: types.CallbackQuery, state: FSMContext):
+    await callback.message.delete()
+    await show_raion_selector(callback.message)
+    await callback.answer()
+
+
+@dp.callback_query(F.data.startswith("geo_otg:"))
+async def process_geo_otg(callback: types.CallbackQuery, state: FSMContext):
+    otg = callback.data.split(":", 1)[1]
+    await state.update_data(geo_otg=otg)
+    await state.set_state(VeteranRegistration.geo_otg)
+    await callback.message.delete()
+
+    # Якщо обрали місто (іде з "місто" в назві) — показуємо райони міста
+    if "місто" in otg.lower():
+        await show_city_district_selector(callback.message, otg)
+    else:
+        # Село / ТГ — немає районів міста, переходимо до згоди
+        await state.set_state(VeteranRegistration.data_consent)
+        await show_consent_screen(callback.message)
+    await callback.answer()
+
+
+async def show_city_district_selector(message: types.Message, city_otg: str):
+    """Step 4 (опціонально): Вибір району міста."""
+    # Райони міста Черкаси
+    districts = CHERKASY_CITY_DISTRICTS if "Черкаси" in city_otg else []
+    rows = []
+    for d in districts:
+        rows.append([InlineKeyboardButton(
+            text=f"🏨 {d}",
+            callback_data=f"geo_city_dist:{d}"
+        )])
+    rows.append([InlineKeyboardButton(
+        text="⏭️ Пропустити (невідомо)",
+        callback_data="geo_city_dist:skip"
+    )])
+    rows.append([InlineKeyboardButton(text="❌ Скасувати", callback_data="vet_cancel_reg")])
+    await message.answer(
+        f"🏙 **Оберіть район міста {city_otg.split(' ')[0]}:**",
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=rows),
+        parse_mode="Markdown"
+    )
+
+
+@dp.callback_query(F.data.startswith("geo_city_dist:"))
+async def process_geo_city_district(callback: types.CallbackQuery, state: FSMContext):
+    district = callback.data.split(":", 1)[1]
+    if district != "skip":
+        await state.update_data(geo_city_district=district)
+    await state.set_state(VeteranRegistration.data_consent)
+    await callback.message.delete()
+    await show_consent_screen(callback.message)
+    await callback.answer()
+
+
+async def show_consent_screen(message: types.Message):
+    """Displays the GDPR consent screen."""
     kb = [
         [InlineKeyboardButton(text="✅ Згоден / Згодна", callback_data="vet_consent:yes")],
         [InlineKeyboardButton(text="❌ Не згоден / Скасувати", callback_data="vet_consent:no")]
     ]
-    
     consent_text = (
         "⚖️ **Згода на обробку персональних даних**:\n\n"
         "Я згоден/згодна на обробку персональних даних (анонімізована аналітика).\n\n"
         "ℹ️ *Примітка:* Аналітичні звіти використовують ТІЛЬКИ категорію запиту + район, без імені/контакту. "
         "Персональні дані не передаються третім особам."
     )
-    
-    await callback.message.delete()
-    await callback.message.answer(consent_text, reply_markup=InlineKeyboardMarkup(inline_keyboard=kb), parse_mode="Markdown")
-    await callback.answer()
+    await message.answer(consent_text, reply_markup=InlineKeyboardMarkup(inline_keyboard=kb), parse_mode="Markdown")
+
 
 @dp.callback_query(F.data.startswith("vet_consent:"))
 async def process_vet_consent(callback: types.CallbackQuery, state: FSMContext):
@@ -678,6 +922,12 @@ async def process_vet_consent(callback: types.CallbackQuery, state: FSMContext):
         return
         
     data = await state.get_data()
+    geo_region = data.get("geo_region")
+    geo_raion = data.get("geo_raion")
+    geo_otg = data.get("geo_otg")
+    geo_city_district = data.get("geo_city_district")
+    is_other_region = data.get("region_request_only", 0)
+
     try:
         db_manager.add_veteran(
             tg_id=callback.from_user.id,
@@ -686,16 +936,43 @@ async def process_vet_consent(callback: types.CallbackQuery, state: FSMContext):
             status=data.get("status"),
             needs=data.get("needs"),
             district=data.get("district"),
-            data_consent=1
+            data_consent=1,
+            region=geo_region,
+            raion=geo_raion,
+            otg=geo_otg,
+            city_district=geo_city_district,
+            region_request_only=is_other_region
         )
-        logging.info(f"✅ Veteran registered: {data.get('first_name')} (ID: {callback.from_user.id})")
-        
+        logging.info(f"✅ Veteran registered: {data.get('first_name')} (ID: {callback.from_user.id}), region={geo_region}, raion={geo_raion}, otg={geo_otg}")
+
+        # Якщо інший регіон — логуємо як регіональний запит
+        if is_other_region and geo_region:
+            db_manager.log_regional_request(
+                tg_id=callback.from_user.id,
+                region=geo_region,
+                raion=geo_raion,
+                otg=geo_otg,
+                needs=data.get("needs"),
+                status=data.get("status")
+            )
+            logging.info(f"📍 Regional request logged: {geo_region}, {geo_raion}")
+
         await callback.message.delete()
-        await callback.message.answer(
-            f"🎉 Вітаємо, {data.get('first_name')}!\n\n"
-            "Ви успішно зареєструвалися на порталі 'Новий Шлях'.\n"
-            "Тепер вам доступні персональні підбірки та знижка 10% у партнерів. 🫡"
-        )
+        if is_other_region:
+            await callback.message.answer(
+                f"🎉 Вітаємо, {data.get('first_name')}!\n\n"
+                f"Ваша реєстрація та запит з **{geo_region} області** зафіксовано.\n\n"
+                "Ми ще не працюємо у вашому регіоні, але ваш запит враховується при плануванні розширення. "
+                "Як тільки в вашому регіоні з'являться партнери — ми повідомимо вас першими. 🫡\n\n"
+                "Ви вже можете користуватися порталом та отримувати консультації онлайн!",
+                parse_mode="Markdown"
+            )
+        else:
+            await callback.message.answer(
+                f"🎉 Вітаємо, {data.get('first_name')}!\n\n"
+                "Ви успішно зареєструвалися на порталі 'Новий Шлях'.\n"
+                "Тепер вам доступні персональні підбірки та знижка 10% у партнерів. 🫡"
+            )
     except Exception as e:
         logging.error(f"Error registering veteran: {e}")
         await callback.message.answer("❌ Виникла помилка при реєстрації. Спробуйте пізніше або зверніться до підтримки.")
@@ -753,12 +1030,29 @@ async def show_vet_profile(message: types.Message):
     else:
         logs_text = "\n\nℹ️ *Ви ще не зверталися до фахівців через бот.*"
         
+    # Формуємо рядок місцезнаходження з нових полів (або fallback на старий district)
+    geo_parts = []
+    if vet.get("region"):
+        geo_parts.append(f"{vet.get('region')} обл.")
+    if vet.get("raion"):
+        geo_parts.append(f"{vet.get('raion')} р-н")
+    if vet.get("otg"):
+        geo_parts.append(vet.get("otg"))
+    if vet.get("city_district"):
+        geo_parts.append(f"({vet.get('city_district')} р-н міста)")
+    location_str = ", ".join(geo_parts) if geo_parts else (vet.get("district") or "Не вказано")
+
+    # Значок для тих хто з іншого регіону
+    region_note = ""
+    if vet.get("region_request_only"):
+        region_note = "\n⏳ _Ваш регіон у черзі на підключення_"
+
     text = (
         f"🎖️ **Ваш профіль ветерана**\n\n"
         f"👤 **Ім'я:** {vet.get('name')}\n"
         f"📞 **Телефон:** {vet.get('phone')}\n"
         f"🏷️ **Статус:** {status_label}\n"
-        f"📍 **Район:** {district_label}\n"
+        f"📍 **Місцезнаходження:** {location_str}{region_note}\n"
         f"💡 **Потреби:** {needs_label}"
         f"{logs_text}\n\n"
         f"Ви можете видалити свій профіль відповідно до GDPR (Право бути забутим)."
