@@ -503,8 +503,9 @@ document.addEventListener('DOMContentLoaded', () => {
             path      = parts[0];
             paramsStr = '?' + parts[1];
         }
+        const urlParams = new URLSearchParams(paramsStr);
 
-        if (path === '#register') {
+        if (path === '#register' || urlParams.get('reg') === 'veteran') {
             resetTabs();
             if (tabRegister) tabRegister.classList.add('active');
             if (formRegister) formRegister.classList.add('active');
@@ -514,8 +515,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (formLogin) formLogin.classList.add('active');
         }
 
-        const urlParams = new URLSearchParams(paramsStr);
-        const role = urlParams.get('role');
+        const role = urlParams.get('role') || (urlParams.get('reg') === 'veteran' ? 'veteran' : null);
         if (role && roleSelector) {
             roleSelector.value = role;
             showRoleSection(role);

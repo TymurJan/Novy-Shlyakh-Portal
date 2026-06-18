@@ -145,31 +145,54 @@ body.is-tg-app .hero {
         </div>
     </section>
 
-    <!-- БЛОК: Як це працює -->
+    <!-- БЛОК: Три кроки + Переваги реєстрації (об'єднано) -->
     <section class="how-it-works" style="padding: 100px 0; background: #151715;">
         <div class="container">
             <h3 class="section-title">Три кроки до комплексної підтримки</h3>
             <p class="section-subtitle">Прозорий та захищений алгоритм реінтеграції</p>
-            <div class="employer-list">
+            <div class="employer-list" style="margin-bottom: 40px;">
                 <div class="employer-item">
                     <div class="emp-logo">01</div>
                     <h4>Захищена Реєстрація</h4>
-                    <p>Створіть свій персональний кабінет за допомогою безпечної верифікації через державний сервіс Дія.Підпис.</p>
+                    <p>Створіть свій персональний кабінет за допомогою безпечної верифікації через державний сервіс Дія.Підпис. Ви автоматично отримаєте 10% знижки на послуги всіх верифікованих партнерів платформи (психологи, юристи, реабілітологи).</p>
                 </div>
                 <div class="employer-item">
                     <div class="emp-logo">02</div>
-                    <h4>Оцінка Потреб</h4>
-                    <p>Сформуйте запит у захищеному просторі. Наш AI-координатор миттєво підбере найкращого профільного експерта.</p>
+                    <h4>Оцінка персональних потреб</h4>
+                    <p>Сформуйте запит у захищеному просторі. Система автоматично підбере найкращого перевіреного профільного експерта під ваші потреби. Рекомендуватиме спеціалістів вашого району та сповіщатиме, як тільки з'явиться новий верифікований спеціаліст.</p>
                 </div>
                 <div class="employer-item">
                     <div class="emp-logo">03</div>
                     <h4>Фаховий Супровід</h4>
-                    <p>Отримайте безкоштовну кваліфіковану юридичну, психологічну або кар'єрну допомогу з повним збереженням конфіденційності.</p>
+                    <p>Отримуйте кваліфіковану юридичну, психологічну або кар'єрну допомогу з повним збереженням конфіденційності.</p>
                 </div>
             </div>
-            
-            <div style="text-align: center; margin-top: 50px;">
-                <a href="my.html#register" class="btn-primary" style="font-size: 16px; padding: 15px 35px; border-radius: 50px; font-weight: 600; box-shadow: 0 10px 25px rgba(46,139,87,0.3); transition: 0.3s;">Розпочати реєстрацію</a>
+
+            <!-- Окремий блок: Внесок у розвиток системи -->
+            <div style="max-width: 800px; margin: 0 auto 50px auto; padding: 25px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 20px; text-align: center;">
+                <h4 style="color: var(--soft-white); font-size: 18px; margin-bottom: 10px;">Внесок у розвиток системи</h4>
+                <p style="color: #ccc; font-size: 14px; line-height: 1.6; margin: 0;">Після реєстрації Ваші запити та відгуки допоможуть нам покращувати доступність послуг у громадах.</p>
+            </div>
+
+            <!-- Динамічна статистика соціального доказу -->
+            <div class="stats-bar" style="display: flex; justify-content: space-around; flex-wrap: wrap; background: rgba(46, 139, 87, 0.05); border: 1px solid rgba(46, 139, 87, 0.25); border-radius: 25px; padding: 40px; margin-bottom: 50px; text-align: center; gap: 30px;">
+                <div class="stat-item">
+                    <span id="stat-specialists" style="display: block; font-size: 36px; font-weight: 700; color: var(--primary-green); font-family: 'Outfit', sans-serif;">...</span>
+                    <span style="color: #ccc; font-size: 14px;">верифікованих фахівців</span>
+                </div>
+                <div class="stat-item" style="border-left: 1px solid rgba(255,255,255,0.1); border-right: 1px solid rgba(255,255,255,0.1); padding: 0 40px;">
+                    <span id="stat-intake" style="display: block; font-size: 36px; font-weight: 700; color: var(--primary-green); font-family: 'Outfit', sans-serif;">...</span>
+                    <span style="color: #ccc; font-size: 14px;">опрацьованих звернень</span>
+                </div>
+                <div class="stat-item">
+                    <span id="stat-veterans" style="display: block; font-size: 36px; font-weight: 700; color: var(--primary-green); font-family: 'Outfit', sans-serif;">...</span>
+                    <span style="color: #ccc; font-size: 14px;">зареєстрованих ветеранів</span>
+                </div>
+            </div>
+
+            <div style="text-align: center;">
+                <a href="my.html?reg=veteran" class="btn-primary" style="font-size: 16px; padding: 15px 35px; border-radius: 50px; font-weight: 600; box-shadow: 0 10px 25px rgba(46,139,87,0.3); transition: 0.3s; text-decoration: none; display: inline-block;">Розпочати реєстрацію</a>
+                <p style="font-size: 11px; color: #888; margin-top: 15px;">Ваші персональні дані захищені відповідно до Закону України №2297-VI. Аналітика повністю анонімізована.</p>
             </div>
         </div>
     </section>
@@ -289,59 +312,6 @@ body.is-tg-app .hero {
         <!-- Перенесено в локації -->
     </section>
 
-    <!-- БЛОК: Чому варто зареєструватися (Реєстраційний CTA-блок) -->
-    <section id="portal-registration-block" class="registration-cta-section" style="padding: 100px 0; background: linear-gradient(180deg, #111 0%, #151715 100%); border-top: 1px solid var(--glass-border);">
-        <div class="container">
-            <h3 class="section-title">Чому варто зареєструватися</h3>
-            <p class="section-subtitle">Отримайте додаткові переваги та допоможіть розвитку платформи за 1 хвилину</p>
-            
-            <div class="benefits-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; margin-top: 50px; margin-bottom: 50px;">
-                <div class="benefit-card" style="background: var(--glass-bg); border: 1px solid var(--glass-border); padding: 30px; border-radius: 20px; transition: transform 0.3s, border-color 0.3s; text-align: left;">
-                    <div style="font-size: 40px; margin-bottom: 15px;">💰</div>
-                    <h4 style="font-size: 20px; margin-bottom: 10px; color: var(--soft-white);">10% знижка на послуги</h4>
-                    <p style="color: #ccc; font-size: 14px; line-height: 1.6;">Знижка діє автоматично на послуги всіх верифікованих партнерів платформи (психологи, юристи, реабілітологи).</p>
-                </div>
-                <div class="benefit-card" style="background: var(--glass-bg); border: 1px solid var(--glass-border); padding: 30px; border-radius: 20px; transition: transform 0.3s, border-color 0.3s; text-align: left;">
-                    <div style="font-size: 40px; margin-bottom: 15px;">🎯</div>
-                    <h4 style="font-size: 20px; margin-bottom: 10px; color: var(--soft-white);">Персональні підбірки</h4>
-                    <p style="color: #ccc; font-size: 14px; line-height: 1.6;">Система автоматично рекомендуватиме перевірених спеціалістів саме вашого району та за напрямками ваших інтересів.</p>
-                </div>
-                <div class="benefit-card" style="background: var(--glass-bg); border: 1px solid var(--glass-border); padding: 30px; border-radius: 20px; transition: transform 0.3s, border-color 0.3s; text-align: left;">
-                    <div style="font-size: 40px; margin-bottom: 15px;">📊</div>
-                    <h4 style="font-size: 20px; margin-bottom: 10px; color: var(--soft-white);">Внесок у розвиток системи</h4>
-                    <p style="color: #ccc; font-size: 14px; line-height: 1.6;">Анонімізовані звіти про запити допомагають бачити, яких фахівців не вистачає в громадах, для залучення нових донорів.</p>
-                </div>
-                <div class="benefit-card" style="background: var(--glass-bg); border: 1px solid var(--glass-border); padding: 30px; border-radius: 20px; transition: transform 0.3s, border-color 0.3s; text-align: left;">
-                    <div style="font-size: 40px; margin-bottom: 15px;">🔔</div>
-                    <h4 style="font-size: 20px; margin-bottom: 10px; color: var(--soft-white);">Миттєві сповіщення</h4>
-                    <p style="color: #ccc; font-size: 14px; line-height: 1.6;">Отримуйте оперативні сповіщення у боті, як тільки у вашому районі з'явиться новий верифікований спеціаліст.</p>
-                </div>
-            </div>
-
-            <!-- Динамічна статистика соціального доказу -->
-            <div class="stats-bar" style="display: flex; justify-content: space-around; flex-wrap: wrap; background: rgba(46, 139, 87, 0.05); border: 1px solid rgba(46, 139, 87, 0.25); border-radius: 25px; padding: 40px; margin-bottom: 50px; text-align: center; gap: 30px;">
-                <div class="stat-item">
-                    <span id="stat-specialists" style="display: block; font-size: 36px; font-weight: 700; color: var(--primary-green); font-family: 'Outfit', sans-serif;">...</span>
-                    <span style="color: #ccc; font-size: 14px;">верифікованих фахівців</span>
-                </div>
-                <div class="stat-item" style="border-left: 1px solid rgba(255,255,255,0.1); border-right: 1px solid rgba(255,255,255,0.1); padding: 0 40px;">
-                    <span id="stat-intake" style="display: block; font-size: 36px; font-weight: 700; color: var(--primary-green); font-family: 'Outfit', sans-serif;">...</span>
-                    <span style="color: #ccc; font-size: 14px;">опрацьованих звернень</span>
-                </div>
-                <div class="stat-item">
-                    <span id="stat-veterans" style="display: block; font-size: 36px; font-weight: 700; color: var(--primary-green); font-family: 'Outfit', sans-serif;">...</span>
-                    <span style="color: #ccc; font-size: 14px;">зареєстрованих ветеранів</span>
-                </div>
-            </div>
-
-            <div style="text-align: center;">
-                <a href="https://t.me/Veteran_Novy_Shlyakh_Bot?start=reg_vet" target="_blank" class="btn-primary" style="font-size: 18px; padding: 18px 45px; border-radius: 50px; font-weight: 600; box-shadow: 0 10px 30px rgba(46,139,87,0.3); transition: 0.3s; display: inline-flex; align-items: center; gap: 10px; text-decoration: none;">
-                    <span>🎖️ Зареєструватися через бот (1 хвилина)</span>
-                </a>
-                <p style="font-size: 11px; color: #888; margin-top: 15px;">Ваші персональні дані захищені відповідно до Закону України №2297-VI. – Аналітика повністю анонімізована.</p>
-            </div>
-        </div>
-    </section>
 
     <!-- БЛОК: Локація та Партнери -->
     <footer class="footer">
