@@ -194,11 +194,39 @@ async def cmd_start(message: types.Message, state: FSMContext = None):
     args = message.text.split()
     is_login_redirect = len(args) > 1 and args[1] == "login"
     is_reg_vet_redirect = len(args) > 1 and args[1] == "reg_vet"
+    is_spec_redirect = len(args) > 1 and args[1].startswith("spec_")
     
     if is_reg_vet_redirect:
         if state:
             await start_veteran_registration_flow(message, state)
             return
+
+    # Якщо перейшов з порталу на конкретного спеціаліста
+    if is_spec_redirect:
+        spec_param = args[1]  # наприклад "spec_123" або "spec_user_456"
+        spec_id = spec_param[5:]  # прибираємо префікс "spec_"
+        db = await load_db_async()
+        spec = next((s for s in db if str(s.get("id")) == str(spec_id) or str(s.get("tg_id")) == str(spec_id)), None)
+        if spec:
+            def get_cat_name(cat):
+                names = {"legal": "Юрист", "psychology": "Психолог", "rehab": "Реабілітолог", "career": "Кар'єра/Бізнес"}
+                return names.get(cat, cat)
+            text = (
+                f"👤 **{spec.get('name', 'Без імені')}**\n"
+                f"🎓 {get_cat_name(spec.get('category'))}\n"
+                f"📍 {spec.get('address', 'Черкаси')}\n"
+                f"🎁 Пільги: {spec.get('discount', 'Уточнюйте')}\n\n"
+                f"📝 {spec.get('bio', '')}"
+            )
+            kb_inline = [[InlineKeyboardButton(text="📞 Отримати контакти", callback_data=f"contact_{spec['id']}")]]
+            await message.answer(
+                f"Ви обрали спеціаліста з порталу:\n\n{text}",
+                reply_markup=InlineKeyboardMarkup(inline_keyboard=kb_inline),
+                parse_mode="Markdown"
+            )
+        else:
+            await message.answer("На жаль, спеціаліста не знайдено. Можливо, він вже не активний.")
+        # Після показу спеціаліста — показуємо звичайне меню
     
     db = await load_db_async()
     # Перевіряємо, чи є цей користувач серед спеціалістів (шукаємо tg_id або префікс в id)

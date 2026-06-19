@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <a href="tel:${spec.phone}" class="btn-card" style="text-align:center; display: flex; align-items: center; justify-content: center; text-decoration: none;">
                             📞 Зателефонувати
                         </a>
-                        <button class="btn-card" onclick="handleBooking('${spec.name}')" style="flex: 1;">
+                        <button class="btn-card" onclick="handleBooking('${spec.id}')" style="flex: 1;">
                             Записатися через Бот
                         </button>
                     </div>
@@ -127,9 +127,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Глобальна функція обробки запису
-    window.handleBooking = (specName) => {
-        window.location.href = 'https://t.me/Veteran_NovyShlyakh_Bot';
+    // Глобальна функція обробки запису — deep link до конкретного спеціаліста
+    window.handleBooking = (specId) => {
+        window.open(`https://t.me/Veteran_NovyShlyakh_Bot?start=spec_${specId}`, '_blank');
     };
 
     // Обробка кліків по табам
