@@ -68,9 +68,9 @@
                     <select id="reg-role-selector" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--primary-color); font-size: 15px; background: white;">
                         <option value="veteran" selected>🎖️ Ветеран / член родини (шукаю допомогу)</option>
                         <option value="specialist">👨‍⚕️ Приватний фахівець (психолог, юрист, реабілітолог)</option>
-                        <option value="partner">🏢 Організація / установа / бюро (Зона 3)</option>
-                        <option value="ngo">💚 Громадська організація / благодійний фонд (Зона 4)</option>
-                        <option value="state">🏛️ Державна структура / орган влади (Зона 5)</option>
+                        <option value="partner">🏢 Організація / установа / бюро</option>
+                        <option value="ngo">💚 Громадська організація / благодійний фонд</option>
+                        <option value="state">🏛️ Державна структура / орган влади</option>
                     </select>
                 </div>
 
@@ -137,51 +137,34 @@
                             Пройти верифікацію
                         </button>
                         <input type="hidden" id="diia-verified-token">
-                        <p id="diia-status-text" style="font-size: 13px; color: var(--danger); font-weight: 600;">⚠️ Очікування верифікації...</p>
-                    </div>
-
-                    <div class="legal-protocol" style="margin: 20px 0; padding: 15px; background: rgba(220, 53, 69, 0.05); border-left: 4px solid var(--danger); border-radius: 4px;">
-                        <h4 style="margin-bottom: 10px; color: var(--danger); font-size: 14px;">Юридичний протокол</h4>
-                        <label style="display: flex; gap: 10px; align-items: flex-start; margin-bottom: 10px; cursor: pointer; font-size: 13px; line-height: 1.4;">
-                            <input type="checkbox" id="reg-verify" style="margin-top: 2px; width: 16px; height: 16px;">
-                            <span>Я підтверджую свою особу та зобов'язуюсь надати <a href="#" id="linkVerification" style="text-decoration: underline;">відповідні документи (УБД/Паспорт)</a> на вимогу спеціаліста.</span>
-                        </label>
-                        <label style="display: flex; gap: 10px; align-items: flex-start; cursor: pointer; font-size: 13px; line-height: 1.4;">
-                            <input type="checkbox" id="reg-nda" style="margin-top: 2px; width: 16px; height: 16px;">
-                            <span>Я приймаю умови <a href="#" id="linkNDA" style="text-decoration: underline;">Договору про нерозголошення (NDA)</a>.</span>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- 2. БЛОК ПРИВАТНОГО ФАХІВЦЯ -->
-                <div id="reg-specialist-section" style="display: none;">
+                        <p id="diia-status-text" style="font-size: 13px; color: var(--danger); font-weight: 600;">⚠️ О�                <div id="reg-specialist-section" style="display: none;">
                     <div class="input-group">
                         <label for="spec-name">ПІБ фахівця</label>
-                        <input type="text" id="spec-name" placeholder="Іваненко Іван Іванович">
+                        <input type="text" id="spec-name" name="name" placeholder="Іваненко Іван Іванович">
                     </div>
                     <div class="input-group">
                         <label for="spec-field">Ваша спеціалізація</label>
-                        <select id="spec-field">
-                            <option value="psychologist">🧠 Психолог / психотерапевт (Зона 1)</option>
-                            <option value="rehabilitation">🦾 Реабілітолог / кінезіолог / остеопат (Зона 1)</option>
-                            <option value="narcologist">💊 Нарколог / психіатр (Зона 1)</option>
-                            <option value="lawyer_consult">⚖️ Юрист (разові консультації) (Зона 1)</option>
-                            <option value="lawyer_docs">⚖️ Юрист (збір документів та супровід) (Зона 2)</option>
-                            <option value="advocate">⚖️ Адвокат (представництво в суді) (Зона 2)</option>
-                            <option value="prosthetist">🦾 Протезист (ортопедичні послуги) (Зона 2)</option>
+                        <select id="spec-field" name="category">
+                            <option value="psychologist">🧠 Психолог / психотерапевт</option>
+                            <option value="rehabilitation">🦾 Реабілітолог / кінезіолог / остеопат</option>
+                            <option value="narcologist">💊 Нарколог / психіатр</option>
+                            <option value="lawyer_consult">⚖️ Юрист (разові консультації)</option>
+                            <option value="lawyer_docs">⚖️ Юрист (збір документів та супровід)</option>
+                            <option value="advocate">⚖️ Адвокат (представництво в суді)</option>
+                            <option value="prosthetist">🦾 Протезист (ортопедичні послуги)</option>
                         </select>
                     </div>
                     <div class="input-group">
                         <label for="spec-phone">Номер телефону</label>
-                        <input type="text" id="spec-phone" placeholder="+38 (063) 123-45-67">
+                        <input type="text" id="spec-phone" name="phone" placeholder="+38 (063) 123-45-67">
                     </div>
                     <div class="input-group">
                         <label for="spec-email">Email</label>
-                        <input type="email" id="spec-email" placeholder="example@gmail.com">
+                        <input type="email" id="spec-email" name="email" placeholder="example@gmail.com">
                     </div>
                     <div class="input-group">
                         <label for="spec-city">Місто / Район кабінету</label>
-                        <input type="text" id="spec-city" placeholder="м. Черкаси / Онлайн">
+                        <input type="text" id="spec-city" name="address" placeholder="м. Черкаси / Онлайн">
                     </div>
                     <div class="input-group">
                         <label style="font-weight: 500; display: block; margin-bottom: 8px;">Формат роботи</label>
@@ -210,23 +193,49 @@
                         <div id="spec-zone1-options">
                             <div class="input-group" style="margin-bottom: 10px;">
                                 <label for="spec-price" style="font-size: 14px;">Вартість однієї сесії (грн)</label>
-                                <input type="number" id="spec-price" placeholder="500" style="padding: 10px;">
+                                <input type="number" id="spec-price" name="avg_service_price" placeholder="500" style="padding: 10px;">
                                 <span style="font-size: 11px; color: var(--text-secondary);">Система автоматично вирахує мін. 10% знижку для ветеранів.</span>
                             </div>
                             <div class="input-group" style="margin-bottom: 10px;">
                                 <label for="spec-choice-tariff" style="font-size: 14px;">Оберіть тариф після Гранту (з 13 міс.):</label>
-                                <select id="spec-choice-tariff" style="padding: 10px;">
+                                <select id="spec-choice-tariff" name="tariff_plan" style="padding: 10px;">
                                     <option value="stable">Стабільний ($30/міс + 5% комісія)</option>
                                     <option value="flexible">Гнучкий ($0 + 10% комісія)</option>
                                 </select>
                             </div>
                             <div class="input-group" style="margin-bottom: 10px;">
                                 <label for="spec-exp-years" style="font-size: 14px;">Досвід роботи (років)</label>
-                                <input type="number" id="spec-exp-years" placeholder="5" style="padding: 10px;">
+                                <input type="number" id="spec-exp-years" name="experience_years" placeholder="5" style="padding: 10px;">
                             </div>
                             <label style="font-size: 14px; display: flex; align-items: center; gap: 8px; font-weight: 500; cursor: pointer; margin-bottom: 10px;">
-                                <input type="checkbox" id="spec-vet-experience" style="width: auto;"> Чи маєте досвід роботи з ветеранами?
+                                <input type="checkbox" id="spec-vet-experience" name="experience_veterans" style="width: auto;"> Чи маєте досвід роботи з ветеранами?
                             </label>
+                        </div>
+                        
+                        <!-- Зона 2: Опції вибору -->
+                        <div id="spec-zone2-options" style="display: none;">
+                            <div class="input-group" style="margin-bottom: 10px;">
+                                <label for="spec-avg-price" style="font-size: 14px;">Середня вартість послуги / справи (грн)</label>
+                                <input type="number" id="spec-avg-price" name="avg_service_price_zone2" placeholder="3000" style="padding: 10px;">
+                            </div>
+                            <div class="input-group" id="spec-bar-number-group" style="margin-bottom: 10px; display: none;">
+                                <label for="spec-bar-number" style="font-size: 14px;">Номер у реєстрі НААУ</label>
+                                <input type="text" id="spec-bar-number" name="bar_number" placeholder="12345/26" style="padding: 10px;">
+                            </div>
+                            <div class="input-group" style="margin-bottom: 10px;">
+                                <label for="spec-discount-format" style="font-size: 14px;">Форма знижки для ветеранів (мін. 10%)</label>
+                                <textarea id="spec-discount-format" name="discount" placeholder="Наприклад: Перша консультація безкоштовно, далі 15% знижка" rows="2" style="padding: 10px; width: 100%; border: 1px solid var(--border-color); border-radius: 8px; font-family: inherit; font-size: 14px;"></textarea>
+                            </div>
+                            <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.4;">
+                                Фіксована підписка: $0 (перші 12 міс.) ➔ $50/міс (13–15 міс.) ➔ $100/міс (16+ міс.)
+                            </div>
+                        </div>
+                    </div>
+ 
+                    <div class="input-group">
+                        <label for="spec-bio">Короткий біо / Опис діяльності</label>
+                        <textarea id="spec-bio" name="bio" placeholder="Розкажіть детальніше про ваш професійний шлях..." rows="3" style="padding: 10px; width: 100%; border: 1px solid var(--border-color); border-radius: 8px; font-family: inherit; font-size: 14px;"></textarea>
+                    </div>
                         </div>
                         
                         <!-- Зона 2: Опції вибору -->
@@ -299,15 +308,15 @@
                     </div>
                 </div>
 
-                <!-- 3. БЛОК ПАРТНЕРА / ЦЕНТРУ (Зона 3) -->
+                <!-- 3. БЛОК ПАРТНЕРА / ЦЕНТРУ -->
                 <div id="reg-partner-section" style="display: none;">
                     <div class="input-group">
                         <label for="part-name">Назва організації / установи</label>
-                        <input type="text" id="part-name" placeholder="ТОВ 'Реабілітаційний центр Черкаси'">
+                        <input type="text" id="part-name" name="name" placeholder="ТОВ 'Реабілітаційний центр Черкаси'">
                     </div>
                     <div class="input-group">
                         <label for="part-type">Тип установи</label>
-                        <select id="part-type">
+                        <select id="part-type" name="category">
                             <option value="Адвокатське бюро">Адвокатське бюро</option>
                             <option value="Реабілітаційний центр">Реабілітаційний центр</option>
                             <option value="Протезний центр">Протезний центр</option>
@@ -318,43 +327,43 @@
                     </div>
                     <div class="input-group">
                         <label for="part-edrpou">ЄДРПОУ організації</label>
-                        <input type="text" id="part-edrpou" placeholder="12345678">
+                        <input type="text" id="part-edrpou" name="edrpou" placeholder="12345678">
                     </div>
                     <div class="input-group">
                         <label for="part-address">Юридична адреса</label>
-                        <input type="text" id="part-address" placeholder="м. Черкаси, вул. ...">
+                        <input type="text" id="part-address" name="address" placeholder="м. Черкаси, вул. ...">
                     </div>
                     <div class="input-group">
                         <label for="part-contact">Відповідальна особа (ПІБ, посада)</label>
-                        <input type="text" id="part-contact" placeholder="Petренко Петро Петрович, директор">
+                        <input type="text" id="part-contact" name="contact_person" placeholder="Petренко Петро Петрович, директор">
                     </div>
                     <div class="input-group">
                         <label for="part-phone">Контактний телефон</label>
-                        <input type="text" id="part-phone" placeholder="+38 (0472) 12-34-56">
+                        <input type="text" id="part-phone" name="phone" placeholder="+38 (0472) 12-34-56">
                     </div>
                     <div class="input-group">
                         <label for="part-email">Email організації</label>
-                        <input type="email" id="part-email" placeholder="office@center.com">
+                        <input type="email" id="part-email" name="email" placeholder="office@center.com">
                     </div>
                     <div class="input-group">
                         <label for="part-website">Веб-сайт (якщо є)</label>
-                        <input type="text" id="part-website" placeholder="https://center.com">
+                        <input type="text" id="part-website" name="website" placeholder="https://center.com">
                     </div>
                     <div class="input-group">
                         <label for="part-logo">Логотип установи (фото/лого)</label>
-                        <input type="file" id="part-logo" accept="image/*">
+                        <input type="file" id="part-logo" name="photo" accept="image/*">
                     </div>
                     <div class="input-group">
                         <label for="part-services">Перелік послуг для ветеранів</label>
-                        <textarea id="part-services" placeholder="Вкажіть послуги та напрямки допомоги..." rows="3" style="padding: 10px; width: 100%; border: 1px solid var(--border-color); border-radius: 8px; font-family: inherit; font-size: 14px;"></textarea>
+                        <textarea id="part-services" name="bio" placeholder="Вкажіть послуги та напрямки допомоги..." rows="3" style="padding: 10px; width: 100%; border: 1px solid var(--border-color); border-radius: 8px; font-family: inherit; font-size: 14px;"></textarea>
                     </div>
                     <div class="input-group">
                         <label for="part-team">Кількість фахівців у команді</label>
-                        <input type="number" id="part-team" placeholder="5">
+                        <input type="number" id="part-team" name="team_work" placeholder="5">
                     </div>
                     <div class="input-group">
                         <label for="part-discount">Форма знижки для ветеранів (мін. 10%)</label>
-                        <textarea id="part-discount" placeholder="Вкажіть формат надання знижки ветеранам..." rows="2" style="padding: 10px; width: 100%; border: 1px solid var(--border-color); border-radius: 8px; font-family: inherit; font-size: 14px;"></textarea>
+                        <textarea id="part-discount" name="discount" placeholder="Вкажіть формат надання знижки ветеранам..." rows="2" style="padding: 10px; width: 100%; border: 1px solid var(--border-color); border-radius: 8px; font-family: inherit; font-size: 14px;"></textarea>
                     </div>
                     
                     <div style="background: rgba(0,0,0,0.02); padding: 12px; border-radius: 8px; font-size: 12px; color: var(--text-secondary); line-height: 1.4; margin-bottom: 15px;">
@@ -380,7 +389,7 @@
                     </label>
                 </div>
 
-                <!-- 4. БЛОК ГО / БЛАГОДІЙНОГО ФОНДУ (Зона 4) -->
+                <!-- 4. БЛОК ГО / БЛАГОДІЙНОГО ФОНДУ -->
                 <div id="reg-ngo-section" style="display: none;">
                     <div class="input-group">
                         <label for="ngo-name">Назва ГО / Благодійного фонду</label>
@@ -437,7 +446,7 @@
                     </label>
                 </div>
 
-                <!-- 5. БЛОК ДЕРЖАВНОЇ СТРУКТУРИ (Зона 5) -->
+                <!-- 5. БЛОК ДЕРЖАВНОЇ СТРУКТУРИ -->
                 <div id="reg-state-section" style="display: none;">
                     <div class="input-group">
                         <label for="state-name">Назва установи / органу влади</label>

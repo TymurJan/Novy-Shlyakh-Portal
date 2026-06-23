@@ -66,9 +66,9 @@ def add_specialist(data):
                 photo_path, document_path, consent_doc_path, consent_at,
                 court_cases, team_work, avg_service_price,
                 tariff_stage, tariff_plan, tariff_fixed_fee, tariff_commission_pct,
-                contract_signed_date, contract_end_date
+                contract_signed_date, contract_end_date, discount
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             data.get('name'),
             data.get('category'),
@@ -95,7 +95,8 @@ def add_specialist(data):
             data.get('tariff_fixed_fee', 0.0),
             data.get('tariff_commission_pct', 0.0),
             data.get('contract_signed_date'),
-            data.get('contract_end_date')
+            data.get('contract_end_date'),
+            data.get('discount')
         ))
         conn.commit()
         last_id = cursor.lastrowid
@@ -137,7 +138,7 @@ def update_specialist_documents(spec_id, doc_data):
         "photo_path", "document_path", "status", "consent_doc_path", "consent_at", "kep_signature_path",
         "court_cases", "team_work", "avg_service_price",
         "tariff_stage", "tariff_plan", "tariff_fixed_fee", "tariff_commission_pct",
-        "contract_signed_date", "contract_end_date"
+        "contract_signed_date", "contract_end_date", "discount"
     ]
     
     for col in doc_cols:
@@ -328,12 +329,119 @@ def sync_to_json():
             "tariff_fixed_fee": s.get('tariff_fixed_fee'),
             "tariff_commission_pct": s.get('tariff_commission_pct'),
             "contract_signed_date": s.get('contract_signed_date'),
-            "contract_end_date": s.get('contract_end_date')
+            "contract_end_date": s.get('contract_end_date'),
+            "discount": s.get('discount')
         })
         
     with open(JSON_BACKUP_PATH, "w", encoding="utf-8") as f:
         json.dump(formatted_specs, f, ensure_ascii=False, indent=2)
     print(f"💾 JSON Backup updated: {len(formatted_specs)} specialists.")
+
+# --- РОБОТА З ВІДГУКАМИ ТА РЕЙТИНГАМИ ---
+
+def recalculate_specialist_rating(specialist_id):
+    """Перераховує середній рейтинг спеціаліста на основі всіх відгуків."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        # Отримуємо середнє середніх оцінок
+        cursor.execute("SELECT AVG(rating_average) FROM reviews WHERE specialist_id = ?", (specialist_id,))
+        avg_rating = cursor.fetchone()[0]
+        if avg_rating is None:
+            avg_rating = 5.0 # Стандартний рейтинг, якщо відгуків немає
+            
+        # Округлюємо до 1 знака після коми
+        avg_rating = round(float(avg_rating), 1)
+        
+        cursor.execute("UPDATE specialists SET rating = ? WHERE id = ?", (avg_rating, specialist_id))
+        conn.commit()
+        print(f"⭐️ Рейтинг спеціаліста (ID: {specialist_id}) оновлено до: {avg_rating}")
+        sync_to_json()
+        return avg_rating
+    except Exception as e:
+        print(f"Error recalculating rating: {e}")
+        return None
+    finally:
+        conn.close()
+
+def add_review(veteran_tg_id, specialist_id, quality, ethics, honesty, comment, is_anonymous):
+    """Зберігає новий відгук від ветерана та оновлює рейтинг спеціаліста."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        # 1. Знаходимо ID ветерана за tg_id
+        cursor.execute("SELECT id FROM veterans WHERE tg_id = ?", (str(veteran_tg_id),))
+        vet = cursor.fetchone()
+        if not vet:
+            return False, "Ветеран не знайдений"
+        vet_id = vet['id']
+
+        # 2. Вираховуємо середній бал
+        avg_score = round((float(quality) + float(ethics) + float(honesty)) / 3.0, 2)
+
+        # 3. Додаємо або оновлюємо відгук
+        cursor.execute('''
+            INSERT INTO reviews (veteran_id, specialist_id, rating_quality, rating_ethics, rating_honesty, rating_average, comment, is_anonymous)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(veteran_id, specialist_id) DO UPDATE SET
+                rating_quality = excluded.rating_quality,
+                rating_ethics = excluded.rating_ethics,
+                rating_honesty = excluded.rating_honesty,
+                rating_average = excluded.rating_average,
+                comment = excluded.comment,
+                is_anonymous = excluded.is_anonymous,
+                created_at = CURRENT_TIMESTAMP
+        ''', (vet_id, specialist_id, quality, ethics, honesty, avg_score, comment, is_anonymous))
+        conn.commit()
+
+        # 4. Перераховуємо загальний рейтинг спеціаліста
+        recalculate_specialist_rating(specialist_id)
+        return True, "Відгук збережено"
+    except Exception as e:
+        print(f"Error adding review: {e}")
+        return False, str(e)
+    finally:
+        conn.close()
+
+def get_reviews_for_specialist(specialist_id):
+    """Отримує всі відгуки для спеціаліста."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute('''
+            SELECT r.*, v.name as veteran_name
+            FROM reviews r
+            JOIN veterans v ON r.veteran_id = v.id
+            WHERE r.specialist_id = ?
+            ORDER BY r.created_at DESC
+        ''', (specialist_id,))
+        rows = cursor.fetchall()
+        return [dict(row) for row in rows]
+    except Exception as e:
+        print(f"Error getting reviews: {e}")
+        return []
+    finally:
+        conn.close()
+
+def has_veteran_reviewed_specialist(veteran_tg_id, specialist_id):
+    """Перевіряє, чи ветеран вже залишав відгук спеціалісту."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute('''
+            SELECT r.id, r.rating_average
+            FROM reviews r
+            JOIN veterans v ON r.veteran_id = v.id
+            WHERE v.tg_id = ? AND r.specialist_id = ?
+        ''', (str(veteran_tg_id), specialist_id))
+        row = cursor.fetchone()
+        return dict(row) if row else None
+    except Exception as e:
+        print(f"Error checking review: {e}")
+        return None
+    finally:
+        conn.close()
+
 
 if __name__ == "__main__":
     # Тестова синхронізація при запуску файлу

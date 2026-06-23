@@ -284,6 +284,9 @@ def _generate_consent_doc(
 
 
 @app.post("/api/register-specialist")
+@app.post("/api/register-partner")
+@app.post("/api/register-ngo")
+@app.post("/api/register-state")
 async def register_specialist(
     request: Request,
     name: str = Form(...),
@@ -292,8 +295,8 @@ async def register_specialist(
     address: str = Form(...),
     bio: str = Form(...),
     tg_id: Optional[str] = Form(None),
-    photo: UploadFile = File(...),
-    document: UploadFile = File(...),
+    photo: Optional[UploadFile] = File(None),
+    document: Optional[UploadFile] = File(None),
     kep_file: Optional[UploadFile] = File(None),
     kep_password: Optional[str] = Form(None),
     
@@ -303,9 +306,10 @@ async def register_specialist(
     avg_service_price: Optional[str] = Form(None),
     tariff_plan: Optional[str] = Form("grant_standard"),
     contract_end_date: Optional[str] = Form(None),
+    discount: Optional[str] = Form(None),
 ):
     """
-    Ендпоінт для фінальної реєстрації спеціаліста (Крок 2).
+    Ендпоінт для фінальної реєстрації спеціаліста/партнера/ГО/держустанови.
 
     Створює per-specialist папку, зберігає файли та генерує
     Consent Receipt (підтвердження згоди) відповідно до GDPR / ЗУ «Про захист ПД».
@@ -319,16 +323,20 @@ async def register_specialist(
         os.makedirs(spec_dir, exist_ok=True)
 
         # 3. Зберігаємо фото
-        photo_ext = os.path.splitext(photo.filename or "photo.jpg")[1] or ".jpg"
-        photo_path = os.path.join(spec_dir, f"photo{photo_ext}")
-        with open(photo_path, "wb") as buffer:
-            shutil.copyfileobj(photo.file, buffer)
+        photo_path = None
+        if photo and photo.filename:
+            photo_ext = os.path.splitext(photo.filename or "photo.jpg")[1] or ".jpg"
+            photo_path = os.path.join(spec_dir, f"photo{photo_ext}")
+            with open(photo_path, "wb") as buffer:
+                shutil.copyfileobj(photo.file, buffer)
 
         # 4. Зберігаємо диплом / ліцензію
-        doc_ext = os.path.splitext(document.filename or "document.pdf")[1] or ".pdf"
-        doc_path = os.path.join(spec_dir, f"diploma{doc_ext}")
-        with open(doc_path, "wb") as buffer:
-            shutil.copyfileobj(document.file, buffer)
+        doc_path = None
+        if document and document.filename:
+            doc_ext = os.path.splitext(document.filename or "document.pdf")[1] or ".pdf"
+            doc_path = os.path.join(spec_dir, f"diploma{doc_ext}")
+            with open(doc_path, "wb") as buffer:
+                shutil.copyfileobj(document.file, buffer)
 
         # 5. Розраховуємо параметри тарифу
         tariff_stage = "stage_1"
@@ -422,9 +430,18 @@ async def register_specialist(
                 "consent_doc_path": consent_path,
                 "consent_at": consent_at,
                 "kep_signature_path": kep_signature_path,
+                "court_cases": court_cases,
+                "team_work": team_work,
+                "avg_service_price": avg_service_price,
+                "tariff_stage": tariff_stage,
+                "tariff_plan": tariff_plan,
+                "tariff_fixed_fee": tariff_fixed_fee,
+                "tariff_commission_pct": tariff_commission_pct,
+                "contract_end_date": contract_end_date,
+                "discount": discount
             })
         except Exception as db_err:
-            print(f"\u26a0\ufe0f DB warning (non-critical): {db_err}")
+            print(f"⚠️ DB warning (non-critical): {db_err}")
 
         # 8. JSON-бекап (сумісність зі старим фронтендом)
         db_path = os.path.join("data", "specialists.json")
@@ -448,7 +465,16 @@ async def register_specialist(
             "kep_signed": kep_signed,
             "status": "pending",
             "rating": "5.0",
-            "reviews": []
+            "reviews": [],
+            "court_cases": court_cases,
+            "team_work": team_work,
+            "avg_service_price": avg_service_price,
+            "tariff_stage": tariff_stage,
+            "tariff_plan": tariff_plan,
+            "tariff_fixed_fee": tariff_fixed_fee,
+            "tariff_commission_pct": tariff_commission_pct,
+            "contract_end_date": contract_end_date,
+            "discount": discount
         })
         with open(db_path, "w", encoding="utf-8") as f:
             json.dump(current_db, f, ensure_ascii=False, indent=2)

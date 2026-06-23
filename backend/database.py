@@ -49,6 +49,7 @@ def init_db():
             tariff_commission_pct REAL DEFAULT 0.0,
             contract_signed_date TEXT,
             contract_end_date TEXT,
+            discount TEXT,
             
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
@@ -84,7 +85,8 @@ def init_db():
             "tariff_fixed_fee": "REAL DEFAULT 0.0",
             "tariff_commission_pct": "REAL DEFAULT 0.0",
             "contract_signed_date": "TEXT",
-            "contract_end_date": "TEXT"
+            "contract_end_date": "TEXT",
+            "discount": "TEXT"
         }
         for col_name, col_type in new_cols.items():
             if col_name not in columns:
@@ -172,6 +174,25 @@ def init_db():
             needs TEXT,                 -- Перелік потреб
             status TEXT,                -- Статус ветерана
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+
+    # 6. Відгуки та рейтинги спеціалістів від ветеранів
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS reviews (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            veteran_id INTEGER,
+            specialist_id INTEGER,
+            rating_quality INTEGER,     -- Оцінка якості (1-5)
+            rating_ethics INTEGER,      -- Оцінка етики (1-5)
+            rating_honesty INTEGER,     -- Оцінка чесності (1-5)
+            rating_average REAL,        -- Середнє арифметичне між 3 оцінками
+            comment TEXT,               -- Текстовий відгук
+            is_anonymous INTEGER DEFAULT 0, -- 1 = анонімно, 0 = з іменем
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(veteran_id) REFERENCES veterans(id),
+            FOREIGN KEY(specialist_id) REFERENCES specialists(id),
+            UNIQUE(veteran_id, specialist_id) -- Один ветеран може залишити лише один відгук одному спеціалісту
         )
     ''')
 

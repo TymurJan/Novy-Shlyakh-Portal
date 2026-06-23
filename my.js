@@ -251,6 +251,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
 
+            // Додаємо Telegram ID з параметрів URL, якщо він є
+            const urlParamsForSubmit = new URLSearchParams(window.location.search || window.location.hash.split('?')[1] || '');
+            const tgIdVal = urlParamsForSubmit.get('tg_id');
+            if (tgIdVal) {
+                formData.append('tg_id', tgIdVal);
+            }
+
             // Для спеціаліста — додаткова логіка КЕП / Дія.Підпис
             if (role === 'specialist') {
                 const chosenMethod = document.querySelector('input[name="sign-method"]:checked')?.value || 'file';
@@ -519,6 +526,48 @@ document.addEventListener('DOMContentLoaded', () => {
         if (role && roleSelector) {
             roleSelector.value = role;
             showRoleSection(role);
+
+            // Автозаповнення полів із GET-параметрів
+            const nameVal = urlParams.get('name');
+            const contactVal = urlParams.get('contact_person');
+            const phoneVal = urlParams.get('phone');
+            const catVal = urlParams.get('cat');
+
+            if (role === 'specialist') {
+                const nameEl = document.getElementById('spec-name');
+                const phoneEl = document.getElementById('spec-phone');
+                const fieldEl = document.getElementById('spec-field');
+                if (nameEl && nameVal) nameEl.value = nameVal;
+                if (phoneEl && phoneVal) phoneEl.value = phoneVal;
+                if (fieldEl && catVal) {
+                    let mappedCat = catVal;
+                    if (catVal === 'legal') mappedCat = 'lawyer_consult';
+                    else if (catVal === 'psychology') mappedCat = 'psychologist';
+                    else if (catVal === 'rehab') mappedCat = 'rehabilitation';
+                    fieldEl.value = mappedCat;
+                }
+            } else if (role === 'partner') {
+                const nameEl = document.getElementById('part-name');
+                const contactEl = document.getElementById('part-contact');
+                const phoneEl = document.getElementById('part-phone');
+                if (nameEl && nameVal) nameEl.value = nameVal;
+                if (contactEl && contactVal) contactEl.value = contactVal;
+                if (phoneEl && phoneVal) phoneEl.value = phoneVal;
+            } else if (role === 'ngo') {
+                const nameEl = document.getElementById('ngo-name');
+                const contactEl = document.getElementById('ngo-contact');
+                const phoneEl = document.getElementById('ngo-phone');
+                if (nameEl && nameVal) nameEl.value = nameVal;
+                if (contactEl && contactVal) contactEl.value = contactVal;
+                if (phoneEl && phoneVal) phoneEl.value = phoneVal;
+            } else if (role === 'state') {
+                const nameEl = document.getElementById('state-name');
+                const contactEl = document.getElementById('state-contact');
+                const phoneEl = document.getElementById('state-phone');
+                if (nameEl && nameVal) nameEl.value = nameVal;
+                if (contactEl && contactVal) contactEl.value = contactVal;
+                if (phoneEl && phoneVal) phoneEl.value = phoneVal;
+            }
         }
     }
 
