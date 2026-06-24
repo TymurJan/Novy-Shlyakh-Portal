@@ -1160,6 +1160,19 @@ async def spec_reg_start(message: types.Message, state: FSMContext):
     )
     await state.update_data(last_prompt_id=msg.message_id)
 
+# --- CANCEL GUARD: перехоплює кнопку скасування у всіх станах реєстрації партнера ---
+@dp.message(Registration.partner_role, F.text == "❌ Скасувати реєстрацію")
+@dp.message(Registration.org_name, F.text == "❌ Скасувати реєстрацію")
+@dp.message(Registration.contact_person, F.text == "❌ Скасувати реєстрацію")
+async def cancel_partner_reg(message: types.Message, state: FSMContext):
+    await state.clear()
+    try:
+        await message.delete()
+    except Exception:
+        pass
+    await message.answer("Реєстрацію скасовано.", reply_markup=ReplyKeyboardRemove())
+    await cmd_start(message, state)
+
 @dp.callback_query(F.data.startswith("partner_role:"))
 async def process_partner_role(callback: types.CallbackQuery, state: FSMContext):
     role = callback.data.split(":")[1]
@@ -1185,7 +1198,7 @@ async def process_partner_role(callback: types.CallbackQuery, state: FSMContext)
         )
     await callback.answer()
 
-@dp.message(Registration.org_name)
+@dp.message(Registration.org_name, ~F.text.in_({"❌ Скасувати реєстрацію"}))
 async def process_partner_org_name(message: types.Message, state: FSMContext):
     is_valid, error_msg = validate_text(message.text, min_words=1, min_len=3)
     if not is_valid:
@@ -1196,7 +1209,7 @@ async def process_partner_org_name(message: types.Message, state: FSMContext):
     await state.set_state(Registration.contact_person)
     await message.answer("👤 Введіть ПІБ контактної особи для взаємодії:")
 
-@dp.message(Registration.contact_person)
+@dp.message(Registration.contact_person, ~F.text.in_({"❌ Скасувати реєстрацію"}))
 async def process_partner_contact_person(message: types.Message, state: FSMContext):
     is_valid, error_msg = validate_text(message.text, min_words=2, min_len=5)
     if not is_valid:
