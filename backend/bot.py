@@ -1179,11 +1179,17 @@ async def process_partner_role(callback: types.CallbackQuery, state: FSMContext)
     await state.update_data(partner_role=role)
     await callback.message.delete()
     
+    cancel_nav_kb = ReplyKeyboardMarkup(keyboard=[
+        [KeyboardButton(text="⬅️ Назад до вибору ролі")],
+        [KeyboardButton(text="❌ Скасувати реєстрацію")]
+    ], resize_keyboard=True)
+
     if role == "specialist":
         await state.set_state(Registration.name)
         await callback.message.answer(
-            "📝 Розпочнемо реєстрацію приватного фахівця.\n\n"
-            "Будь ласка, введіть ваші ПІБ та посаду (наприклад, 'Іванов Петро Сидорович, юрист'):"
+            "📝 Інтродукція: Реєстрація приватного фахівця.\n\n"
+            "Будь ласка, введіть ваші ПІБ та посаду (наприклад: 'Іванов Петро Сидорович, юрист'):",
+            reply_markup=cancel_nav_kb
         )
     else:
         role_names = {
@@ -1193,12 +1199,36 @@ async def process_partner_role(callback: types.CallbackQuery, state: FSMContext)
         }
         await state.set_state(Registration.org_name)
         await callback.message.answer(
-            f"📝 Розпочнемо реєстрацію {role_names.get(role, 'партнера')}.\n\n"
-            f"Будь ласка, введіть офіційну назву вашої організації/установи/фонду:"
+            f"📝 Інтродукція: Реєстрація {role_names.get(role, 'партнера')}.\n\n"
+            f"Будь ласка, введіть офіційну назву вашої організації/установи/фонду:",
+            reply_markup=cancel_nav_kb
         )
     await callback.answer()
 
-@dp.message(Registration.org_name, ~F.text.in_({"❌ Скасувати реєстрацію"}))
+# --- BACK: повернення на вибір ролі (для орг. та спеціаліста) ---
+@dp.message(Registration.org_name, F.text == "⬅️ Назад до вибору ролі")
+@dp.message(Registration.name, F.text == "⬅️ Назад до вибору ролі")
+async def back_to_partner_role(message: types.Message, state: FSMContext):
+    try:
+        await message.delete()
+    except Exception:
+        pass
+    await state.set_state(Registration.partner_role)
+    
+    kb = [
+        [InlineKeyboardButton(text="👨‍⚕️ Приватний фахівець", callback_data="partner_role:specialist")],
+        [InlineKeyboardButton(text="🏢 Організація / установа / бюро", callback_data="partner_role:partner")],
+        [InlineKeyboardButton(text="💚 Громадська організація / БФ", callback_data="partner_role:ngo")],
+        [InlineKeyboardButton(text="🏛️ Державна структура / орган влади", callback_data="partner_role:state")]
+    ]
+    nav_kb = ReplyKeyboardMarkup(keyboard=[
+        [KeyboardButton(text="❌ Скасувати реєстрацію")],
+        [KeyboardButton(text="🌐 Перейти на Портал", web_app=WebAppInfo(url=f"{PORTAL_URL}?v=24"))]
+    ], resize_keyboard=True)
+    await message.answer("Оберіть форму співпраці:", reply_markup=InlineKeyboardMarkup(inline_keyboard=kb))
+    await message.answer("Ви можете скасувати або перейти на портал 👇", reply_markup=nav_kb)
+
+@dp.message(Registration.org_name, ~F.text.in_({"❌ Скасувати реєстрацію", "⬅️ Назад до вибору ролі"}))
 async def process_partner_org_name(message: types.Message, state: FSMContext):
     is_valid, error_msg = validate_text(message.text, min_words=1, min_len=3)
     if not is_valid:
@@ -1207,9 +1237,27 @@ async def process_partner_org_name(message: types.Message, state: FSMContext):
         
     await state.update_data(org_name=message.text)
     await state.set_state(Registration.contact_person)
-    await message.answer("👤 Введіть ПІБ контактної особи для взаємодії:")
+    nav_kb = ReplyKeyboardMarkup(keyboard=[
+        [KeyboardButton(text="⬅️ Назад до назви")],
+        [KeyboardButton(text="❌ Скасувати реєстрацію")]
+    ], resize_keyboard=True)
+    await message.answer("👤 Введіть ПІБ контактної особи для взаємодії:", reply_markup=nav_kb)
 
-@dp.message(Registration.contact_person, ~F.text.in_({"❌ Скасувати реєстрацію"}))
+# --- BACK: повернення на назву організації ---
+@dp.message(Registration.contact_person, F.text == "⬅️ Назад до назви")
+async def back_to_org_name(message: types.Message, state: FSMContext):
+    try:
+        await message.delete()
+    except Exception:
+        pass
+    await state.set_state(Registration.org_name)
+    nav_kb = ReplyKeyboardMarkup(keyboard=[
+        [KeyboardButton(text="⬅️ Назад до вибору ролі")],
+        [KeyboardButton(text="❌ Скасувати реєстрацію")]
+    ], resize_keyboard=True)
+    await message.answer("Повертаємось. Введіть офіційну назву організації/установи/фонду:", reply_markup=nav_kb)
+
+@dp.message(Registration.contact_person, ~F.text.in_({"❌ Скасувати реєстрацію", "⬅️ Назад до назви"}))
 async def process_partner_contact_person(message: types.Message, state: FSMContext):
     is_valid, error_msg = validate_text(message.text, min_words=2, min_len=5)
     if not is_valid:
@@ -1221,10 +1269,25 @@ async def process_partner_contact_person(message: types.Message, state: FSMConte
     
     kb = [
         [KeyboardButton(text="📱 Поділитися моїм номером", request_contact=True)],
+        [KeyboardButton(text="⬅️ Назад до контактної особи")],
         [KeyboardButton(text="❌ Скасувати реєстрацію")]
     ]
     markup = ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True, one_time_keyboard=True)
     await message.answer("📞 Будь ласка, поділіться своїм номером телефону для верифікації профілю:", reply_markup=markup)
+
+# --- BACK: phone → contact_person (для орг/нго/держ) ---
+@dp.message(Registration.phone, F.text == "⬅️ Назад до контактної особи")
+async def back_to_contact_person(message: types.Message, state: FSMContext):
+    try:
+        await message.delete()
+    except Exception:
+        pass
+    await state.set_state(Registration.contact_person)
+    nav_kb = ReplyKeyboardMarkup(keyboard=[
+        [KeyboardButton(text="⬅️ Назад до назви")],
+        [KeyboardButton(text="❌ Скасувати реєстрацію")]
+    ], resize_keyboard=True)
+    await message.answer("Повертаємось. Введіть ПІБ контактної особи для взаємодії:", reply_markup=nav_kb)
 
 @dp.message(F.text == "❌ Скасувати реєстрацію")
 async def cancel_reg(message: types.Message, state: FSMContext):
@@ -1235,7 +1298,7 @@ async def cancel_reg(message: types.Message, state: FSMContext):
     await state.clear()
     await cmd_start(message)
 
-@dp.message(Registration.name)
+@dp.message(Registration.name, ~F.text.in_({"❌ Скасувати реєстрацію", "⬅️ Назад до вибору ролі"}))
 async def process_name(message: types.Message, state: FSMContext):
     is_valid, error_msg = validate_text(message.text, min_words=2, min_len=5)
     if not is_valid:
@@ -1251,11 +1314,11 @@ async def process_name(message: types.Message, state: FSMContext):
     await state.set_state(Registration.category)
     
     nav_kb = [
-        [KeyboardButton(text="⬅️ Назад до імені")],
-        [KeyboardButton(text="🌐 Перейти на Портал", web_app=WebAppInfo(url=f"{PORTAL_URL}?v=24"))]
+        [KeyboardButton(text="⬅️ Назад до вибору ролі")],
+        [KeyboardButton(text="❌ Скасувати реєстрацію")]
     ]
     await message.answer("Оберіть вашу категорію:", reply_markup=InlineKeyboardMarkup(inline_keyboard=kb))
-    msg = await message.answer("Ви можете повернутися або перейти на портал 👇", reply_markup=ReplyKeyboardMarkup(keyboard=nav_kb, resize_keyboard=True))
+    msg = await message.answer("Натисніть кнопку нижче для навігації 👇", reply_markup=ReplyKeyboardMarkup(keyboard=nav_kb, resize_keyboard=True))
     await state.update_data(last_prompt_id=msg.message_id)
 
 @dp.message(Registration.category, F.text == "⬅️ Назад до імені")
@@ -1274,13 +1337,13 @@ async def back_to_name(message: types.Message, state: FSMContext):
             pass
             
     await state.set_state(Registration.name)
-    kb = [
-        [KeyboardButton(text="❌ Скасувати реєстрацію")],
-        [KeyboardButton(text="🌐 Перейти на Портал", web_app=WebAppInfo(url=f"{PORTAL_URL}?v=24"))]
-    ]
+    nav_kb = ReplyKeyboardMarkup(keyboard=[
+        [KeyboardButton(text="⬅️ Назад до вибору ролі")],
+        [KeyboardButton(text="❌ Скасувати реєстрацію")]
+    ], resize_keyboard=True)
     msg = await message.answer(
         "Повертаємось. Як вас звати? (Введіть ПІБ та посаду)", 
-        reply_markup=ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
+        reply_markup=nav_kb
     )
     await state.update_data(last_prompt_id=msg.message_id)
 
