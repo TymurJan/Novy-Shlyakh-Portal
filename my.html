@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
@@ -137,7 +137,24 @@
                             Пройти верифікацію
                         </button>
                         <input type="hidden" id="diia-verified-token">
-                        <p id="diia-status-text" style="font-size: 13px; color: var(--danger); font-weight: 600;">⚠️ О�                <div id="reg-specialist-section" style="display: none;">
+                        <p id="diia-status-text" style="font-size: 13px; color: var(--danger); font-weight: 600;">⚠️ Очікування верифікації...</p>
+                    </div>
+
+                    <div class="legal-protocol" style="margin: 20px 0; padding: 15px; background: rgba(220, 53, 69, 0.05); border-left: 4px solid var(--danger); border-radius: 4px;">
+                        <h4 style="margin-bottom: 10px; color: var(--danger); font-size: 14px;">Юридичний протокол</h4>
+                        <label style="display: flex; gap: 10px; align-items: flex-start; margin-bottom: 10px; cursor: pointer; font-size: 13px; line-height: 1.4;">
+                            <input type="checkbox" id="reg-verify" style="margin-top: 2px; width: 16px; height: 16px;">
+                            <span>Я підтверджую свою особу та зобов'язуюсь надати <a href="#" id="linkVerification" style="text-decoration: underline;">відповідні документи (УБД/Паспорт)</a> на вимогу спеціаліста.</span>
+                        </label>
+                        <label style="display: flex; gap: 10px; align-items: flex-start; cursor: pointer; font-size: 13px; line-height: 1.4;">
+                            <input type="checkbox" id="reg-nda" style="margin-top: 2px; width: 16px; height: 16px;">
+                            <span>Я приймаю умови <a href="#" id="linkNDA" style="text-decoration: underline;">Договору про нерозголошення (NDA)</a>.</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 2. БЛОК ПРИВАТНОГО ФАХІВЦЯ -->
+                <div id="reg-specialist-section" style="display: none;">
                     <div class="input-group">
                         <label for="spec-name">ПІБ фахівця</label>
                         <input type="text" id="spec-name" name="name" placeholder="Іваненко Іван Іванович">

@@ -251,9 +251,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
 
-            // Додаємо Telegram ID з параметрів URL, якщо він є
-            const urlParamsForSubmit = new URLSearchParams(window.location.search || window.location.hash.split('?')[1] || '');
-            const tgIdVal = urlParamsForSubmit.get('tg_id');
+            // Додаємо Telegram ID — спершу з dataset (збережено applyUrlParams), потім з URL
+            const tgIdVal = (formRegister && formRegister.dataset.tgId)
+                || new URLSearchParams(window.location.hash.split('?')[1] || window.location.search.slice(1)).get('tg_id');
             if (tgIdVal) {
                 formData.append('tg_id', tgIdVal);
             }
@@ -505,12 +505,20 @@ document.addEventListener('DOMContentLoaded', () => {
         let path      = hash || '';
         let paramsStr = search || '';
 
+        // Підтримуємо обидва формати: #register?params та ?params
         if (path.includes('?')) {
             const parts = path.split('?');
             path      = parts[0];
-            paramsStr = '?' + parts[1];
+            // Об'єднуємо параметри з хешу та search (search має пріоритет)
+            paramsStr = '?' + parts[1] + (search ? '&' + search.slice(1) : '');
         }
         const urlParams = new URLSearchParams(paramsStr);
+
+        // Зберігаємо tg_id як data-атрибут на формі для надійного доступу при сабміті
+        const tgId = urlParams.get('tg_id');
+        if (tgId && formRegister) {
+            formRegister.dataset.tgId = tgId;
+        }
 
         if (path === '#register' || urlParams.get('reg') === 'veteran') {
             resetTabs();
@@ -572,6 +580,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     applyUrlParams();
+    // Повторний виклик через setTimeout щоб поля точно заповнились після рендеру вкладки
+    setTimeout(applyUrlParams, 50);
     window.addEventListener('hashchange', applyUrlParams);
 
     // --- Навігація в Дашборді ---

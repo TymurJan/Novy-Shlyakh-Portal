@@ -1463,7 +1463,12 @@ async def process_phone_contact(message: types.Message, state: FSMContext):
         params["contact_person"] = data.get("contact_person")
         
     query = urllib.parse.urlencode(params)
-    reg_url = f"{PORTAL_URL}#registration?{query}"
+    # Направляємо на my.html#register, де my.js правильно парсить hash+params
+    base = PORTAL_URL.rstrip("/")
+    # Якщо base вже закінчується на index.html — замінюємо, інакше додаємо my.html
+    if base.endswith("index.html"):
+        base = base[:-len("index.html")]
+    reg_url = f"{base}/my.html#register?{query}"
     
     kb = [[InlineKeyboardButton(text="🚀 Завершити реєстрацію на порталі", web_app=WebAppInfo(url=reg_url))]]
     markup = InlineKeyboardMarkup(inline_keyboard=kb)
