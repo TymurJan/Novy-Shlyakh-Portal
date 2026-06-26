@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
@@ -9,6 +9,65 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="my.css?v=20260616">
     <link rel="stylesheet" href="accessibility.css?v=20260616">
+    <!-- Telegram Web App Script & Viewport Fixes -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+        (function() {
+            var tg = window.Telegram && window.Telegram.WebApp;
+            if (tg) {
+                tg.ready();
+                tg.expand();
+            }
+
+            function detectPlatform() {
+                var ua = navigator.userAgent.toLowerCase();
+                var isDesktop = false;
+                
+                if (tg && tg.platform && ['tdesktop', 'macos', 'weba', 'webk', 'web'].indexOf(tg.platform) !== -1) {
+                    isDesktop = true;
+                } else if (ua.indexOf('telegramdesktop') !== -1 || ((ua.indexOf('windows') !== -1 || ua.indexOf('macintosh') !== -1) && ua.indexOf('android') === -1 && ua.indexOf('iphone') === -1)) {
+                    isDesktop = true;
+                }
+
+                if (isDesktop) {
+                    if (tg && tg.requestFullscreen) {
+                        tg.requestFullscreen();
+                    }
+                    document.documentElement.classList.add('is-desktop-tg');
+                    document.body.classList.add('is-desktop-tg');
+                    var vp = document.querySelector('meta[name="viewport"]');
+                    if (vp) {
+                        vp.setAttribute('content', 'width=device-width, initial-scale=1.0');
+                    }
+                }
+            }
+            window.addEventListener('DOMContentLoaded', detectPlatform);
+        })();
+    </script>
+    <style>
+        /* Примусовий фікс верстки під Telegram WebApp */
+        body.is-desktop-tg #auth-screen {
+            display: flex !important;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        body.is-desktop-tg .auth-container {
+            max-width: 600px;
+            width: 100%;
+        }
+        /* Адаптивність для кнопок КЕП на мобілках */
+        @media (max-width: 480px) {
+            .form-group div[style*="display: flex"] {
+                flex-direction: column !important;
+                gap: 8px !important;
+            }
+            .form-group label {
+                width: 100% !important;
+            }
+        }
+    </style>
 </head>
 <body>
 
@@ -253,32 +312,7 @@
                         <label for="spec-bio">Короткий біо / Опис діяльності</label>
                         <textarea id="spec-bio" name="bio" placeholder="Розкажіть детальніше про ваш професійний шлях..." rows="3" style="padding: 10px; width: 100%; border: 1px solid var(--border-color); border-radius: 8px; font-family: inherit; font-size: 14px;"></textarea>
                     </div>
-                        </div>
-                        
-                        <!-- Зона 2: Опції вибору -->
-                        <div id="spec-zone2-options" style="display: none;">
-                            <div class="input-group" style="margin-bottom: 10px;">
-                                <label for="spec-avg-price" style="font-size: 14px;">Середня вартість послуги / справи (грн)</label>
-                                <input type="number" id="spec-avg-price" placeholder="3000" style="padding: 10px;">
-                            </div>
-                            <div class="input-group" id="spec-bar-number-group" style="margin-bottom: 10px; display: none;">
-                                <label for="spec-bar-number" style="font-size: 14px;">Номер у реєстрі НААУ</label>
-                                <input type="text" id="spec-bar-number" placeholder="12345/26" style="padding: 10px;">
-                            </div>
-                            <div class="input-group" style="margin-bottom: 10px;">
-                                <label for="spec-discount-format" style="font-size: 14px;">Форма знижки для ветеранів (мін. 10%)</label>
-                                <textarea id="spec-discount-format" placeholder="Наприклад: Перша консультація безкоштовно, далі 15% знижка" rows="2" style="padding: 10px; width: 100%; border: 1px solid var(--border-color); border-radius: 8px; font-family: inherit; font-size: 14px;"></textarea>
-                            </div>
-                            <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.4;">
-                                Фіксована підписка: $0 (перші 12 міс.) ➔ $50/міс (13–15 міс.) ➔ $100/міс (16+ міс.)
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="input-group">
-                        <label for="spec-bio">Короткий біо / Опис діяльності</label>
-                        <textarea id="spec-bio" placeholder="Розкажіть детальніше про ваш професійний шлях..." rows="3" style="padding: 10px; width: 100%; border: 1px solid var(--border-color); border-radius: 8px; font-family: inherit; font-size: 14px;"></textarea>
-                    </div>
                     <div class="input-group">
                         <label for="spec-photo">📸 Фото профілю (PNG/JPG)</label>
                         <input type="file" id="spec-photo" accept="image/*">
