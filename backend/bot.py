@@ -204,11 +204,34 @@ async def cmd_start(message: types.Message, state: FSMContext = None):
     is_login_redirect = len(args) > 1 and args[1] == "login"
     is_reg_vet_redirect = len(args) > 1 and args[1] == "reg_vet"
     is_spec_redirect = len(args) > 1 and args[1].startswith("spec_")
+    is_support_redirect = len(args) > 1 and args[1] == "support"
     
     if is_reg_vet_redirect:
         if state:
             await start_veteran_registration_flow(message, state)
             return
+
+    if is_support_redirect:
+        import uuid
+        session_id = str(uuid.uuid4())
+        await state.set_state(SupportDialog.in_dialogue)
+        await state.update_data(
+            support_session_id=session_id,
+            support_platform="bot",
+            support_user_id=str(message.from_user.id),
+            support_bug_reported=False,
+        )
+        await message.answer(
+            "🤖 *ШІ-асистент підтримки автоматично підключено (перехід з порталу).*\n\n"
+            "Опишіть вашу проблему текстом. Я допоможу або передам звіт розробникам.\n"
+            "_Щоб завершити діалог і повернутись до меню — напишіть /start_",
+            reply_markup=ReplyKeyboardMarkup(
+                keyboard=[[KeyboardButton(text="/start")]],
+                resize_keyboard=True
+            ),
+            parse_mode="Markdown"
+        )
+        return
 
     # Якщо перейшов з порталу на конкретного спеціаліста
     if is_spec_redirect:
