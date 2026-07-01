@@ -82,4 +82,68 @@ document.addEventListener('DOMContentLoaded', () => {
             requestsTableBody.appendChild(tr);
         });
     }
+
+    // Навігація в кабінеті
+    const navRequests = document.getElementById('nav-requests');
+    const navSettings = document.getElementById('nav-settings');
+    const requestsSection = document.getElementById('requestsSection');
+    const settingsSection = document.getElementById('settingsSection');
+
+    if (navRequests && navSettings) {
+        navRequests.addEventListener('click', (e) => {
+            e.preventDefault();
+            navRequests.classList.add('active');
+            navSettings.classList.remove('active');
+            requestsSection.style.display = 'block';
+            settingsSection.style.display = 'none';
+        });
+
+        navSettings.addEventListener('click', (e) => {
+            e.preventDefault();
+            navRequests.classList.remove('active');
+            navSettings.classList.add('active');
+            requestsSection.style.display = 'none';
+            settingsSection.style.display = 'block';
+        });
+    }
+
+    // Видалення власного профілю
+    const btnDelete = document.getElementById('btnDeleteSpecialistSelf');
+    const deleteConfirmToken = document.getElementById('deleteConfirmToken');
+
+    if (btnDelete) {
+        btnDelete.addEventListener('click', async () => {
+            const idToken = deleteConfirmToken.value.trim();
+            if (!idToken) {
+                alert('Будь ласка, введіть ваш Telegram ID або системний ID для підтвердження.');
+                return;
+            }
+
+            const sure = confirm('УВАГА: Ця дія повністю анонімізує вашу анкету та видалить усі завантажені вами документи назавжди. Продовжити?');
+            if (!sure) return;
+
+            try {
+                btnDelete.disabled = true;
+                btnDelete.textContent = 'Видалення...';
+                
+                const response = await fetch(`/api/specialists/${idToken}?requester_tg_id=${idToken}`, {
+                    method: 'DELETE'
+                });
+                const result = await response.json();
+                
+                if (response.ok && result.status === 'success') {
+                    alert('Ваш профіль успішно видалено з системи (дані анонімізовано).');
+                    window.location.href = 'index.html';
+                } else {
+                    alert('Помилка: ' + (result.detail || 'Не вдалося виконати видалення. Перевірте правильність введеного ID.'));
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Помилка з\'єднання з сервером.');
+            } finally {
+                btnDelete.disabled = false;
+                btnDelete.textContent = 'Видалити мій профіль та всі дані';
+            }
+        });
+    }
 });

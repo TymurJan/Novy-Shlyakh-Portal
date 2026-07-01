@@ -50,6 +50,10 @@ def init_db():
             contract_signed_date TEXT,
             contract_end_date TEXT,
             discount TEXT,
+            video_url TEXT,
+            sub_specialties TEXT,
+            moderation_reason TEXT,
+            gender TEXT,
             
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
@@ -74,6 +78,18 @@ def init_db():
         if "kep_signature_path" not in columns:
             cursor.execute("ALTER TABLE specialists ADD COLUMN kep_signature_path TEXT")
             print("🔧 Додано колонку kep_signature_path в таблицю specialists")
+        if "video_url" not in columns:
+            cursor.execute("ALTER TABLE specialists ADD COLUMN video_url TEXT")
+            print("🔧 Додано колонку video_url в таблицю specialists")
+        if "sub_specialties" not in columns:
+            cursor.execute("ALTER TABLE specialists ADD COLUMN sub_specialties TEXT")
+            print("🔧 Додано колонку sub_specialties в таблицю specialists")
+        if "moderation_reason" not in columns:
+            cursor.execute("ALTER TABLE specialists ADD COLUMN moderation_reason TEXT")
+            print("🔧 Додано колонку moderation_reason в таблицю specialists")
+        if "gender" not in columns:
+            cursor.execute("ALTER TABLE specialists ADD COLUMN gender TEXT")
+            print("🔧 Додано колонку gender в таблицю specialists")
             
         # Міграція для нових тарифних колонок
         new_cols = {
@@ -193,6 +209,21 @@ def init_db():
             FOREIGN KEY(veteran_id) REFERENCES veterans(id),
             FOREIGN KEY(specialist_id) REFERENCES specialists(id),
             UNIQUE(veteran_id, specialist_id) -- Один ветеран може залишити лише один відгук одному спеціалісту
+        )
+    ''')
+
+    # 7. Логи кліків та пошукових запитів (Аналітика дефіциту послуг)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS click_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            specialist_id TEXT,
+            click_type TEXT NOT NULL,          -- call, bot_booking, video_view, search_filter
+            raion TEXT,                        -- Район ветерана
+            otg TEXT,                          -- ОТГ / місто
+            city_district TEXT,                -- Район міста
+            category TEXT,                     -- Категорія послуги
+            issue_tag TEXT,                    -- Конкретна підтематика запиту (напр. ubd, ptsr)
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
 

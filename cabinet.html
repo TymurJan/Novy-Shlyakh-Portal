@@ -48,41 +48,58 @@
                     <p style="color: #888; font-size: 12px;">Back-office</p>
                 </div>
                 <nav class="sidebar-nav">
-                    <a href="#" class="active">Запити</a>
-                    <a href="#">Мої кейси</a>
-                    <a href="#">Аналітика</a>
+                    <a href="#" class="active" id="nav-requests">Запити</a>
+                    <a href="#" id="nav-settings">Налаштування</a>
                     <a href="index.html" style="color: #ff4444; margin-top: 50px;">Вихід</a>
                 </nav>
             </aside>
 
             <!-- Main Content -->
             <main class="main-content">
-                <header class="dash-header">
-                    <h2>Нові запити від ветеранів</h2>
-                    <div class="status-toggle">
-                        <span id="statusText" style="color: #888; font-size: 14px;">Статус: Не приймаю заявки</span>
-                        <label class="switch">
-                            <input type="checkbox" id="statusCheckbox">
-                            <span class="slider round"></span>
-                        </label>
-                    </div>
-                </header>
+                <div id="requestsSection">
+                    <header class="dash-header">
+                        <h2>Нові запити від ветеранів</h2>
+                        <div class="status-toggle">
+                            <span id="statusText" style="color: #888; font-size: 14px;">Статус: Не приймаю заявки</span>
+                            <label class="switch">
+                                <input type="checkbox" id="statusCheckbox">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                    </header>
 
-                <div class="table-container">
-                    <table class="requests-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Напрямок</th>
-                                <th>Короткий опис</th>
-                                <th>Дата</th>
-                                <th>Дія</th>
-                            </tr>
-                        </thead>
-                        <tbody id="requestsTableBody">
-                            <!-- Заповнюється через JS -->
-                        </tbody>
-                    </table>
+                    <div class="table-container">
+                        <table class="requests-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Напрямок</th>
+                                    <th>Короткий опис</th>
+                                    <th>Дата</th>
+                                    <th>Дія</th>
+                                </tr>
+                            </thead>
+                            <tbody id="requestsTableBody">
+                                <!-- Заповнюється через JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Налаштування та видалення профілю -->
+                <div id="settingsSection" style="display: none; padding: 25px; background: rgba(255,255,255,0.02); border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); margin-top: 20px;">
+                    <header class="dash-header" style="margin-bottom: 20px;">
+                        <h2>Налаштування кабінету</h2>
+                    </header>
+                    <h3 style="color: #ff4d4d; margin-bottom: 10px; font-size: 18px;">⚠️ Видалення профілю (Право на забуття)</h3>
+                    <p style="color: #aaa; font-size: 14px; margin-bottom: 20px; line-height: 1.5;">Ви можете назавжди видалити свій профіль спеціаліста, всі завантажені фото, документи про освіту (дипломи, ліцензії) та КЕП-підписи з бази даних проєкту «Новий Шлях».</p>
+                    <div style="display: flex; gap: 15px; flex-direction: column; max-width: 400px;">
+                        <label style="font-size: 13px; color: #ccc;">Для підтвердження введіть ваш Telegram ID або системний ID:</label>
+                        <input type="text" id="deleteConfirmToken" placeholder="Введіть ID для підтвердження" style="padding: 10px; border-radius: 8px; background: #222; border: 1px solid #444; color: white; outline: none; font-size: 14px;">
+                        <button id="btnDeleteSpecialistSelf" style="background: #ff4d4d; border: none; padding: 12px; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; transition: 0.2s;">
+                            Видалити мій профіль та всі дані
+                        </button>
+                    </div>
                 </div>
             </main>
         </div>

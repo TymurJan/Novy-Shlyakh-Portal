@@ -7,11 +7,36 @@ from datetime import datetime
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "data", "novy_shlyakh.db")
 JSON_BACKUP_PATH = os.path.join(BASE_DIR, "data", "specialists.json")
+JSON_ORGS_PATH = os.path.join(BASE_DIR, "data", "organizations.json")
 
 def get_db_connection():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row  # Дозволяє звертатися до колонок за іменами
     return conn
+
+def send_admin_notification(text):
+    """Надсилає сповіщення адміністратору в Telegram."""
+    bot_token = os.getenv("BOT_TOKEN")
+    admin_id = os.getenv("ADMIN_ID")
+    if not bot_token or not admin_id:
+        print("⚠️ BOT_TOKEN або ADMIN_ID не знайдено в оточенні!")
+        return False
+    import urllib.request
+    import json
+    url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+    payload = {
+        "chat_id": admin_id,
+        "text": text,
+        "parse_mode": "HTML"
+    }
+    try:
+        data = json.dumps(payload).encode("utf-8")
+        req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
+        with urllib.request.urlopen(req, timeout=5) as response:
+            return response.status == 200
+    except Exception as e:
+        print(f"Error sending admin notification: {e}")
+        return False
 
 # --- РОБОТА ЗІ СПЕЦІАЛІСТАМИ ---
 
@@ -28,7 +53,7 @@ def get_specialists(status=None, category=None):
         query += " AND category = ?"
         params.append(category)
     
-    query += " ORDER BY rating DESC"
+    query += " ORDER BY rating DESC, (video_url IS NOT NULL AND video_url != '') DESC"
     
     cursor = conn.cursor()
     cursor.execute(query, params)
@@ -66,9 +91,9 @@ def add_specialist(data):
                 photo_path, document_path, consent_doc_path, consent_at,
                 court_cases, team_work, avg_service_price,
                 tariff_stage, tariff_plan, tariff_fixed_fee, tariff_commission_pct,
-                contract_signed_date, contract_end_date, discount
+                contract_signed_date, contract_end_date, discount, video_url, sub_specialties, gender
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             data.get('name'),
             data.get('category'),
@@ -96,7 +121,10 @@ def add_specialist(data):
             data.get('tariff_commission_pct', 0.0),
             data.get('contract_signed_date'),
             data.get('contract_end_date'),
-            data.get('discount')
+            data.get('discount'),
+            data.get('video_url'),
+            data.get('sub_specialties'),
+            data.get('gender')
         ))
         conn.commit()
         last_id = cursor.lastrowid
@@ -122,6 +150,78 @@ def update_specialist_status(spec_id, status):
     conn.close()
     sync_to_json()
 
+def anonymize_specialist(spec_id):
+    """
+    Видаляє персональні дані та завантажені файли спеціаліста (Право на забуття).
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        # 1. Знаходимо спеціаліста за ID або tg_id
+        if isinstance(spec_id, str) and (spec_id.startswith("spec_") or not spec_id.isdigit()):
+            clean_id = spec_id.replace("spec_", "")
+            cursor.execute("SELECT * FROM specialists WHERE id = ? OR tg_id = ?", (clean_id, spec_id))
+        else:
+            cursor.execute("SELECT * FROM specialists WHERE id = ?", (spec_id,))
+        spec = cursor.fetchone()
+        
+        if not spec:
+            return False, "Спеціаліста не знайдено"
+            
+        real_id = spec['id']
+
+        # 2. Видаляємо фізичні файли з сервера
+        files_to_delete = [
+            spec.get('photo_path'),
+            spec.get('document_path'),
+            spec.get('consent_doc_path'),
+            spec.get('kep_signature_path')
+        ]
+        # Папка завантажень розташована в backend/uploads
+        for f_path in files_to_delete:
+            if f_path:
+                full_path = os.path.join(BASE_DIR, f_path)
+                if os.path.exists(full_path):
+                    try:
+                        os.remove(full_path)
+                        print(f"🗑️ Видалено файл: {full_path}")
+                    except Exception as fe:
+                        print(f"Помилка видалення файлу {full_path}: {fe}")
+
+        # 3. Анонімізуємо дані в базі
+        cursor.execute('''
+            UPDATE specialists
+            SET name = 'Видалений фахівець',
+                phone = NULL,
+                address = NULL,
+                coordinates = NULL,
+                bio = NULL,
+                status = 'archived',
+                doc_diia_enc = NULL,
+                doc_diploma_enc = NULL,
+                doc_license_enc = NULL,
+                doc_fop_enc = NULL,
+                photo_path = NULL,
+                document_path = NULL,
+                consent_doc_path = NULL,
+                consent_at = NULL,
+                kep_signature_path = NULL,
+                video_url = NULL,
+                sub_specialties = NULL,
+                moderation_reason = 'Видалено за запитом користувача (Право на забуття)'
+            WHERE id = ?
+        ''', (real_id,))
+        conn.commit()
+        
+        print(f"🔒 Спеціаліст (ID: {real_id}) успішно анонімізований.")
+        sync_to_json()
+        return True, "Профіль успішно анонімізовано"
+    except Exception as e:
+        print(f"Error anonymizing specialist: {e}")
+        return False, str(e)
+    finally:
+        conn.close()
+
 def update_specialist_documents(spec_id, doc_data):
     """
     Оновлює зашифровані документи та інші поля спеціаліста.
@@ -138,7 +238,7 @@ def update_specialist_documents(spec_id, doc_data):
         "photo_path", "document_path", "status", "consent_doc_path", "consent_at", "kep_signature_path",
         "court_cases", "team_work", "avg_service_price",
         "tariff_stage", "tariff_plan", "tariff_fixed_fee", "tariff_commission_pct",
-        "contract_signed_date", "contract_end_date", "discount"
+        "contract_signed_date", "contract_end_date", "discount", "video_url", "sub_specialties", "gender"
     ]
     
     for col in doc_cols:
@@ -292,9 +392,11 @@ def log_intake(tg_id, spec_id, status='requested'):
 # --- СИНХРОНІЗАЦІЯ (БЕЗПЕКА) ---
 
 def sync_to_json():
-    """Експортує верифікованих спеціалістів у JSON для фронтенду та бекапу."""
+    """Експортує верифікованих спеціалістів та організації у роздільні JSON файли."""
     specs = get_specialists(status='verified')
     formatted_specs = []
+    formatted_orgs = []
+    
     for s in specs:
         coords = [49.4444, 32.0597] # Default
         if s['coordinates'] and ',' in s['coordinates']:
@@ -302,7 +404,7 @@ def sync_to_json():
                 coords = [float(x.strip()) for x in s['coordinates'].split(',')]
             except: pass
             
-        formatted_specs.append({
+        data_item = {
             "id": s['tg_id'] or f"spec_{s['id']}",
             "name": s['name'],
             "role": s['role'],
@@ -319,6 +421,9 @@ def sync_to_json():
             "doc_fop_enc": s.get('doc_fop_enc'),
             "photo_path": s.get('photo_path'),
             "document_path": s.get('document_path'),
+            "video_url": s.get('video_url'),
+            "sub_specialties": s.get('sub_specialties'),
+            "gender": s.get('gender'),
             
             # Тарифні та анкетні поля для синхронізації
             "court_cases": s.get('court_cases'),
@@ -331,11 +436,26 @@ def sync_to_json():
             "contract_signed_date": s.get('contract_signed_date'),
             "contract_end_date": s.get('contract_end_date'),
             "discount": s.get('discount')
-        })
+        }
+        
+        # Критерій розділення: приватні спеціалісти vs організації
+        is_individual = (
+            s['category'] in ('psychologist', 'rehabilitation', 'narcologist', 'lawyer_consult') or 
+            s['tariff_plan'] in ('grant_standard', 'zone1_stable', 'zone1_flexible')
+        )
+        
+        if is_individual:
+            formatted_specs.append(data_item)
+        else:
+            formatted_orgs.append(data_item)
         
     with open(JSON_BACKUP_PATH, "w", encoding="utf-8") as f:
         json.dump(formatted_specs, f, ensure_ascii=False, indent=2)
-    print(f"💾 JSON Backup updated: {len(formatted_specs)} specialists.")
+        
+    with open(JSON_ORGS_PATH, "w", encoding="utf-8") as f:
+        json.dump(formatted_orgs, f, ensure_ascii=False, indent=2)
+        
+    print(f"💾 JSON backups updated: {len(formatted_specs)} specialists and {len(formatted_orgs)} organizations.")
 
 # --- РОБОТА З ВІДГУКАМИ ТА РЕЙТИНГАМИ ---
 
@@ -356,6 +476,19 @@ def recalculate_specialist_rating(specialist_id):
         cursor.execute("UPDATE specialists SET rating = ? WHERE id = ?", (avg_rating, specialist_id))
         conn.commit()
         print(f"⭐️ Рейтинг спеціаліста (ID: {specialist_id}) оновлено до: {avg_rating}")
+        
+        # Перевірка на критично низький рейтинг
+        if avg_rating < 3.0:
+            cursor.execute("SELECT name FROM specialists WHERE id = ?", (specialist_id,))
+            row = cursor.fetchone()
+            spec_name = row['name'] if row else f"Спеціаліст #{specialist_id}"
+            send_admin_notification(
+                f"⚠️ <b>Критично низький рейтинг!</b>\n\n"
+                f"👨‍⚕️ <b>Спеціаліст:</b> {spec_name} (ID: {specialist_id})\n"
+                f"📉 <b>Загальний рейтинг:</b> {avg_rating} (менше ніж 3.0)\n"
+                f"📋 Рекомендується перевірити профіль спеціаліста."
+            )
+
         sync_to_json()
         return avg_rating
     except Exception as e:
@@ -393,6 +526,24 @@ def add_review(veteran_tg_id, specialist_id, quality, ethics, honesty, comment, 
                 created_at = CURRENT_TIMESTAMP
         ''', (vet_id, specialist_id, quality, ethics, honesty, avg_score, comment, is_anonymous))
         conn.commit()
+
+        # Перевірка на низьку оцінку відгуку
+        if int(quality) <= 2 or int(ethics) <= 2 or int(honesty) <= 2:
+            cursor.execute("SELECT name FROM specialists WHERE id = ?", (specialist_id,))
+            row_spec = cursor.fetchone()
+            spec_name = row_spec['name'] if row_spec else f"Спеціаліст #{specialist_id}"
+            
+            cursor.execute("SELECT name FROM veterans WHERE id = ?", (vet_id,))
+            row_vet = cursor.fetchone()
+            vet_name = row_vet['name'] if row_vet else f"Ветеран #{vet_id}"
+            
+            send_admin_notification(
+                f"⚠️ <b>Низька оцінка роботи спеціаліста!</b>\n\n"
+                f"👤 <b>Ветеран:</b> {vet_name}\n"
+                f"👨‍⚕️ <b>Спеціаліст:</b> {spec_name} (ID: {specialist_id})\n"
+                f"🤝 Якість: {quality} | 🌿 Етика: {ethics} | ⚖️ Чесність: {honesty}\n"
+                f"💬 <b>Коментар:</b> {comment}"
+            )
 
         # 4. Перераховуємо загальний рейтинг спеціаліста
         recalculate_specialist_rating(specialist_id)
@@ -439,6 +590,33 @@ def has_veteran_reviewed_specialist(veteran_tg_id, specialist_id):
     except Exception as e:
         print(f"Error checking review: {e}")
         return None
+    finally:
+        conn.close()
+
+def log_click(data):
+    """Записує факт кліку або пошукового запиту в аналітику."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute('''
+            INSERT INTO click_logs (
+                specialist_id, click_type, raion, otg, city_district, category, issue_tag
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        ''', (
+            data.get('specialist_id'),
+            data.get('click_type'),
+            data.get('raion'),
+            data.get('otg'),
+            data.get('city_district'),
+            data.get('category'),
+            data.get('issue_tag')
+        ))
+        conn.commit()
+        return True
+    except Exception as e:
+        print(f"Error logging click: {e}")
+        return False
     finally:
         conn.close()
 

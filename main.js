@@ -8,9 +8,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function loadSpecialists() {
         try {
-            const response = await fetch('backend/data/specialists.json');
-            if (!response.ok) throw new Error('Помилка завантаження');
-            specialists = await response.json();
+            const [respSpecs, respOrgs] = await Promise.all([
+                fetch('backend/data/specialists.json'),
+                fetch('backend/data/organizations.json')
+            ]);
+            
+            const specs = respSpecs.ok ? await respSpecs.json() : [];
+            const orgs = respOrgs.ok ? await respOrgs.json() : [];
+            
+            specialists = [...specs, ...orgs];
+            
+            // Сортуємо в пам'яті: спочатку рейтинг DESC, потім наявність відео DESC
+            specialists.sort((a, b) => {
+                const ratA = parseFloat(a.rating) || 0;
+                const ratB = parseFloat(b.rating) || 0;
+                if (ratB !== ratA) return ratB - ratA;
+                
+                const hasVidA = a.video_url ? 1 : 0;
+                const hasVidB = b.video_url ? 1 : 0;
+                return hasVidB - hasVidA;
+            });
             
             // Рендеримо тільки верифікованих для публічного списку
             renderSpecialists();
@@ -18,8 +35,8 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.warn("Локальний запуск (без сервера), використовуємо fallback дані", error);
             specialists = [
-                { id: "f1", category: "legal", name: "Олександр Іваненко (Fallback)", role: "Юрист (Земельні питання)", phone: "+380671112233", address: "м. Черкаси, вул. Смілянська, 10", status: "verified", coordinates: [49.4444, 32.0597], rating: "4.9", bio: "Експерт з виплат." },
-                { id: "f2", category: "psychology", name: "Марія Ковальчук (Fallback)", role: "Психолог (ПТСР)", phone: "+380634445566", address: "м. Черкаси, б-р Шевченка, 205", status: "verified", coordinates: [49.4411, 32.0622], rating: "5.0", bio: "Кризова допомога." }
+                { id: "f1", category: "legal", name: "Олександр Іваненко (Fallback)", role: "Юрист (Земельні питання)", phone: "+380671112233", address: "м. Черкаси, вул. Смілянська, 10", status: "verified", coordinates: [49.4444, 32.0597], rating: "4.9", bio: "Експерт з виплат.", photo_path: null, video_url: null },
+                { id: "f2", category: "psychology", name: "Марія Ковальчук (Fallback)", role: "Психолог (ПТСР)", phone: "+380634445566", address: "м. Черкаси, б-р Шевченка, 205", status: "verified", coordinates: [49.4411, 32.0622], rating: "5.0", bio: "Кризова допомога.", photo_path: null, video_url: "https://youtube.com" }
             ];
             renderSpecialists();
             initNetworkMap();
@@ -72,13 +89,67 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const isUserLoggedIn = localStorage.getItem('current_veteran');
 
-    function renderSpecialists(filter = 'all') {
+    let currentCategoryFilter = 'all';
+
+    function renderSpecialists(categoryFilter = 'all') {
         if (!specialistGrid) return;
         specialistGrid.innerHTML = '';
-        
-        let filtered = filter === 'all' 
-            ? specialists 
-            : specialists.filter(s => s.category === filter);
+        currentCategoryFilter = categoryFilter;
+
+        const genderFilter = document.getElementById('filterGender')?.value || 'all';
+        const priceFilter = document.getElementById('filterPrice')?.value || 'all';
+        const locationFilter = document.getElementById('filterLocation')?.value || 'all';
+        const specQuery = document.getElementById('filterSpecialization')?.value.toLowerCase().trim() || '';
+
+        let filtered = specialists;
+
+        // 1. Фільтрація по категорії (вкладки)
+        if (categoryFilter !== 'all') {
+            if (categoryFilter === 'legal') {
+                filtered = filtered.filter(s => ['lawyer_consult', 'lawyer_docs', 'advocate'].includes(s.category));
+            } else if (categoryFilter === 'psychology') {
+                filtered = filtered.filter(s => ['psychologist', 'narcologist'].includes(s.category));
+            } else if (categoryFilter === 'rehab') {
+                filtered = filtered.filter(s => ['rehabilitation', 'prosthetist'].includes(s.category));
+            } else {
+                filtered = filtered.filter(s => s.category === categoryFilter);
+            }
+        }
+
+        // 2. Фільтрація по статі
+        if (genderFilter !== 'all') {
+            filtered = filtered.filter(s => s.gender === genderFilter);
+        }
+
+        // 3. Фільтрація по вартості
+        if (priceFilter !== 'all') {
+            if (priceFilter === 'free') {
+                filtered = filtered.filter(s => s.tariff_plan === 'grant_standard' || parseFloat(s.tariff_fixed_fee) === 0);
+            } else if (priceFilter === 'discount') {
+                filtered = filtered.filter(s => (s.discount && s.discount !== '') || s.tariff_plan?.includes('flexible') || s.tariff_plan?.includes('stable'));
+            }
+        }
+
+        // 4. Фільтрація по локації
+        if (locationFilter !== 'all') {
+            if (locationFilter === 'cherkasy') {
+                filtered = filtered.filter(s => s.address?.toLowerCase().includes('черкаси') && !s.address?.toLowerCase().includes('район'));
+            } else if (locationFilter === 'raions') {
+                filtered = filtered.filter(s => !s.address?.toLowerCase().includes('черкаси') || s.address?.toLowerCase().includes('область') || s.address?.toLowerCase().includes('район'));
+            } else if (locationFilter === 'online') {
+                filtered = filtered.filter(s => s.address?.toLowerCase().includes('онлайн') || s.address?.toLowerCase().includes('дистанційно'));
+            }
+        }
+
+        // 5. Пошуковий запит спеціалізації (підкатегорії)
+        if (specQuery !== '') {
+            filtered = filtered.filter(s => 
+                s.name?.toLowerCase().includes(specQuery) ||
+                s.bio?.toLowerCase().includes(specQuery) ||
+                s.sub_specialties?.toLowerCase().includes(specQuery) ||
+                s.role?.toLowerCase().includes(specQuery)
+            );
+        }
 
         // --- НОВА ЛОГІКА ТОР-СПЕЦІАЛІСТІВ ---
         if (!isUserLoggedIn) {
@@ -102,22 +173,48 @@ document.addEventListener('DOMContentLoaded', () => {
         filtered.forEach(spec => {
             const card = document.createElement('div');
             card.className = 'spec-card';
+            
+            // Визначаємо фото профілю або колір-заглушку
+            let imgStyle = 'background-color: var(--deep-teal)';
+            if (spec.photo_path) {
+                // Переконуємось у правильному шляху (сервер запускається з папки Novy_Shlyakh_Portal, uploads знаходиться там)
+                imgStyle = `background-image: url('backend/${spec.photo_path}'); background-size: cover; background-position: center;`;
+            } else if (spec.photo_url) {
+                imgStyle = `background-image: url('backend/${spec.photo_url}'); background-size: cover; background-position: center;`;
+            }
+            
+            // Кнопка відео-презентації (якщо вказано URL)
+            let videoBtnHtml = '';
+            if (spec.video_url) {
+                videoBtnHtml = `
+                    <div style="margin-top: 10px;">
+                        <a href="${spec.video_url}" target="_blank" onclick="trackClick('${spec.id}', 'video_view', '${spec.category}', '${spec.sub_specialties || ''}')" class="btn-card" style="text-align:center; display: flex; align-items: center; justify-content: center; text-decoration: none; border: 1.5px solid var(--primary-green); color: var(--primary-green); background: transparent; font-weight: 600; font-size: 13px; gap: 8px;">
+                            ▶️ Відео-презентація
+                        </a>
+                    </div>
+                `;
+            }
+
             card.innerHTML = `
-                <div class="spec-img" style="background-color: var(--deep-teal)">
+                <div class="spec-img" style="${imgStyle}">
                     <div class="spec-rating">⭐ ${spec.rating || '5.0'}</div>
                 </div>
                 <div class="spec-info">
                     <span class="spec-tag">${spec.role || spec.category}</span>
                     <h4>${spec.name}</h4>
                     <p class="spec-power">${spec.bio || spec.power || ''}</p>
-                    <div class="spec-stats" style="flex-direction: column; gap: 5px;">
+                    <div class="spec-stats" style="display: flex; justify-content: space-between; align-items: center; gap: 5px; width: 100%;">
                         <span>📍 ${spec.address || 'Черкаси'}</span>
+                        <button class="btn-reviews" onclick="openReviewsModal('${spec.id}', '${spec.name}')" style="background: transparent; border: none; color: var(--primary-green); cursor: pointer; text-decoration: underline; font-size: 13px; padding: 0; font-weight: 600;">
+                            💬 Відгуки
+                        </button>
                     </div>
+                    ${videoBtnHtml}
                     <div style="display: flex; gap: 10px; margin-top: 15px;">
-                        <a href="tel:${spec.phone}" class="btn-card" style="text-align:center; display: flex; align-items: center; justify-content: center; text-decoration: none;">
+                        <a href="tel:${spec.phone}" onclick="trackClick('${spec.id}', 'call', '${spec.category}', '${spec.sub_specialties || ''}')" class="btn-card" style="text-align:center; display: flex; align-items: center; justify-content: center; text-decoration: none;">
                             📞 Зателефонувати
                         </a>
-                        <button class="btn-card" onclick="handleBooking('${spec.id}')" style="flex: 1;">
+                        <button class="btn-card" onclick="handleBookingClick('${spec.id}', '${spec.category}', '${spec.sub_specialties || ''}')" style="flex: 1;">
                             Записатися через Бот
                         </button>
                     </div>
@@ -132,14 +229,94 @@ document.addEventListener('DOMContentLoaded', () => {
         window.open(`https://t.me/Veteran_NovyShlyakh_Bot?start=spec_${specId}`, '_blank');
     };
 
+    // Глобальна функція для трекінгу кліків на спеціалістів
+    window.trackClick = async (specId, clickType, category, subSpecialties) => {
+        try {
+            const raion = localStorage.getItem('filter_raion') || null;
+            const otg = localStorage.getItem('filter_otg') || null;
+            const cityDistrict = localStorage.getItem('filter_city_district') || null;
+            const issueTag = subSpecialties ? subSpecialties.split(',')[0].trim() : null;
+
+            await fetch('/api/track-click', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    specialist_id: specId,
+                    click_type: clickType,
+                    raion: raion,
+                    otg: otg,
+                    city_district: cityDistrict,
+                    category: category,
+                    issue_tag: issueTag
+                })
+            });
+        } catch (e) {
+            console.warn('Помилка трекінгу кліку:', e);
+        }
+    };
+
+    window.handleBookingClick = (specId, category, subSpecialties) => {
+        window.trackClick(specId, 'bot_booking', category, subSpecialties);
+        window.handleBooking(specId);
+    };
+
+    window.trackSearchFilter = async (category) => {
+        try {
+            const raion = localStorage.getItem('filter_raion') || null;
+            const otg = localStorage.getItem('filter_otg') || null;
+            const cityDistrict = localStorage.getItem('filter_city_district') || null;
+            
+            await fetch('/api/track-click', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    click_type: 'search_filter',
+                    raion: raion,
+                    otg: otg,
+                    city_district: cityDistrict,
+                    category: category
+                })
+            });
+        } catch (e) {
+            console.warn('Помилка трекінгу фільтра:', e);
+        }
+    };
+
     // Обробка кліків по табам
     specTabs.forEach(btn => {
         btn.addEventListener('click', () => {
             specTabs.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             renderSpecialists(btn.dataset.category);
+            window.trackSearchFilter(btn.dataset.category);
         });
     });
+
+    // Обробка додаткових фільтрів (стать, ціна, локація, спеціалізація)
+    const filterGender = document.getElementById('filterGender');
+    const filterPrice = document.getElementById('filterPrice');
+    const filterLocation = document.getElementById('filterLocation');
+    const filterSpecialization = document.getElementById('filterSpecialization');
+    const btnClearFilters = document.getElementById('btnClearFilters');
+
+    const triggerFilterUpdate = () => {
+        renderSpecialists(currentCategoryFilter);
+    };
+
+    if (filterGender) filterGender.addEventListener('change', triggerFilterUpdate);
+    if (filterPrice) filterPrice.addEventListener('change', triggerFilterUpdate);
+    if (filterLocation) filterLocation.addEventListener('change', triggerFilterUpdate);
+    if (filterSpecialization) filterSpecialization.addEventListener('input', triggerFilterUpdate);
+
+    if (btnClearFilters) {
+        btnClearFilters.addEventListener('click', () => {
+            if (filterGender) filterGender.value = 'all';
+            if (filterPrice) filterPrice.value = 'all';
+            if (filterLocation) filterLocation.value = 'all';
+            if (filterSpecialization) filterSpecialization.value = '';
+            renderSpecialists(currentCategoryFilter);
+        });
+    }
 
     // Обробка кнопки приєднання
     if (btnJoin) {
@@ -366,6 +543,17 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             return true;
         }
+        if (stepNum === 4) {
+            const photoInput = document.getElementById('regPhoto');
+            if (!photoInput || !photoInput.files || photoInput.files.length === 0) {
+                const specField = document.getElementById('regSpecialistField')?.value || '';
+                const isZone1 = ['psychologist', 'rehabilitation', 'narcologist', 'lawyer_consult'].includes(specField);
+                const msg = isZone1 ? 'Будь ласка, обов’язково завантажте фото для вашого профілю.' : 'Будь ласка, обов’язково завантажте логотип вашої організації.';
+                alert(msg);
+                return false;
+            }
+            return true;
+        }
         return true;
     }
 
@@ -589,6 +777,8 @@ document.addEventListener('DOMContentLoaded', () => {
             formData.append('bio', document.getElementById('regBio').value);
             formData.append('photo', document.getElementById('regPhoto').files[0]);
             formData.append('document', document.getElementById('regDoc').files[0]);
+            formData.append('video_url', document.getElementById('regVideoUrl')?.value || '');
+            formData.append('gender', document.getElementById('regGender')?.value || 'org');
 
             // Анкетні дані для юристів
             if (category === 'legal') {
@@ -657,3 +847,132 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     checkRegistrationHash();
+
+    // --- ЛОГІКА МОДАЛЬНОГО ВІКНА ВІДГУКІВ ---
+    const reviewsModal = document.getElementById('reviews-modal');
+    const closeReviewsBtn = document.getElementById('closeReviewsModal');
+    const reviewsList = document.getElementById('reviews-list');
+    const reviewsTitle = document.getElementById('reviews-title');
+    const reviewsForm = document.getElementById('addReviewForm');
+    const reviewsLoginWarning = document.getElementById('reviews-login-warning');
+    
+    let activeReviewSpecId = null;
+
+    window.openReviewsModal = async (specId, specName) => {
+        activeReviewSpecId = specId;
+        if (reviewsTitle) reviewsTitle.textContent = `💬 Відгуки про фахівця: ${specName}`;
+        if (reviewsModal) reviewsModal.classList.add('active');
+        
+        // Завантажуємо відгуки
+        await fetchReviews(specId);
+        
+        // Перевіряємо авторизацію для показу форми
+        const currentUserStr = localStorage.getItem('current_veteran');
+        if (currentUserStr) {
+            if (reviewsForm) reviewsForm.style.display = 'flex';
+            if (reviewsLoginWarning) reviewsLoginWarning.style.display = 'none';
+        } else {
+            if (reviewsForm) reviewsForm.style.display = 'none';
+            if (reviewsLoginWarning) reviewsLoginWarning.style.display = 'block';
+        }
+    };
+
+    const fetchReviews = async (specId) => {
+        if (!reviewsList) return;
+        reviewsList.innerHTML = '<div style="color: var(--primary-green); text-align:center;">Завантаження відгуків...</div>';
+        
+        try {
+            const response = await fetch(`/api/specialists/${specId}/reviews`);
+            const data = await response.json();
+            
+            if (data.status === 'success' && data.reviews && data.reviews.length > 0) {
+                reviewsList.innerHTML = '';
+                data.reviews.forEach(rev => {
+                    const revItem = document.createElement('div');
+                    revItem.style.background = 'rgba(255,255,255,0.03)';
+                    revItem.style.padding = '15px';
+                    revItem.style.borderRadius = '12px';
+                    revItem.style.border = '1px solid rgba(255,255,255,0.05)';
+                    
+                    const dateFormatted = rev.created_at ? rev.created_at.split(' ')[0] : '';
+                    
+                    revItem.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px;">
+                            <strong style="color: var(--primary-green);">${rev.veteran_name}</strong>
+                            <span style="color: #666;">${dateFormatted}</span>
+                        </div>
+                        <div style="display: flex; gap: 10px; margin-bottom: 8px; font-size: 11px; color: #aaa;">
+                            <span>🤝 Якість: ${'⭐'.repeat(rev.rating_quality)}</span>
+                            <span>🌿 Етика: ${'⭐'.repeat(rev.rating_ethics)}</span>
+                            <span>⚖️ Чесність: ${'⭐'.repeat(rev.rating_honesty)}</span>
+                        </div>
+                        <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #eee;">${rev.comment}</p>
+                    `;
+                    reviewsList.appendChild(revItem);
+                });
+            } else {
+                reviewsList.innerHTML = '<div style="color: #666; text-align:center; padding: 20px;">Ще немає жодного відгуку. Будьте першим, хто залишить відгук!</div>';
+            }
+        } catch (e) {
+            console.warn('Помилка завантаження відгуків:', e);
+            reviewsList.innerHTML = '<div style="color: #ff4d4f; text-align:center;">Помилка завантаження відгуків з сервера.</div>';
+        }
+    };
+
+    if (closeReviewsBtn) {
+        closeReviewsBtn.onclick = () => {
+            if (reviewsModal) reviewsModal.classList.remove('active');
+            activeReviewSpecId = null;
+            if (reviewsForm) reviewsForm.reset();
+        };
+    }
+
+    if (reviewsForm) {
+        reviewsForm.onsubmit = async (e) => {
+            e.preventDefault();
+            if (!activeReviewSpecId) return;
+            
+            const currentUserStr = localStorage.getItem('current_veteran');
+            if (!currentUserStr) {
+                alert('Помилка: Ви не авторизовані!');
+                return;
+            }
+            
+            const currentUser = JSON.parse(currentUserStr);
+            const tgId = currentUser.tg_id;
+            
+            const submitData = {
+                veteran_tg_id: String(tgId),
+                rating_quality: parseInt(document.getElementById('revQuality').value),
+                rating_ethics: parseInt(document.getElementById('revEthics').value),
+                rating_honesty: parseInt(document.getElementById('revHonesty').value),
+                comment: document.getElementById('revComment').value.trim(),
+                is_anonymous: document.getElementById('revAnonymous').checked ? 1 : 0
+            };
+
+            const submitBtn = reviewsForm.querySelector('button[type="submit"]');
+            if (submitBtn) submitBtn.disabled = true;
+
+            try {
+                const response = await fetch(`/api/specialists/${activeReviewSpecId}/reviews`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(submitData)
+                });
+                
+                const result = await response.json();
+                if (response.ok && result.status === 'success') {
+                    alert('Дякуємо! Ваш відгук успішно додано.');
+                    reviewsForm.reset();
+                    await fetchReviews(activeReviewSpecId);
+                } else {
+                    alert(result.detail || 'Помилка збереження відгуку');
+                }
+            } catch (err) {
+                console.error('Помилка відправки відгуку:', err);
+                alert('Помилка з\'єднання з сервером при відправці відгуку.');
+            } finally {
+                if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Надіслати'; }
+            }
+        };
+    }

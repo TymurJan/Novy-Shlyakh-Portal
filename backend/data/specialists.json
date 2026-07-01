@@ -19,6 +19,9 @@
     "doc_fop_enc": null,
     "photo_path": null,
     "document_path": null,
+    "video_url": null,
+    "sub_specialties": null,
+    "gender": null,
     "court_cases": 0,
     "team_work": 0,
     "avg_service_price": null,
@@ -27,7 +30,8 @@
     "tariff_fixed_fee": 0.0,
     "tariff_commission_pct": 0.0,
     "contract_signed_date": null,
-    "contract_end_date": null
+    "contract_end_date": null,
+    "discount": null
   },
   {
     "id": "user_531215718_1778172334",
@@ -49,6 +53,9 @@
     "doc_fop_enc": null,
     "photo_path": null,
     "document_path": null,
+    "video_url": null,
+    "sub_specialties": null,
+    "gender": null,
     "court_cases": 0,
     "team_work": 0,
     "avg_service_price": null,
@@ -57,6 +64,7 @@
     "tariff_fixed_fee": 0.0,
     "tariff_commission_pct": 0.0,
     "contract_signed_date": null,
-    "contract_end_date": null
+    "contract_end_date": null,
+    "discount": null
   }
 ]

@@ -281,9 +281,14 @@ async def cmd_start(message: types.Message, state: FSMContext = None):
 async def portal_redirect(message: types.Message):
     kb = [[InlineKeyboardButton(text="🚀 Відкрити Портал", web_app=WebAppInfo(url=f"{PORTAL_URL}?v=24"))]]
     await message.answer(
-        "Натисніть кнопку нижче, щоб перейти до ветеранського порталу. \n\n"
-        "На комп'ютері він відкриється у браузері, на телефоні — у Telegram. 👇",
-        reply_markup=InlineKeyboardMarkup(inline_keyboard=kb)
+        "🌐 **Наш Веб-портал «Новий Шлях»** — це зручний інтерактивний каталог допомоги Черкащини.\n\n"
+        "**Переваги порталу:**\n"
+        "✨ **Розумний пошук та фільтри**: миттєва фільтрація за статтю спеціаліста, вартістю послуг (Pro Bono/знижки), вашим районом/ОТГ Черкащини чи підкатегоріями.\n"
+        "🎥 **Відеовізитки**: дивіться короткі відеопривітання спеціалістів перед записом.\n"
+        "⭐️ **Реальні відгуки та оцінки** від інших ветеранів з інтегрованою системою модерації.\n\n"
+        "На комп'ютері портал відкриється у великому вікні браузера, на телефоні — безпосередньо у Telegram. 👇",
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=kb),
+        parse_mode="Markdown"
     )
 
 # --- ШЛЯХ ВЕТЕРАНА ---
@@ -468,7 +473,8 @@ async def handle_contact_request(callback: types.CallbackQuery):
         # Попередження про зворотний зв'язок
         await callback.message.answer(
             "⏳ **За 48 годин** ми надішлемо вам коротке опитування, щоб дізнатися, чи була ця допомога корисною. \n"
-            "Це допомагає нам покращувати сервіс для ветеранів. Дякуємо!",
+            "Це допомагає нам покращувати сервіс для ветеранів. Дякуємо!\n\n"
+            "💡 *Підказка:* Наступного разу ви можете налаштувати свої персональні критерії пошуку (стать спеціаліста, локацію Черкащини чи пільговий тариф) в Особистому кабінеті в боті, або скористатися нашими зручними розширеними фільтрами безпосередньо на порталі 🌐.",
             parse_mode="Markdown"
         )
         
@@ -1002,7 +1008,9 @@ async def process_vet_consent(callback: types.CallbackQuery, state: FSMContext):
             await callback.message.answer(
                 f"🎉 Вітаємо, {data.get('first_name')}!\n\n"
                 "Ви успішно зареєструвалися на порталі 'Новий Шлях'.\n"
-                "Тепер вам доступні персональні підбірки та знижка 10% у партнерів. 🫡"
+                "Тепер вам доступні персональні підбірки та знижка 10% у партнерів. 🫡\n\n"
+                "💡 *Порада:* Ви можете налаштувати свої персональні критерії пошуку (стать спеціаліста, ціновий тариф або локацію Черкащини) в Особистому кабінеті в боті, або перейти безпосередньо на наш веб-портал 🌐, де доступні зручні розширені фільтри, реальні відгуки та відеовізитки спеціалістів!",
+                parse_mode="Markdown"
             )
     except Exception as e:
         logging.error(f"Error registering veteran: {e}")
@@ -1794,10 +1802,9 @@ async def delete_profile_confirm(callback: types.CallbackQuery):
 
 @dp.callback_query(F.data == "delete_profile_final")
 async def delete_profile_final(callback: types.CallbackQuery):
-    db = await load_db_async()
-    new_db = [s for s in db if str(s.get("tg_id")) != str(callback.from_user.id)]
-    await save_db_async(new_db)
-    await callback.message.edit_text("✅ Ваш профіль успішно видалено. Дякуємо за співпрацю!")
+    # Виконуємо анонімізацію в SQLite та видалення файлів
+    db_manager.anonymize_specialist(str(callback.from_user.id))
+    await callback.message.edit_text("✅ Ваш профіль успішно видалено (анонімізовано). Дякуємо за співпрацю!")
     await callback.answer()
 
 @dp.callback_query(F.data == "to_cabinet")

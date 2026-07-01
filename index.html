@@ -211,6 +211,52 @@ body.is-tg-app .hero {
                 <button class="tab-btn" data-category="social" id="btn-social">Соціальний хаб</button>
             </div>
 
+            <!-- Панель фільтрів пошуку -->
+            <div class="filters-panel" style="display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; background: rgba(255,255,255,0.02); padding: 15px 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); justify-content: space-between; align-items: center;">
+                <div style="display: flex; gap: 15px; flex-wrap: wrap; flex: 1;">
+                    <!-- Стать -->
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <label style="font-size: 11px; color: #aaa; font-weight: 600; text-transform: uppercase;">Стать</label>
+                        <select id="filterGender" style="padding: 8px 12px; border-radius: 8px; background: #222; border: 1px solid #444; color: white; font-size: 13px; outline: none; cursor: pointer;">
+                            <option value="all">Всі статі</option>
+                            <option value="male">Чоловік</option>
+                            <option value="female">Жінка</option>
+                        </select>
+                    </div>
+
+                    <!-- Ціна -->
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <label style="font-size: 11px; color: #aaa; font-weight: 600; text-transform: uppercase;">Вартість</label>
+                        <select id="filterPrice" style="padding: 8px 12px; border-radius: 8px; background: #222; border: 1px solid #444; color: white; font-size: 13px; outline: none; cursor: pointer;">
+                            <option value="all">Будь-яка ціна</option>
+                            <option value="free">Безкоштовно (Грант / Pro Bono)</option>
+                            <option value="discount">Пільгові ціни</option>
+                        </select>
+                    </div>
+
+                    <!-- Локація -->
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <label style="font-size: 11px; color: #aaa; font-weight: 600; text-transform: uppercase;">Локація</label>
+                        <select id="filterLocation" style="padding: 8px 12px; border-radius: 8px; background: #222; border: 1px solid #444; color: white; font-size: 13px; outline: none; cursor: pointer;">
+                            <option value="all">Черкаська область</option>
+                            <option value="cherkasy">м. Черкаси</option>
+                            <option value="raions">Райони / ОТГ області</option>
+                            <option value="online">Онлайн / Дистанційно</option>
+                        </select>
+                    </div>
+
+                    <!-- Піднапрямок / Спеціалізація -->
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <label style="font-size: 11px; color: #aaa; font-weight: 600; text-transform: uppercase;">Напрямок роботи</label>
+                        <input type="text" id="filterSpecialization" placeholder="Напр. житлові, ВЛК, ПТСР..." style="padding: 8px 12px; border-radius: 8px; background: #222; border: 1px solid #444; color: white; font-size: 13px; outline: none; width: 200px;">
+                    </div>
+                </div>
+
+                <button id="btnClearFilters" style="padding: 8px 15px; border-radius: 8px; background: transparent; border: 1px solid var(--primary-green); color: var(--primary-green); cursor: pointer; font-size: 13px; font-weight: 600; transition: 0.2s;">
+                    ❌ Скинути
+                </button>
+            </div>
+
             <div class="specialist-grid" id="specialistGrid">
                 <!-- Картки спеціалістів будуть згенеровані через JS -->
             </div>
@@ -356,6 +402,14 @@ body.is-tg-app .hero {
                             <option value="prosthetist">🦾 Протезист / ортопедичні послуги</option>
                         </select>
                     </div>
+                    <div class="form-group">
+                        <label style="font-weight: 600; display: block; margin-bottom: 6px;">Стать спеціаліста (для індивідуальних осіб):</label>
+                        <select id="regGender" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(46,139,87,0.25); font-size: 14px; margin-bottom: 12px;">
+                            <option value="male">Чоловік</option>
+                            <option value="female">Жінка</option>
+                            <option value="org" selected>Організація / ГО / Інше</option>
+                        </select>
+                    </div>
                 </div>
 
                 <!-- Крок 2: Основна інформація & Анкета -->
@@ -459,6 +513,11 @@ body.is-tg-app .hero {
                     <div class="form-group" style="margin-bottom: 15px;">
                         <label style="font-weight: 600; display: block; margin-bottom: 6px;">📄 Диплом або Ліцензія (PDF)</label>
                         <input type="file" id="regDoc" accept="application/pdf" required>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label style="font-weight: 600; display: block; margin-bottom: 6px;">▶️ Посилання на відео-презентацію (YouTube, Drive, Telegram тощо) [Опціонально]</label>
+                        <input type="url" id="regVideoUrl" placeholder="https://..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(46,139,87,0.25); font-size: 14px; background: #111; color: white;">
                     </div>
 
                     <!-- Підписання угоди: вибір методу -->
@@ -574,6 +633,77 @@ body.is-tg-app .hero {
                 <h5>3. Верифікація та Припинення</h5>
                 <p>Спеціаліст погоджується надати документи для перевірки. У разі видалення профілю угода припиняється негайно.</p>
             </div>
+        </div>
+    </div>
+
+    <!-- МОДАЛЬНЕ ВІКНО ВІДГУКІВ -->
+    <div id="reviews-modal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 600px; padding: 30px; border-radius: 25px; background: #111; border: 1px solid var(--primary-green); color: white;">
+            <button class="close-modal" id="closeReviewsModal" style="color: white; font-size: 28px;">&times;</button>
+            <h3 class="outfit-font" id="reviews-title" style="margin-bottom: 10px; color: var(--primary-green);">💬 Відгуки про фахівця</h3>
+            <p id="reviews-subtitle" style="color: #aaa; font-size: 14px; margin-bottom: 20px;">Тут ви можете ознайомитися з досвідом інших ветеранів або поділитися своїм.</p>
+            
+            <!-- Список відгуків -->
+            <div id="reviews-list" style="max-height: 250px; overflow-y: auto; margin-bottom: 20px; padding-right: 10px; display: flex; flex-direction: column; gap: 15px;">
+                <!-- Динамічно завантажувані відгуки -->
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 20px;">
+
+            <!-- Попередження для гостей -->
+            <div id="reviews-login-warning" style="display: none; text-align: center; padding: 15px; background: rgba(255, 255, 255, 0.05); border-radius: 12px; border: 1px dashed rgba(255,255,255,0.2);">
+                <p style="font-size: 14px; color: #ccc; margin: 0;">🔒 Тільки авторизовані ветерани можуть залишати відгуки. <br> Будь ласка, увійдіть у свій <a href="my.html" style="color: var(--primary-green); text-decoration: underline;">Кабінет</a>.</p>
+            </div>
+
+            <!-- Форма написання відгуку -->
+            <form id="addReviewForm" style="display: none; flex-direction: column; gap: 12px;">
+                <h4 style="margin-bottom: 5px; font-size: 16px;">✍️ Залишити свій відгук</h4>
+                
+                <div style="display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 120px;">
+                        <label style="font-size: 12px; color: #aaa; display: block; margin-bottom: 4px;">🤝 Якість послуг</label>
+                        <select id="revQuality" style="width: 100%; padding: 8px; border-radius: 6px; background: #222; border: 1px solid #444; color: white;" required>
+                            <option value="5">⭐⭐⭐⭐⭐ (5)</option>
+                            <option value="4">⭐⭐⭐⭐ (4)</option>
+                            <option value="3">⭐⭐⭐ (3)</option>
+                            <option value="2">⭐⭐ (2)</option>
+                            <option value="1">⭐ (1)</option>
+                        </select>
+                    </div>
+                    <div style="flex: 1; min-width: 120px;">
+                        <label style="font-size: 12px; color: #aaa; display: block; margin-bottom: 4px;">🌿 Етика спілкування</label>
+                        <select id="revEthics" style="width: 100%; padding: 8px; border-radius: 6px; background: #222; border: 1px solid #444; color: white;" required>
+                            <option value="5">⭐⭐⭐⭐⭐ (5)</option>
+                            <option value="4">⭐⭐⭐⭐ (4)</option>
+                            <option value="3">⭐⭐⭐ (3)</option>
+                            <option value="2">⭐⭐ (2)</option>
+                            <option value="1">⭐ (1)</option>
+                        </select>
+                    </div>
+                    <div style="flex: 1; min-width: 120px;">
+                        <label style="font-size: 12px; color: #aaa; display: block; margin-bottom: 4px;">⚖️ Чесність</label>
+                        <select id="revHonesty" style="width: 100%; padding: 8px; border-radius: 6px; background: #222; border: 1px solid #444; color: white;" required>
+                            <option value="5">⭐⭐⭐⭐⭐ (5)</option>
+                            <option value="4">⭐⭐⭐⭐ (4)</option>
+                            <option value="3">⭐⭐⭐ (3)</option>
+                            <option value="2">⭐⭐ (2)</option>
+                            <option value="1">⭐ (1)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label style="font-size: 12px; color: #aaa; display: block; margin-bottom: 4px;">💬 Коментар (українською мовою)</label>
+                    <textarea id="revComment" rows="3" placeholder="Розкажіть про свій досвід роботи з фахівцем..." style="width: 100%; padding: 10px; border-radius: 8px; background: #222; border: 1px solid #444; color: white; resize: none;" required></textarea>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                    <label style="font-size: 13px; display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" id="revAnonymous" style="width: auto;"> Залишити анонімно
+                    </label>
+                    <button type="submit" class="btn-primary" style="padding: 10px 25px; border-radius: 8px;">Надіслати</button>
+                </div>
+            </form>
         </div>
     </div>
 

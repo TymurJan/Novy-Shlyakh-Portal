@@ -8,6 +8,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
 
+try:
+    from text_filters import validate_text
+except ImportError:
+    from backend.text_filters import validate_text
+
 # Імітація майбутнього сервера для AI-Чату
 # Цей файл є заготовкою (boilerplate) для розгортання RAG-системи.
 # Потребує: pip install fastapi uvicorn openai
@@ -307,6 +312,8 @@ async def register_specialist(
     tariff_plan: Optional[str] = Form("grant_standard"),
     contract_end_date: Optional[str] = Form(None),
     discount: Optional[str] = Form(None),
+    video_url: Optional[str] = Form(None),
+    gender: Optional[str] = Form("org"),
 ):
     """
     Ендпоінт для фінальної реєстрації спеціаліста/партнера/ГО/держустанови.
@@ -315,6 +322,12 @@ async def register_specialist(
     Consent Receipt (підтвердження згоди) відповідно до GDPR / ЗУ «Про захист ПД».
     """
     try:
+        # Валідація обов'язковості фото/логотипа
+        if not photo or not photo.filename:
+            is_individual = category in ('psychologist', 'rehabilitation', 'narcologist', 'lawyer_consult') or tariff_plan in ('grant_standard', 'zone1_stable', 'zone1_flexible')
+            msg = "Будь ласка, завантажте фото для вашого профілю" if is_individual else "Будь ласка, завантажте логотип вашої організації"
+            raise HTTPException(status_code=400, detail=msg)
+
         # 1. Визначаємо унікальний ідентифікатор спеціаліста
         spec_id = tg_id or f"anon_{abs(hash(phone))}"
 
@@ -438,7 +451,9 @@ async def register_specialist(
                 "tariff_fixed_fee": tariff_fixed_fee,
                 "tariff_commission_pct": tariff_commission_pct,
                 "contract_end_date": contract_end_date,
-                "discount": discount
+                "discount": discount,
+                "video_url": video_url,
+                "gender": gender
             })
         except Exception as db_err:
             print(f"⚠️ DB warning (non-critical): {db_err}")
@@ -474,7 +489,8 @@ async def register_specialist(
             "tariff_fixed_fee": tariff_fixed_fee,
             "tariff_commission_pct": tariff_commission_pct,
             "contract_end_date": contract_end_date,
-            "discount": discount
+            "discount": discount,
+            "video_url": video_url
         })
         with open(db_path, "w", encoding="utf-8") as f:
             json.dump(current_db, f, ensure_ascii=False, indent=2)
@@ -533,6 +549,161 @@ async def get_portal_stats():
             "intake_count": 0,
             "veterans_count": 0
         }
+
+class ClickLogRequest(BaseModel):
+    specialist_id: Optional[str] = None
+    click_type: str
+    raion: Optional[str] = None
+    otg: Optional[str] = None
+    city_district: Optional[str] = None
+    category: Optional[str] = None
+    issue_tag: Optional[str] = None
+
+@app.post("/api/track-click")
+async def track_click_endpoint(req: ClickLogRequest):
+    """
+    Ендпоінт для запису дій користувача (кліків на телефони, бот, перегляд відео та пошук).
+    """
+    try:
+        import db_manager
+        success = db_manager.log_click(req.dict())
+        if not success:
+            raise HTTPException(status_code=500, detail="Не вдалося записати лог")
+        return {"status": "success", "message": "Дію успішно записано в аналітику"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+class ReviewSubmitRequest(BaseModel):
+    veteran_tg_id: str
+    rating_quality: int
+    rating_ethics: int
+    rating_honesty: int
+    comment: str
+    is_anonymous: int = 0
+
+@app.get("/api/specialists/{spec_id}/reviews")
+async def get_reviews_endpoint(spec_id: str):
+    """
+    Отримує всі відгуки для конкретного спеціаліста.
+    """
+    try:
+        import db_manager
+        # Визначаємо числовий ID спеціаліста в базі
+        conn = db_manager.get_db_connection()
+        cursor = conn.cursor()
+        if spec_id.isdigit():
+            db_spec_id = int(spec_id)
+        else:
+            cursor.execute("SELECT id FROM specialists WHERE tg_id = ?", (spec_id,))
+            row = cursor.fetchone()
+            if not row:
+                raise HTTPException(status_code=404, detail="Спеціаліста не знайдено")
+            db_spec_id = row['id']
+        conn.close()
+        
+        reviews = db_manager.get_reviews_for_specialist(db_spec_id)
+        # Очищуємо імена якщо відгук анонімний
+        for r in reviews:
+            if r['is_anonymous']:
+                r['veteran_name'] = "Анонімний ветеран"
+        return {"status": "success", "reviews": reviews}
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/specialists/{spec_id}/reviews")
+async def add_review_endpoint(spec_id: str, req: ReviewSubmitRequest):
+    """
+    Додає новий відгук про спеціаліста з перевіркою цензури та мови.
+    """
+    # 1. Валідація тексту на цензуру та мову
+    is_valid, error_msg = validate_text(req.comment)
+    if not is_valid:
+        raise HTTPException(status_code=400, detail=error_msg)
+        
+    try:
+        import db_manager
+        # Визначаємо числовий ID спеціаліста в базі
+        conn = db_manager.get_db_connection()
+        cursor = conn.cursor()
+        if spec_id.isdigit():
+            db_spec_id = int(spec_id)
+        else:
+            cursor.execute("SELECT id FROM specialists WHERE tg_id = ?", (spec_id,))
+            row = cursor.fetchone()
+            if not row:
+                raise HTTPException(status_code=404, detail="Спеціаліста не знайдено")
+            db_spec_id = row['id']
+        conn.close()
+
+        success, message = db_manager.add_review(
+            veteran_tg_id=req.veteran_tg_id,
+            specialist_id=db_spec_id,
+            quality=req.rating_quality,
+            ethics=req.rating_ethics,
+            honesty=req.rating_honesty,
+            comment=req.comment,
+            is_anonymous=req.is_anonymous
+        )
+        if not success:
+            raise HTTPException(status_code=400, detail=message)
+            
+        return {"status": "success", "message": "Відгук успішно збережено"}
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.delete("/api/specialists/{spec_id}")
+async def delete_specialist_endpoint(spec_id: str, requester_tg_id: Optional[str] = None, admin_secret: Optional[str] = None):
+    """
+    Видаляє (анонімізує) спеціаліста з бази даних.
+    Може бути викликаний або самим спеціалістом (при співпадінні tg_id), або адміністратором.
+    """
+    try:
+        import db_manager
+        
+        # 1. Перевірка на адміна
+        is_admin = False
+        env_admin_id = os.getenv("ADMIN_ID")
+        if admin_secret and env_admin_id and str(admin_secret).strip() == str(env_admin_id).strip():
+            is_admin = True
+            
+        # 2. Якщо не адмін, перевіряємо, чи видаляє спеціаліст сам себе
+        if not is_admin:
+            if not requester_tg_id:
+                raise HTTPException(status_code=401, detail="Неавторизований запит")
+                
+            # Отримуємо спеціаліста з бази, щоб перевірити його tg_id
+            conn = db_manager.get_db_connection()
+            cursor = conn.cursor()
+            if spec_id.isdigit():
+                cursor.execute("SELECT tg_id FROM specialists WHERE id = ?", (spec_id,))
+            else:
+                cursor.execute("SELECT tg_id FROM specialists WHERE tg_id = ?", (spec_id,))
+            row = cursor.fetchone()
+            conn.close()
+            
+            if not row:
+                raise HTTPException(status_code=404, detail="Спеціаліста не знайдено")
+                
+            if not row['tg_id'] or str(row['tg_id']).strip() != str(requester_tg_id).strip():
+                raise HTTPException(status_code=403, detail="Немає прав для видалення цього профілю")
+
+        # 3. Виконуємо анонімізацію
+        success, message = db_manager.anonymize_specialist(spec_id)
+        if not success:
+            raise HTTPException(status_code=500, detail=message)
+            
+        return {"status": "success", "message": "Профіль успішно видалено (анонімізовано)"}
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 if __name__ == "__main__":
     import uvicorn
