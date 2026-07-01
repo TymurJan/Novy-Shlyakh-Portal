@@ -371,6 +371,14 @@ body.is-tg-app .hero {
                 <div>
                     <h4 style="color: var(--soft-white); font-size: 18px; margin-bottom: 10px;">Контакти</h4>
                     <p>Тел: +38 (063) 656-89-99</p>
+                    <p style="margin-top: 6px;">
+                        <a href="#" onclick="toggleSupportWidget(); return false;"
+                           style="color: #fc8181; text-decoration: none; font-size: 14px;"
+                           onmouseover="this.style.textDecoration='underline'"
+                           onmouseout="this.style.textDecoration='none'">
+                            🆘 Техпідтримка
+                        </a>
+                    </p>
                 </div>
             </div>
             <p style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">&copy; 2026 Новий Шлях | Всі права захищені. Проєкт ГО «Талан ЮА»</p>
@@ -726,21 +734,9 @@ body.is-tg-app .hero {
     <!-- СИСТЕМА ТЕХНІЧНОЇ ПІДТРИМКИ                                -->
     <!-- ═══════════════════════════════════════════════════════════ -->
 
-    <!-- Плаваюча кнопка підтримки (правий нижній кут) -->
-    <button id="supportFab" onclick="toggleSupportWidget()" title="Техпідтримка" aria-label="Відкрити техпідтримку" style="
-        position: fixed; bottom: 90px; right: 22px; z-index: 9998;
-        width: 52px; height: 52px; border-radius: 50%;
-        background: linear-gradient(135deg, #e53e3e, #c53030);
-        border: none; cursor: pointer; box-shadow: 0 4px 16px rgba(229,62,62,0.4);
-        display: flex; align-items: center; justify-content: center;
-        font-size: 22px; transition: transform 0.2s, box-shadow 0.2s;
-    " onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
-        🆘
-    </button>
-
-    <!-- Головне вікно чат-віджету -->
+    <!-- Чат-віджет Техпідтримки -->
     <div id="supportWidget" style="
-        display: none; position: fixed; bottom: 155px; right: 22px; z-index: 9997;
+        display: none; position: fixed; bottom: 40px; right: 22px; z-index: 9997;
         width: 340px; max-height: 520px;
         background: #1a1a2e; border-radius: 16px;
         box-shadow: 0 8px 40px rgba(0,0,0,0.5);
@@ -807,39 +803,6 @@ body.is-tg-app .hero {
         </div>
     </div>
 
-    <!-- Секція техпідтримки у «футері» сторінки -->
-    <div style="
-        background: rgba(229,62,62,0.05); border-top: 1px solid rgba(229,62,62,0.15);
-        padding: 24px 20px; text-align: center; margin-top: 40px;
-    ">
-        <p style="color:#718096; font-size:13px; margin:0 0 12px;">
-            Маєте технічні питання щодо роботи порталу?
-        </p>
-        <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
-            <button onclick="openSupportWithOption('chat')" style="
-                background: rgba(229,62,62,0.1); border: 1px solid rgba(229,62,62,0.3);
-                color: #fc8181; border-radius:8px; padding:8px 16px; font-size:13px; cursor:pointer;
-                transition: background 0.2s;">
-                💬 Чат підтримки
-            </button>
-            <a href="https://t.me/Veteran_NovyShlyakh_Bot" target="_blank" style="
-                background: rgba(229,62,62,0.1); border: 1px solid rgba(229,62,62,0.3);
-                color: #fc8181; border-radius:8px; padding:8px 16px; font-size:13px;
-                text-decoration:none; display:inline-flex; align-items:center; gap:6px;
-                transition: background 0.2s;">
-                ✈️ Telegram-бот
-            </a>
-            <a href="mailto:ngo.talan.ua@gmail.com" style="
-                background: rgba(229,62,62,0.1); border: 1px solid rgba(229,62,62,0.3);
-                color: #fc8181; border-radius:8px; padding:8px 16px; font-size:13px;
-                text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
-                ✉️ Email
-            </a>
-        </div>
-        <p style="color:#4a5568; font-size:11px; margin:12px 0 0;">
-            © 2026 ГО «Талан ЮА» · Проєкт «Новий Шлях» · Всі права захищено
-        </p>
-    </div>
 
     <script>
     // ─── ГЛОБАЛЬНИЙ СТАН ────────────────────────────────────────────────────────
