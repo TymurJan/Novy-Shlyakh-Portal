@@ -8,10 +8,20 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
 
+import uuid
+
 try:
     from text_filters import validate_text
 except ImportError:
     from backend.text_filters import validate_text
+
+try:
+    from support_ai import process_support_message
+except ImportError:
+    try:
+        from backend.support_ai import process_support_message
+    except ImportError:
+        process_support_message = None
 
 # Імітація майбутнього сервера для AI-Чату
 # Цей файл є заготовкою (boilerplate) для розгортання RAG-системи.
@@ -703,6 +713,72 @@ async def delete_specialist_endpoint(spec_id: str, requester_tg_id: Optional[str
         raise he
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# ─── Підтримка: Моделі запиту ─────────────────────────────────────────────────
+class SupportChatRequest(BaseModel):
+    message: str
+    session_id: Optional[str] = None
+    page_url: Optional[str] = "невідома сторінка"
+    platform: Optional[str] = "portal"   # "portal" або "bot"
+    user_id: Optional[str] = None         # Telegram ID або email
+    device: Optional[str] = None
+    browser: Optional[str] = None
+
+class SupportChatResponse(BaseModel):
+    reply: str
+    is_system_bug: bool = False
+    is_escalated: bool = False
+    session_id: str
+    report_id: Optional[str] = None
+
+
+@app.post("/api/support/chat", response_model=SupportChatResponse)
+async def support_chat_endpoint(req: SupportChatRequest):
+    """
+    Ендпоінт для спілкування з ШІ-асистентом підтримки.
+    Приймає повідомлення + метадані сторінки (URL, пристрій, браузер).
+    При виявленні системного бага — автоматично генерує JSON-звіт
+    та надсилає Telegram-сповіщення адміністратору.
+    """
+    # Генеруємо session_id якщо не переданий
+    session_id = req.session_id or str(uuid.uuid4())
+
+    # Валідація тексту (захист від спаму/ненормативної лексики)
+    try:
+        validate_text(req.message)
+    except ValueError as ve:
+        return SupportChatResponse(
+            reply=f"⚠️ Некоректне повідомлення: {ve}. Будь ласка, сформулюйте запит інакше.",
+            session_id=session_id,
+        )
+
+    if process_support_message is None:
+        # Якщо support_ai недоступний — базова відповідь
+        return SupportChatResponse(
+            reply="Дякую за звернення. Наш асистент тимчасово недоступний. Напишіть на ngo.talan.ua@gmail.com.",
+            session_id=session_id,
+        )
+
+    try:
+        result = await process_support_message(
+            user_message=req.message,
+            session_id=session_id,
+            page_url=req.page_url or "невідома сторінка",
+            platform=req.platform or "portal",
+            user_id=req.user_id,
+            device=req.device,
+            browser=req.browser,
+        )
+        return SupportChatResponse(
+            reply=result["reply"],
+            is_system_bug=result["is_system_bug"],
+            is_escalated=result["is_escalated"],
+            session_id=result["session_id"],
+            report_id=result.get("report_id"),
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Помилка асистента підтримки: {str(e)}")
 
 
 if __name__ == "__main__":

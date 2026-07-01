@@ -722,5 +722,253 @@ body.is-tg-app .hero {
         }
     </script>
 
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- СИСТЕМА ТЕХНІЧНОЇ ПІДТРИМКИ                                -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+
+    <!-- Плаваюча кнопка підтримки (правий нижній кут) -->
+    <button id="supportFab" onclick="toggleSupportWidget()" title="Техпідтримка" aria-label="Відкрити техпідтримку" style="
+        position: fixed; bottom: 90px; right: 22px; z-index: 9998;
+        width: 52px; height: 52px; border-radius: 50%;
+        background: linear-gradient(135deg, #e53e3e, #c53030);
+        border: none; cursor: pointer; box-shadow: 0 4px 16px rgba(229,62,62,0.4);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 22px; transition: transform 0.2s, box-shadow 0.2s;
+    " onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+        🆘
+    </button>
+
+    <!-- Головне вікно чат-віджету -->
+    <div id="supportWidget" style="
+        display: none; position: fixed; bottom: 155px; right: 22px; z-index: 9997;
+        width: 340px; max-height: 520px;
+        background: #1a1a2e; border-radius: 16px;
+        box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+        border: 1px solid rgba(255,255,255,0.1);
+        font-family: 'Inter', sans-serif; overflow: hidden;
+        animation: slideUp 0.25s ease;
+    ">
+        <style>
+            @keyframes slideUp {
+                from { opacity: 0; transform: translateY(20px); }
+                to   { opacity: 1; transform: translateY(0); }
+            }
+            .sw-header { background: linear-gradient(135deg,#e53e3e,#c53030); padding: 14px 16px; display:flex; align-items:center; justify-content:space-between; }
+            .sw-header h4 { margin:0; color:#fff; font-size:14px; font-weight:600; }
+            .sw-close { background:none; border:none; color:#fff; font-size:18px; cursor:pointer; padding:0 4px; opacity:0.8; }
+            .sw-close:hover { opacity:1; }
+            .sw-body { padding: 14px; max-height: 360px; overflow-y: auto; display:flex; flex-direction:column; gap: 10px; }
+            .sw-msg { max-width: 85%; padding: 9px 12px; border-radius: 12px; font-size: 13px; line-height: 1.5; word-break: break-word; }
+            .sw-msg.bot { background: rgba(255,255,255,0.08); color:#e2e8f0; border-bottom-left-radius:3px; align-self:flex-start; }
+            .sw-msg.user { background: linear-gradient(135deg,#e53e3e,#c53030); color:#fff; border-bottom-right-radius:3px; align-self:flex-end; }
+            .sw-msg.system { background: rgba(229,62,62,0.15); border: 1px solid rgba(229,62,62,0.3); color:#fc8181; border-radius:8px; align-self:center; text-align:center; font-size:12px; }
+            .sw-typing { color: #718096; font-size: 12px; padding: 4px 14px; display:none; }
+            .sw-footer { border-top: 1px solid rgba(255,255,255,0.08); padding: 10px 12px; display:flex; gap:8px; }
+            .sw-input { flex:1; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 8px 10px; color:#e2e8f0; font-size:13px; outline:none; resize:none; }
+            .sw-input:focus { border-color: rgba(229,62,62,0.5); }
+            .sw-send { background: #e53e3e; border:none; border-radius:8px; padding:8px 12px; color:#fff; cursor:pointer; font-size:16px; transition: background 0.2s; }
+            .sw-send:hover { background: #c53030; }
+            .sw-options { display:flex; flex-direction:column; gap:8px; padding: 14px; }
+            .sw-opt-btn { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 11px 14px; color:#e2e8f0; font-size:13px; cursor:pointer; text-align:left; transition: background 0.2s; display:flex; align-items:center; gap:10px; }
+            .sw-opt-btn:hover { background: rgba(229,62,62,0.15); border-color: rgba(229,62,62,0.4); }
+        </style>
+
+        <!-- Шапка -->
+        <div class="sw-header">
+            <h4>🆘 Техпідтримка — Новий Шлях</h4>
+            <button class="sw-close" onclick="toggleSupportWidget()">✕</button>
+        </div>
+
+        <!-- Екран вибору варіанту (показується першим) -->
+        <div id="sw-options-screen" class="sw-options">
+            <div style="color:#a0aec0; font-size:12px; text-align:center; padding-bottom:4px;">Оберіть зручний варіант:</div>
+            <button class="sw-opt-btn" onclick="startSupportChat()">
+                <span>💬</span>
+                <div><div style="font-weight:600;">Чат з ШІ-асистентом</div><div style="font-size:11px;opacity:0.6;">Відповідь за 30 сек.</div></div>
+            </button>
+            <button class="sw-opt-btn" onclick="openTelegramSupport()">
+                <span>✈️</span>
+                <div><div style="font-weight:600;">Telegram-бот «Новий Шлях»</div><div style="font-size:11px;opacity:0.6;">Живий чат у Telegram</div></div>
+            </button>
+            <button class="sw-opt-btn" onclick="openEmailSupport()">
+                <span>✉️</span>
+                <div><div style="font-weight:600;">Email</div><div style="font-size:11px;opacity:0.6;">ngo.talan.ua@gmail.com</div></div>
+            </button>
+        </div>
+
+        <!-- Екран чату з ШІ (прихований спочатку) -->
+        <div id="sw-chat-screen" style="display:none; flex-direction:column;">
+            <div id="sw-messages" class="sw-body"></div>
+            <div class="sw-typing" id="sw-typing">🤖 Друкує...</div>
+            <div class="sw-footer">
+                <textarea id="sw-input" class="sw-input" rows="1" placeholder="Опишіть проблему..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendSupportMessage();}"></textarea>
+                <button class="sw-send" onclick="sendSupportMessage()">➤</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Секція техпідтримки у «футері» сторінки -->
+    <div style="
+        background: rgba(229,62,62,0.05); border-top: 1px solid rgba(229,62,62,0.15);
+        padding: 24px 20px; text-align: center; margin-top: 40px;
+    ">
+        <p style="color:#718096; font-size:13px; margin:0 0 12px;">
+            Маєте технічні питання щодо роботи порталу?
+        </p>
+        <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
+            <button onclick="openSupportWithOption('chat')" style="
+                background: rgba(229,62,62,0.1); border: 1px solid rgba(229,62,62,0.3);
+                color: #fc8181; border-radius:8px; padding:8px 16px; font-size:13px; cursor:pointer;
+                transition: background 0.2s;">
+                💬 Чат підтримки
+            </button>
+            <a href="https://t.me/Veteran_NovyShlyakh_Bot" target="_blank" style="
+                background: rgba(229,62,62,0.1); border: 1px solid rgba(229,62,62,0.3);
+                color: #fc8181; border-radius:8px; padding:8px 16px; font-size:13px;
+                text-decoration:none; display:inline-flex; align-items:center; gap:6px;
+                transition: background 0.2s;">
+                ✈️ Telegram-бот
+            </a>
+            <a href="mailto:ngo.talan.ua@gmail.com" style="
+                background: rgba(229,62,62,0.1); border: 1px solid rgba(229,62,62,0.3);
+                color: #fc8181; border-radius:8px; padding:8px 16px; font-size:13px;
+                text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+                ✉️ Email
+            </a>
+        </div>
+        <p style="color:#4a5568; font-size:11px; margin:12px 0 0;">
+            © 2026 ГО «Талан ЮА» · Проєкт «Новий Шлях» · Всі права захищено
+        </p>
+    </div>
+
+    <script>
+    // ─── ГЛОБАЛЬНИЙ СТАН ────────────────────────────────────────────────────────
+    let supportSessionId = null;
+    let supportWidgetOpen = false;
+    const SUPPORT_API = '/api/support/chat';
+
+    // ─── ВІДКРИТИ / ЗАКРИТИ ВІДЖЕТ ──────────────────────────────────────────────
+    function toggleSupportWidget() {
+        supportWidgetOpen = !supportWidgetOpen;
+        const widget = document.getElementById('supportWidget');
+        widget.style.display = supportWidgetOpen ? 'block' : 'none';
+    }
+
+    function openSupportWithOption(option) {
+        supportWidgetOpen = true;
+        document.getElementById('supportWidget').style.display = 'block';
+        if (option === 'chat') startSupportChat();
+    }
+
+    // ─── ВИБІР ВАРІАНТІВ ─────────────────────────────────────────────────────────
+    function openTelegramSupport() {
+        window.open('https://t.me/Veteran_NovyShlyakh_Bot', '_blank');
+    }
+
+    function openEmailSupport() {
+        const subject = encodeURIComponent('Техпідтримка — Портал «Новий Шлях»');
+        const body = encodeURIComponent('Сторінка: ' + window.location.href + '\n\nОпис проблеми:\n');
+        window.location.href = 'mailto:ngo.talan.ua@gmail.com?subject=' + subject + '&body=' + body;
+    }
+
+    // ─── ЗАПУСК ЧАТУ ─────────────────────────────────────────────────────────────
+    function startSupportChat() {
+        document.getElementById('sw-options-screen').style.display = 'none';
+        const chatScreen = document.getElementById('sw-chat-screen');
+        chatScreen.style.display = 'flex';
+
+        // Генеруємо ID сесії
+        supportSessionId = 'sess_' + Math.random().toString(36).substr(2, 9);
+
+        // Перше привітання
+        addSupportMessage('bot',
+            '👋 Вітаю! Я ШІ-асистент підтримки порталу «Новий Шлях».\n' +
+            'Опишіть вашу проблему, і я постараюсь допомогти. ' +
+            'Якщо виявлю системну помилку — автоматично передам розробникам.\n\n' +
+            '_Щоб повернутись до вибору варіанту — оновіть сторінку._'
+        );
+        document.getElementById('sw-input').focus();
+    }
+
+    // ─── НАДСИЛАННЯ ПОВІДОМЛЕННЯ ─────────────────────────────────────────────────
+    async function sendSupportMessage() {
+        const input = document.getElementById('sw-input');
+        const text = input.value.trim();
+        if (!text) return;
+
+        addSupportMessage('user', text);
+        input.value = '';
+
+        // Збираємо метадані
+        const meta = {
+            message: text,
+            session_id: supportSessionId,
+            page_url: window.location.href,
+            platform: 'portal',
+            device: /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop',
+            browser: getBrowserName(),
+        };
+
+        // Показуємо "друкує..."
+        document.getElementById('sw-typing').style.display = 'block';
+        scrollSupportChat();
+
+        try {
+            const resp = await fetch(SUPPORT_API, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(meta),
+            });
+
+            document.getElementById('sw-typing').style.display = 'none';
+
+            if (!resp.ok) throw new Error('HTTP ' + resp.status);
+
+            const data = await resp.json();
+            addSupportMessage('bot', data.reply);
+
+            // Якщо баг зафіксовано — показуємо системне повідомлення
+            if (data.is_escalated && data.report_id) {
+                addSupportMessage('system',
+                    '🔴 Помилку зафіксовано та передано розробникам.\n' +
+                    'ID звіту: ' + data.report_id
+                );
+            }
+
+        } catch (err) {
+            document.getElementById('sw-typing').style.display = 'none';
+            addSupportMessage('bot',
+                '⚠️ Без зв\'язку з асистентом. ' +
+                'Напишіть нам на ngo.talan.ua@gmail.com або в Telegram-бот.'
+            );
+        }
+        scrollSupportChat();
+    }
+
+    // ─── ДОПОМІЖНІ ФУНКЦІЇ ───────────────────────────────────────────────────────
+    function addSupportMessage(type, text) {
+        const container = document.getElementById('sw-messages');
+        const div = document.createElement('div');
+        div.className = 'sw-msg ' + type;
+        div.innerHTML = text.replace(/\n/g, '<br>').replace(/\*(.*?)\*/g, '<b>$1</b>').replace(/_(.*?)_/g, '<i>$1</i>');
+        container.appendChild(div);
+        scrollSupportChat();
+    }
+
+    function scrollSupportChat() {
+        const box = document.getElementById('sw-messages');
+        if (box) box.scrollTop = box.scrollHeight;
+    }
+
+    function getBrowserName() {
+        const ua = navigator.userAgent;
+        if (ua.includes('Chrome') && !ua.includes('Edg')) return 'Chrome';
+        if (ua.includes('Safari') && !ua.includes('Chrome')) return 'Safari';
+        if (ua.includes('Firefox')) return 'Firefox';
+        if (ua.includes('Edg')) return 'Edge';
+        return 'Інший';
+    }
+    </script>
+
 </body>
 </html>

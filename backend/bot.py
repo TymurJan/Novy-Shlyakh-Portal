@@ -109,6 +109,12 @@ class Financial(StatesGroup):
     reporting_amount = State()
     uploading_receipt = State()
 
+# СТАНИ ДЛЯ ТЕХПІДТРИМКИ
+class SupportDialog(StatesGroup):
+    choosing_option = State()    # вибір між чатом та email
+    in_dialogue = State()        # активний діалог з ШІ
+    waiting_device_info = State() # очікуємо дані пристрою/браузер
+
 # --- ДОПОМІЖНІ ФУНКЦІЇ ---
 
 db_lock = asyncio.Lock()
@@ -262,7 +268,9 @@ async def cmd_start(message: types.Message, state: FSMContext = None):
     
     if str(message.from_user.id).strip() == str(ADMIN_ID).strip():
         kb.append([KeyboardButton(text="🛡️ Адмін-панель")])
-        
+
+    kb.append([KeyboardButton(text="🆘 Техпідтримка")])
+
     reply_markup = ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
     
     welcome_text = "Вітаємо у координаційному центрі **'Новий Шлях'**!\n\nЦей бот допоможе вам знайти фахівця або долучитися до нашої мережі підтримки."
@@ -2551,6 +2559,172 @@ async def catch_all_handler(message: types.Message, state: FSMContext):
             "Вітаємо! Оберіть, будь ласка, хто ви:",
             reply_markup=reply_markup
         )
+
+
+# ══════════════════════════════════════════
+# ТЕХПІДТРИМКА (шІ-асистент)
+# ══════════════════════════════════════════
+@dp.message(F.text == "🆘 Техпідтримка")
+async def support_entry(message: types.Message, state: FSMContext):
+    """Перша точка входу в систему підтримки."""
+    await state.set_state(SupportDialog.choosing_option)
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="💬 Почати діалог (ШІ-асистент)", callback_data="support_chat")],
+        [InlineKeyboardButton(text="✉️ Написати на Email", callback_data="support_email")],
+        [InlineKeyboardButton(text="❌ Скасувати", callback_data="support_cancel")],
+    ])
+    await message.answer(
+        "🆘 *Технічна Підтримка — Портал «Новий Шлях»*\n\n"
+        "Оберіть зручний варіант:\n\n"
+        "💬 *Діалог з ШІ-асистентом* — відповість зазвичай протягом 30 сек.\n"
+        "✉️ *Email* — ngo.talan.ua@gmail.com (до 2 роб. днів)",
+        reply_markup=kb,
+        parse_mode="Markdown"
+    )
+
+
+@dp.callback_query(F.data == "support_chat")
+async def support_start_chat(callback: types.CallbackQuery, state: FSMContext):
+    """Запускаємо діалог з ШІ."""
+    await callback.message.edit_text(
+        "🤖 *ШІ-асистент підтримки підключено.*\n\n"
+        "Опишіть вашу проблему текстом. Я допоможу або передам звіт розробникам.\n"
+        "_Щоб завершити діалог — напишіть /start_",
+        parse_mode="Markdown"
+    )
+    # Зберігаємо сесію
+    import uuid
+    session_id = str(uuid.uuid4())
+    await state.set_state(SupportDialog.in_dialogue)
+    await state.update_data(
+        support_session_id=session_id,
+        support_platform="bot",
+        support_user_id=str(callback.from_user.id),
+        support_bug_reported=False,
+    )
+    await callback.answer()
+
+
+@dp.callback_query(F.data == "support_email")
+async def support_show_email(callback: types.CallbackQuery, state: FSMContext):
+    await state.clear()
+    await callback.message.edit_text(
+        "✉️ *Офіційна Email підтримки:*\n\n"
+        "`ngo.talan.ua@gmail.com`\n\n"
+        "У листі вкажіть:\n"
+        "• Опис проблеми\n"
+        "• Скріншот помилки (якщо є)\n"
+        "• Ваш Telegram ID: `{}`\n\n"
+        "⤵️ Очікуйте відповідь до 2 робочих днів.".format(callback.from_user.id),
+        parse_mode="Markdown"
+    )
+    await callback.answer()
+
+
+@dp.callback_query(F.data == "support_cancel")
+async def support_cancel(callback: types.CallbackQuery, state: FSMContext):
+    await state.clear()
+    await callback.message.edit_text("❌ Підтримку скасовано. Поверніться до меню /start")
+    await callback.answer()
+
+
+@dp.message(SupportDialog.in_dialogue)
+async def support_handle_message(message: types.Message, state: FSMContext):
+    """Обробка повідомлень у діалозі з ШІ-асистентом."""
+    data = await state.get_data()
+    session_id = data.get("support_session_id", "unknown")
+    user_id = str(message.from_user.id)
+
+    # Показуємо "..."
+    typing_msg = await message.answer("🤖 Друкує...")
+
+    try:
+        import aiohttp
+        import json as _json
+
+        # Звертаємось до локального API
+        backend_url = os.getenv("BACKEND_URL", "http://localhost:8000")
+        payload = {
+            "message": message.text,
+            "session_id": session_id,
+            "platform": "bot",
+            "user_id": user_id,
+            "page_url": "Телеграм-бот «Новий Шлях»",
+        }
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                f"{backend_url}/api/support/chat",
+                json=payload,
+                timeout=aiohttp.ClientTimeout(total=30)
+            ) as resp:
+                result = await resp.json()
+
+        reply = result.get("reply", "Вибачте, відповідь не отримана. Спробуйте ще раз.")
+        is_bug = result.get("is_system_bug", False)
+        is_escalated = result.get("is_escalated", False)
+        report_id = result.get("report_id")
+
+        await typing_msg.delete()
+        await message.answer(reply, parse_mode="Markdown")
+
+        # Якщо баг зафіксовано і ще не запитували дані пристрою
+        if is_bug and not data.get("support_bug_reported"):
+            await state.update_data(support_bug_reported=True)
+            await state.set_state(SupportDialog.waiting_device_info)
+            await message.answer(
+                "📱 Уточніть, будь ласка: який *пристрій* (телефон/планшет/комп'ютер) \n"
+                "та який *браузер* ви використовуєте? (напр., _iPhone, Chrome_)",
+                parse_mode="Markdown"
+            )
+            if report_id:
+                await message.answer(f"📌 ID звіту: `{report_id}`", parse_mode="Markdown")
+
+    except Exception as e:
+        logging.error(f"Support bot handler error: {e}")
+        await typing_msg.delete()
+        await message.answer(
+            "❗️ Без з'єднання з асистентом. \n"
+            "Напишіть на ngo.talan.ua@gmail.com"
+        )
+
+
+@dp.message(SupportDialog.waiting_device_info)
+async def support_collect_device(message: types.Message, state: FSMContext):
+    """Отримуємо дані пристрою/браузер і додаємо до звіту."""
+    data = await state.get_data()
+    session_id = data.get("support_session_id", "unknown")
+    user_id = str(message.from_user.id)
+    device_info = message.text
+
+    # Оновлюємо звіт з даними пристрою
+    try:
+        import aiohttp
+        backend_url = os.getenv("BACKEND_URL", "http://localhost:8000")
+        payload = {
+            "message": f"[DEVICE INFO] {device_info}",
+            "session_id": session_id,
+            "platform": "bot",
+            "user_id": user_id,
+            "device": device_info,
+            "browser": device_info,
+        }
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                f"{backend_url}/api/support/chat",
+                json=payload,
+                timeout=aiohttp.ClientTimeout(total=15)
+            ) as resp:
+                pass
+    except Exception:
+        pass
+
+    await state.set_state(SupportDialog.in_dialogue)
+    await message.answer(
+        "✅ Дякую! Інформацію додано до технічного звіту.\n"
+        "Проблему вирішатимуться якнайшвидше.\n\n"
+        "Продовжуйте писати, якщо є інші запитання, \n"
+        "або /start для повернення до меню."
+    )
 
 
 # ══════════════════════════════════════════
