@@ -392,7 +392,8 @@ async def veteran_menu(message: types.Message, state: FSMContext = None):
         nav_kb.append([KeyboardButton(text="🎖️ Реєстрація ветерана (знижка 10%)")])
     elif is_veteran:
         nav_kb.append([KeyboardButton(text="🎖️ Кабінет Ветерана")])
-        
+
+    nav_kb.append([KeyboardButton(text="📰 Новини та Оголошення")])
     nav_kb.append([KeyboardButton(text="⬅️ Повернутися до вибору ролі")])
     nav_markup = ReplyKeyboardMarkup(keyboard=nav_kb, resize_keyboard=True)
     
@@ -405,6 +406,36 @@ async def veteran_menu(message: types.Message, state: FSMContext = None):
     if state:
         await state.update_data(last_menu_id=msg.message_id)
     await message.answer("Ви можете повернутися або перейти на портал кнопками внизу 👇", reply_markup=nav_markup)
+
+@dp.message(F.text == "📰 Новини та Оголошення")
+async def show_bot_news(message: types.Message):
+    import time
+    ts = int(time.time())
+    base = PORTAL_URL.rstrip("/")
+    if base.endswith("index.html"):
+        base = base[:-len("index.html")].rstrip("/")
+
+    text = (
+        "📰 **Актуальні новини та оголошення «Нового Шляху»**\n\n"
+        "1️⃣ **🛡️ Портал розпочав роботу** (29 лип)\n"
+        "Координаційний центр відкрив онлайн-портал підтримки для ветеранів Черкащини.\n\n"
+        "2️⃣ **⚖️ Оновлення процедури УБД** (27 лип)\n"
+        "Міністерство у справах ветеранів скоротило строк розгляду з 30 до 15 робочих днів.\n\n"
+        "3️⃣ **🏆 Гранти «єРобота 2026»** (25 лип)\n"
+        "Відкрито прийом заявок на безповоротні гранти до 250 000 грн на власну справу.\n\n"
+        "4️⃣ **🧠 Безкоштовні психологічні сесії** (22 лип)\n"
+        "Три нові психологи зі спеціалізацією ПТСР долучились до команди.\n\n"
+        "5️⃣ **📅 Юридичні консультації у ЦНАП Черкас** (20 лип)\n"
+        "Щотижня пн, ср, пт з 10:00 до 13:00 — безкоштовно та без запису.\n"
+    )
+
+    kb = [
+        [InlineKeyboardButton(text="⚖️ Записатись до юриста", callback_data="find_legal")],
+        [InlineKeyboardButton(text="🧠 Записатись до психолога", callback_data="find_psychology")],
+        [InlineKeyboardButton(text="🌐 Читати всі новини на Порталі", web_app=WebAppInfo(url=f"{base}/news.html?v={ts}"))]
+    ]
+
+    await message.answer(text, reply_markup=InlineKeyboardMarkup(inline_keyboard=kb), parse_mode="Markdown")
 
 @dp.message(F.text == "⬅️ Повернутися до вибору ролі")
 async def back_to_main_msg(message: types.Message, state: FSMContext):
