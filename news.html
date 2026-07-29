@@ -8,17 +8,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Outfit:wght@300;400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=45">
-    <link rel="stylesheet" href="accessibility.css?v=45">
+    <link rel="stylesheet" href="style.css?v=46">
+    <link rel="stylesheet" href="accessibility.css?v=46">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script>
-        (function() {
-            var tg = window.Telegram && window.Telegram.WebApp;
-            if (tg) { tg.ready(); tg.expand(); }
-        })();
-    </script>
+    <script>(function(){var t=window.Telegram&&window.Telegram.WebApp;if(t){t.ready();t.expand();}}());</script>
     <style>
-        /* ===== ЗАГАЛЬНІ СТИЛІ СТОРІНКИ ===== */
+        /* ===== ГЕРОЙ ===== */
         .news-hero {
             padding: 90px 0 50px;
             background: linear-gradient(180deg, #0d0f0d 0%, #151715 100%);
@@ -26,28 +21,23 @@
         }
         .news-hero h1 {
             font-family: 'Outfit', sans-serif;
-            font-size: clamp(28px, 5vw, 46px);
+            font-size: clamp(26px, 5vw, 44px);
             font-weight: 700;
             color: var(--soft-white);
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
-        .news-hero p {
-            color: #aaa;
-            font-size: 16px;
-            max-width: 620px;
-            line-height: 1.7;
-        }
+        .news-hero p { color: #aaa; font-size: 15px; max-width: 580px; line-height: 1.7; }
 
         /* ===== ФІЛЬТРИ ===== */
-        .news-section { padding: 60px 0 80px; background: #151715; }
+        .news-section { padding: 50px 0 80px; background: #151715; min-height: 60vh; }
         .news-filter-bar {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             flex-wrap: wrap;
-            margin-bottom: 40px;
+            margin-bottom: 36px;
         }
         .news-filter-btn {
-            padding: 8px 20px;
+            padding: 7px 18px;
             border-radius: 50px;
             border: 1px solid rgba(255,255,255,0.12);
             background: transparent;
@@ -64,221 +54,197 @@
             background: rgba(46,139,87,0.08);
         }
 
-        /* ===== СІТКА КАРТОК ===== */
-        .news-cards {
+        /* ===== ВЕРТИКАЛЬНИЙ СПИСОК НОВИН ===== */
+        .news-list { display: flex; flex-direction: column; gap: 0; }
+
+        /* --- Один елемент списку --- */
+        .news-item {
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+            scroll-margin-top: 90px;
+        }
+        .news-item:first-child { border-top: 1px solid rgba(255,255,255,0.07); }
+
+        /* --- Обкладинка-заголовок (клікабельна частина) --- */
+        .news-item-header {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr));
-            gap: 28px;
-        }
-        .news-card {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            overflow: hidden;
-            transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+            grid-template-columns: 220px 1fr;
+            min-height: 160px;
             cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            scroll-margin-top: 100px;
+            transition: background 0.2s;
         }
-        .news-card:hover {
-            border-color: var(--primary-green);
-            transform: translateY(-4px);
-            box-shadow: 0 12px 40px rgba(46,139,87,0.12);
+        .news-item-header:hover { background: rgba(255,255,255,0.02); }
+        @media (max-width: 600px) {
+            .news-item-header { grid-template-columns: 1fr; }
         }
-        .news-card.highlighted {
-            border-color: var(--primary-green);
-            box-shadow: 0 0 0 2px rgba(46,139,87,0.3);
+
+        /* --- Обкладинка (ліворуч) --- */
+        .news-cover {
+            position: relative;
+            overflow: hidden;
+            min-height: 160px;
         }
-        .news-card-icon {
-            width: 100%;
-            height: 160px;
+        .news-cover-bg {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            transition: transform 0.4s ease;
+        }
+        .news-item-header:hover .news-cover-bg { transform: scale(1.04); }
+        .news-cover-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent 60%, #151715 100%);
+        }
+        .news-cover-emoji {
+            position: absolute;
+            inset: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 56px;
-            background: linear-gradient(135deg, #1a2a1a 0%, #2d4f3a 100%);
+            font-size: 52px;
+            opacity: 0.85;
         }
-        .news-card-body {
-            padding: 20px 22px;
-            flex: 1;
+        @media (max-width: 600px) {
+            .news-cover { min-height: 130px; }
+            .news-cover-overlay { background: linear-gradient(180deg, transparent 50%, #151715 100%); }
+        }
+
+        /* --- Текстова частина (праворуч) --- */
+        .news-item-content {
+            padding: 22px 28px;
             display: flex;
             flex-direction: column;
+            justify-content: center;
             gap: 10px;
         }
-        .news-card-meta {
+        .news-item-meta {
             display: flex;
             align-items: center;
             gap: 10px;
             flex-wrap: wrap;
         }
         .news-tag {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.6px;
             padding: 3px 10px;
             border-radius: 50px;
             background: rgba(46,139,87,0.12);
             color: var(--primary-green);
             border: 1px solid rgba(46,139,87,0.2);
         }
-        .news-tag.law   { background: rgba(59,130,246,0.1); color: #60a5fa; border-color: rgba(59,130,246,0.2); }
-        .news-tag.event { background: rgba(245,158,11,0.1); color: #fbbf24; border-color: rgba(245,158,11,0.2); }
-        .news-tag.grant { background: rgba(139,92,246,0.1); color: #a78bfa; border-color: rgba(139,92,246,0.2); }
-        .news-tag.psych { background: rgba(236,72,153,0.1); color: #f472b6; border-color: rgba(236,72,153,0.2); }
-        .news-date { font-size: 12px; color: #555; margin-left: auto; }
-        .news-card-title {
+        .news-tag.law   { background: rgba(59,130,246,0.1);  color: #60a5fa;  border-color: rgba(59,130,246,0.2); }
+        .news-tag.event { background: rgba(245,158,11,0.1); color: #fbbf24;  border-color: rgba(245,158,11,0.2); }
+        .news-tag.grant { background: rgba(139,92,246,0.1); color: #a78bfa;  border-color: rgba(139,92,246,0.2); }
+        .news-tag.psych { background: rgba(236,72,153,0.1); color: #f472b6;  border-color: rgba(236,72,153,0.2); }
+        .news-item-date { font-size: 12px; color: #555; }
+        .news-item-title {
             font-family: 'Outfit', sans-serif;
-            font-size: 17px;
+            font-size: clamp(15px, 2.2vw, 19px);
             font-weight: 600;
             color: var(--soft-white);
-            line-height: 1.45;
+            line-height: 1.4;
         }
-        .news-card-excerpt {
-            font-size: 13px;
-            color: #aaa;
-            line-height: 1.65;
-            flex: 1;
-        }
-        .news-card-footer {
-            padding: 14px 22px;
-            border-top: 1px solid var(--glass-border);
-            font-size: 12px;
-            color: var(--primary-green);
-            font-weight: 600;
-            display: flex;
+        .news-item-excerpt { font-size: 13px; color: #888; line-height: 1.65; }
+        .news-item-toggle {
+            display: inline-flex;
             align-items: center;
             gap: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--primary-green);
+            margin-top: 4px;
+            user-select: none;
         }
+        .news-item-toggle .arrow {
+            display: inline-block;
+            transition: transform 0.3s ease;
+            font-style: normal;
+        }
+        .news-item.open .news-item-toggle .arrow { transform: rotate(180deg); }
 
-        /* ===== МОДАЛЬНЕ ВІКНО ===== */
-        .news-modal-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.75);
-            backdrop-filter: blur(6px);
-            z-index: 9000;
-            align-items: flex-start;
-            justify-content: center;
-            padding: 30px 16px;
-            overflow-y: auto;
+        /* --- Розгорнутий контент (акордеон) --- */
+        .news-item-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.45s ease;
         }
-        .news-modal-overlay.open { display: flex; }
-        .news-modal {
-            background: #1a1e1a;
-            border: 1px solid rgba(46,139,87,0.3);
-            border-radius: 24px;
-            width: 100%;
-            max-width: 720px;
-            margin: auto;
-            position: relative;
-            animation: modalIn 0.3s ease;
+        .news-item.open .news-item-body { max-height: 1200px; }
+        .news-item-body-inner {
+            padding: 0 28px 32px;
+            border-top: 1px solid rgba(46,139,87,0.15);
+            margin-top: 0;
         }
-        @keyframes modalIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-        .news-modal-header {
-            padding: 28px 32px 0;
-        }
-        .news-modal-tags {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-bottom: 16px;
-            align-items: center;
-        }
-        .news-modal-date { font-size: 12px; color: #555; margin-left: auto; }
-        .news-modal-title {
-            font-family: 'Outfit', sans-serif;
-            font-size: clamp(20px, 3vw, 28px);
-            font-weight: 700;
-            color: var(--soft-white);
-            line-height: 1.35;
-            margin-bottom: 8px;
-        }
-        .news-modal-lead {
-            color: #aaa;
+        .news-body-lead {
             font-size: 15px;
-            line-height: 1.7;
-            border-left: 3px solid var(--primary-green);
-            padding-left: 16px;
-            margin: 20px 0;
-        }
-        .news-modal-body {
-            padding: 0 32px 28px;
             color: #bbb;
-            font-size: 14px;
-            line-height: 1.8;
+            line-height: 1.75;
+            border-left: 3px solid var(--primary-green);
+            padding: 14px 18px;
+            margin: 24px 0 20px;
+            background: rgba(46,139,87,0.04);
+            border-radius: 0 8px 8px 0;
         }
-        .news-modal-body h4 {
-            color: var(--soft-white);
+        .news-body-text {
+            font-size: 14px;
+            color: #aaa;
+            line-height: 1.85;
+        }
+        .news-body-text h4 {
             font-family: 'Outfit', sans-serif;
+            color: var(--soft-white);
             font-size: 16px;
             font-weight: 600;
             margin: 22px 0 10px;
         }
-        .news-modal-body ul {
-            padding-left: 20px;
+        .news-body-text ul { padding-left: 20px; }
+        .news-body-text ul li { margin-bottom: 8px; }
+        .news-body-text .info-box {
+            margin-top: 18px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            border-left: 3px solid;
+            font-size: 13px;
         }
-        .news-modal-body ul li {
-            margin-bottom: 8px;
-        }
-        .news-modal-footer {
-            padding: 20px 32px;
-            border-top: 1px solid var(--glass-border);
+        .news-body-actions {
             display: flex;
             gap: 12px;
             align-items: center;
             flex-wrap: wrap;
+            margin-top: 24px;
+            padding-top: 18px;
+            border-top: 1px solid rgba(255,255,255,0.06);
         }
-        .news-modal-close {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
+        .btn-collapse {
+            background: transparent;
             border: 1px solid var(--glass-border);
-            background: rgba(255,255,255,0.05);
             color: #aaa;
-            font-size: 18px;
+            padding: 9px 20px;
+            border-radius: 50px;
+            font-size: 12px;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            font-family: 'Inter', sans-serif;
             transition: all 0.2s;
         }
-        .news-modal-close:hover { background: rgba(255,255,255,0.1); color: white; }
+        .btn-collapse:hover { border-color: #aaa; color: white; }
 
         /* ===== ПІДПИСКА ===== */
-        .news-subscribe {
-            background: var(--glass-bg);
-            border-top: 1px solid var(--glass-border);
-            padding: 60px 0;
-        }
+        .news-subscribe { background: var(--glass-bg); border-top: 1px solid var(--glass-border); padding: 60px 0; }
         .subscribe-card {
-            max-width: 560px;
-            margin: 0 auto;
-            text-align: center;
-            padding: 40px;
+            max-width: 540px; margin: 0 auto; text-align: center;
+            padding: 36px;
             background: linear-gradient(135deg, rgba(46,139,87,0.06) 0%, rgba(0,0,0,0.4) 100%);
             border: 1px solid rgba(46,139,87,0.25);
             border-radius: 24px;
         }
-        .subscribe-card h3 {
-            font-family: 'Outfit', sans-serif;
-            font-size: 22px;
-            font-weight: 700;
-            margin-bottom: 10px;
-            color: var(--soft-white);
-        }
-        .subscribe-card p { color: #aaa; font-size: 14px; margin-bottom: 25px; line-height: 1.6; }
+        .subscribe-card h3 { font-family:'Outfit',sans-serif; font-size:20px; font-weight:700; margin-bottom:8px; color:var(--soft-white); }
+        .subscribe-card p { color:#aaa; font-size:13px; margin-bottom:22px; line-height:1.6; }
     </style>
 </head>
 <body>
+
     <!-- ХЕДЕР -->
     <header class="header">
         <div class="container">
@@ -286,13 +252,13 @@
                 <span class="ngo-badge">Проєкт ГО ТАЛАН ЮА</span>
                 <h1>НОВИЙ ШЛЯХ</h1>
             </div>
-            <nav class="nav" style="display: flex; align-items: center;">
-                <a href="news.html" style="color: var(--primary-green);">Новини</a>
+            <nav class="nav" style="display:flex;align-items:center;">
+                <a href="news.html" style="color:var(--primary-green);">Новини</a>
                 <a href="index.html#state-resources">Держресурси</a>
                 <a href="index.html#specialists">Права та Допомога</a>
                 <a href="index.html#training">Навчання</a>
                 <a href="index.html#employers">Робота та Бізнес</a>
-                <a href="my.html" class="btn-primary" style="margin-left: 15px; border-radius: 8px; font-weight: 600; display: flex; align-items: center; gap: 8px; padding: 10px 20px;">
+                <a href="my.html" class="btn-primary" style="margin-left:15px;border-radius:8px;font-weight:600;display:flex;align-items:center;gap:8px;padding:10px 20px;">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                     Кабінет
                 </a>
@@ -308,11 +274,11 @@
         </div>
     </section>
 
-    <!-- НОВИНИ -->
+    <!-- СПИСОК НОВИН -->
     <section class="news-section">
         <div class="container">
 
-            <!-- Фільтри -->
+            <!-- Фільтри — «Всі новини» перша кнопка -->
             <div class="news-filter-bar">
                 <button class="news-filter-btn active" data-filter="all">Всі новини</button>
                 <button class="news-filter-btn" data-filter="portal">🛡️ Портал</button>
@@ -322,91 +288,249 @@
                 <button class="news-filter-btn" data-filter="event">📅 Заходи</button>
             </div>
 
-            <!-- Картки новин -->
-            <div class="news-cards" id="newsCardsGrid">
+            <!-- ВЕРТИКАЛЬНИЙ ХРОНОЛОГІЧНИЙ СПИСОК -->
+            <div class="news-list" id="newsList">
 
-                <!-- НОВИНА 1 -->
-                <article id="news-1" class="news-card" data-category="portal" onclick="openNewsModal('news-1')">
-                    <div class="news-card-icon">🛡️</div>
-                    <div class="news-card-body">
-                        <div class="news-card-meta">
-                            <span class="news-tag">Портал</span>
-                            <span class="news-date">29 липня 2026</span>
+                <!-- ══ НОВИНА 1 ══ 29 липня 2026 ══ Портал ══ -->
+                <article id="news-1" class="news-item" data-category="portal">
+                    <div class="news-item-header" onclick="toggleNews('news-1')">
+                        <div class="news-cover">
+                            <!-- Замінити src на URL реальної обкладинки новини -->
+                            <div class="news-cover-bg" style="background: linear-gradient(135deg,#0d1f0d 0%,#1a3d1a 50%,#2e7a2e 100%);"></div>
+                            <div class="news-cover-overlay"></div>
+                            <div class="news-cover-emoji">🛡️</div>
                         </div>
-                        <div class="news-card-title">Портал «Новий Шлях» розпочав роботу для ветеранів Черкащини</div>
-                        <div class="news-card-excerpt">Координаційний центр реінтеграції ветеранів відкрив онлайн-портал: реєстрація, підключення до спеціалістів та AI-помічник у зручному форматі.</div>
+                        <div class="news-item-content">
+                            <div class="news-item-meta">
+                                <span class="news-tag">Портал</span>
+                                <span class="news-item-date">29 липня 2026</span>
+                            </div>
+                            <div class="news-item-title">Портал «Новий Шлях» розпочав роботу для ветеранів Черкащини</div>
+                            <div class="news-item-excerpt">Координаційний центр реінтеграції відкрив онлайн-портал: реєстрація, AI-помічник та підключення до спеціалістів — в одному місці.</div>
+                            <span class="news-item-toggle">Читати повністю <i class="arrow">▾</i></span>
+                        </div>
                     </div>
-                    <div class="news-card-footer">Читати повністю →</div>
+                    <div class="news-item-body">
+                        <div class="news-item-body-inner">
+                            <div class="news-body-lead">Координаційний центр реінтеграції ветеранів «Новий Шлях» офіційно запустив онлайн-портал підтримки для ветеранів Черкащини та їхніх родин.</div>
+                            <div class="news-body-text">
+                                <p>Портал об'єднує юридичну, психологічну та кар'єрну допомогу в одному місці. Ветеран може зареєструватись, описати свою ситуацію та отримати маршрут підтримки — без черг і зайвої бюрократії.</p>
+                                <h4>Що доступно на порталі:</h4>
+                                <ul>
+                                    <li>AI-помічник для швидких відповідей на питання щодо виплат, прав та послуг</li>
+                                    <li>Каталог перевірених спеціалістів: юристи, психологи, кар'єрні консультанти</li>
+                                    <li>Особистий кабінет ветерана для зберігання документів та записів</li>
+                                    <li>Партнерська мережа роботодавців та навчальних програм</li>
+                                    <li>Telegram-бот для цілодобової підтримки</li>
+                                </ul>
+                                <h4>Як почати:</h4>
+                                <p>Натисніть кнопку «Кабінет» у верхньому правому куті порталу або напишіть у Telegram-бот <strong>@Veteran_NovyShlyakh_Bot</strong>. Реєстрація займає менше 3 хвилин.</p>
+                            </div>
+                            <div class="news-body-actions">
+                                <a href="my.html" class="btn-primary" style="text-decoration:none;padding:10px 22px;border-radius:50px;font-size:13px;font-weight:600;">Зареєструватись</a>
+                                <button class="btn-collapse" onclick="toggleNews('news-1')">↑ Згорнути</button>
+                            </div>
+                        </div>
+                    </div>
                 </article>
 
-                <!-- НОВИНА 2 -->
-                <article id="news-2" class="news-card" data-category="law" onclick="openNewsModal('news-2')">
-                    <div class="news-card-icon">⚖️</div>
-                    <div class="news-card-body">
-                        <div class="news-card-meta">
-                            <span class="news-tag law">Законодавство</span>
-                            <span class="news-date">27 липня 2026</span>
+                <!-- ══ НОВИНА 2 ══ 27 липня 2026 ══ Законодавство ══ -->
+                <article id="news-2" class="news-item" data-category="law">
+                    <div class="news-item-header" onclick="toggleNews('news-2')">
+                        <div class="news-cover">
+                            <div class="news-cover-bg" style="background: linear-gradient(135deg,#0d0d1f 0%,#1a1a3d 50%,#2e2e7a 100%);"></div>
+                            <div class="news-cover-overlay"></div>
+                            <div class="news-cover-emoji">⚖️</div>
                         </div>
-                        <div class="news-card-title">Нові правила оформлення статусу УБД — що змінилось у процедурі</div>
-                        <div class="news-card-excerpt">Міністерство у справах ветеранів затвердило оновлений порядок оформлення статусу учасника бойових дій. Дізнайтесь, що змінилось і які документи тепер потрібні.</div>
+                        <div class="news-item-content">
+                            <div class="news-item-meta">
+                                <span class="news-tag law">Законодавство</span>
+                                <span class="news-item-date">27 липня 2026</span>
+                            </div>
+                            <div class="news-item-title">Нові правила оформлення статусу УБД — що змінилось у процедурі</div>
+                            <div class="news-item-excerpt">Міністерство у справах ветеранів затвердило оновлений порядок оформлення статусу УБД. Строк розгляду скорочено до 15 робочих днів.</div>
+                            <span class="news-item-toggle">Читати повністю <i class="arrow">▾</i></span>
+                        </div>
                     </div>
-                    <div class="news-card-footer">Читати повністю →</div>
+                    <div class="news-item-body">
+                        <div class="news-item-body-inner">
+                            <div class="news-body-lead">Міністерство у справах ветеранів України затвердило оновлений порядок оформлення статусу учасника бойових дій. Зміни набрали чинності з 1 серпня 2026 року.</div>
+                            <div class="news-body-text">
+                                <p>Основна мета змін — спрощення процедури та скорочення строків розгляду заяв. Відтепер більшість документів можна подати через «Дія» або безпосередньо через ЦНАП.</p>
+                                <h4>Ключові зміни:</h4>
+                                <ul>
+                                    <li>Строк розгляду заявки скорочено з 30 до <strong>15 робочих днів</strong></li>
+                                    <li>Дозволено подання документів через «Дія» без особистого візиту</li>
+                                    <li>Розширено перелік документів, що підтверджують участь у бойових діях</li>
+                                    <li>Скасовано вимогу нотаріального засвідчення копій для окремих категорій</li>
+                                </ul>
+                                <h4>Необхідні документи (новий перелік):</h4>
+                                <ul>
+                                    <li>Заява встановленого зразка</li>
+                                    <li>Паспорт або ID-картка</li>
+                                    <li>Довідка військової частини або витяг із наказу</li>
+                                    <li>Фото 3×4 (якщо подається особисто)</li>
+                                </ul>
+                                <p>Якщо є питання — зверніться до юриста «Новий Шлях» через особистий кабінет або Telegram-бот.</p>
+                            </div>
+                            <div class="news-body-actions">
+                                <a href="my.html" class="btn-primary" style="text-decoration:none;padding:10px 22px;border-radius:50px;font-size:13px;font-weight:600;">Отримати консультацію</a>
+                                <button class="btn-collapse" onclick="toggleNews('news-2')">↑ Згорнути</button>
+                            </div>
+                        </div>
+                    </div>
                 </article>
 
-                <!-- НОВИНА 3 -->
-                <article id="news-3" class="news-card" data-category="grant" onclick="openNewsModal('news-3')">
-                    <div class="news-card-icon">🏆</div>
-                    <div class="news-card-body">
-                        <div class="news-card-meta">
-                            <span class="news-tag grant">Грант</span>
-                            <span class="news-date">25 липня 2026</span>
+                <!-- ══ НОВИНА 3 ══ 25 липня 2026 ══ Грант ══ -->
+                <article id="news-3" class="news-item" data-category="grant">
+                    <div class="news-item-header" onclick="toggleNews('news-3')">
+                        <div class="news-cover">
+                            <div class="news-cover-bg" style="background: linear-gradient(135deg,#1a0d1f 0%,#3d1a3d 50%,#7a2e7a 100%);"></div>
+                            <div class="news-cover-overlay"></div>
+                            <div class="news-cover-emoji">🏆</div>
                         </div>
-                        <div class="news-card-title">Відкрито прийом заявок на «єРобота: Власна Справа 2026» для ветеранів</div>
-                        <div class="news-card-excerpt">Програма надає ветеранам гранти до 250 000 грн на відкриття власного бізнесу. Прийом заявок — до 31 серпня 2026 року через Дія.</div>
+                        <div class="news-item-content">
+                            <div class="news-item-meta">
+                                <span class="news-tag grant">Грант</span>
+                                <span class="news-item-date">25 липня 2026</span>
+                            </div>
+                            <div class="news-item-title">Відкрито прийом заявок на «єРобота: Власна Справа 2026» для ветеранів</div>
+                            <div class="news-item-excerpt">Гранти від 50 000 до 250 000 грн на відкриття власного бізнесу. Прийом заявок відкрито до 31 серпня 2026 через Дія.</div>
+                            <span class="news-item-toggle">Читати повністю <i class="arrow">▾</i></span>
+                        </div>
                     </div>
-                    <div class="news-card-footer">Читати повністю →</div>
+                    <div class="news-item-body">
+                        <div class="news-item-body-inner">
+                            <div class="news-body-lead">Програма «єРобота: Власна Справа» надає ветеранам безповоротні гранти від 50 000 до 250 000 грн на відкриття власного бізнесу.</div>
+                            <div class="news-body-text">
+                                <p>Програма реалізується Міністерством економіки спільно з Фондом розвитку підприємництва. Для ветеранів — пріоритетний розгляд заявок.</p>
+                                <h4>Умови участі:</h4>
+                                <ul>
+                                    <li>Статус УБД або ветерана (підтверджений)</li>
+                                    <li>Наявність бізнес-ідеї або малого бізнесу до 2 років</li>
+                                    <li>Проходження навчального модуля «Основи підприємництва» (16 год онлайн)</li>
+                                    <li>Власний внесок від 20% суми гранту</li>
+                                </ul>
+                                <h4>Розміри грантів:</h4>
+                                <ul>
+                                    <li>До <strong>50 000 грн</strong> — стартап без досвіду бізнесу</li>
+                                    <li>До <strong>150 000 грн</strong> — розширення існуючого бізнесу</li>
+                                    <li>До <strong>250 000 грн</strong> — для ветеранів з інвалідністю або сімей загиблих</li>
+                                </ul>
+                                <div class="info-box" style="background:rgba(139,92,246,0.08);border-color:#a78bfa;color:#c4b5fd;">⏰ <strong>Дедлайн: 31 серпня 2026 року</strong> — подача через diia.gov.ua або через кабінет «Новий Шлях»</div>
+                            </div>
+                            <div class="news-body-actions">
+                                <a href="my.html" class="btn-primary" style="text-decoration:none;padding:10px 22px;border-radius:50px;font-size:13px;font-weight:600;">Подати заявку</a>
+                                <button class="btn-collapse" onclick="toggleNews('news-3')">↑ Згорнути</button>
+                            </div>
+                        </div>
+                    </div>
                 </article>
 
-                <!-- НОВИНА 4 -->
-                <article id="news-4" class="news-card" data-category="psych" onclick="openNewsModal('news-4')">
-                    <div class="news-card-icon">🧠</div>
-                    <div class="news-card-body">
-                        <div class="news-card-meta">
-                            <span class="news-tag psych">Психологія</span>
-                            <span class="news-date">22 липня 2026</span>
+                <!-- ══ НОВИНА 4 ══ 22 липня 2026 ══ Психологія ══ -->
+                <article id="news-4" class="news-item" data-category="psych">
+                    <div class="news-item-header" onclick="toggleNews('news-4')">
+                        <div class="news-cover">
+                            <div class="news-cover-bg" style="background: linear-gradient(135deg,#1f0d14 0%,#3d1a28 50%,#7a2e4a 100%);"></div>
+                            <div class="news-cover-overlay"></div>
+                            <div class="news-cover-emoji">🧠</div>
                         </div>
-                        <div class="news-card-title">Нові безкоштовні психологічні сесії для ветеранів та їхніх родин</div>
-                        <div class="news-card-excerpt">До команди «Новий Шлях» долучились три нові психологи зі спеціалізацією у ПТСР та адаптаційних розладах. Запис через Telegram-бот.</div>
+                        <div class="news-item-content">
+                            <div class="news-item-meta">
+                                <span class="news-tag psych">Психологія</span>
+                                <span class="news-item-date">22 липня 2026</span>
+                            </div>
+                            <div class="news-item-title">Нові безкоштовні психологічні сесії для ветеранів та їхніх родин</div>
+                            <div class="news-item-excerpt">До команди «Новий Шлях» долучились три нові психологи зі спеціалізацією у ПТСР та адаптаційних розладах.</div>
+                            <span class="news-item-toggle">Читати повністю <i class="arrow">▾</i></span>
+                        </div>
                     </div>
-                    <div class="news-card-footer">Читати повністю →</div>
+                    <div class="news-item-body">
+                        <div class="news-item-body-inner">
+                            <div class="news-body-lead">До команди «Новий Шлях» долучились три нові психологи зі спеціалізацією у ПТСР, адаптаційних розладах та сімейній терапії.</div>
+                            <div class="news-body-text">
+                                <p>Тепер у базі порталу — більше 15 психологів та психотерапевтів, готових працювати з ветеранами та їхніми родинами в онлайн або офлайн форматі в Черкасах.</p>
+                                <h4>Нові спеціалісти:</h4>
+                                <ul>
+                                    <li><strong>Олена Василенко</strong> — психотерапевт, CBT, EMDR, ПТСР. Черкаси (офлайн + онлайн)</li>
+                                    <li><strong>Максим Коваль</strong> — психолог-консультант, кризова інтервенція, сімейна терапія. Онлайн</li>
+                                    <li><strong>Наталія Мороз</strong> — дитячий та сімейний психолог, адаптація дітей. Черкаси (офлайн)</li>
+                                </ul>
+                                <h4>Формати роботи:</h4>
+                                <ul>
+                                    <li>Індивідуальні сесії (45–60 хв) — <strong>безкоштовно</strong> для ветеранів з УБД</li>
+                                    <li>Сімейні сесії — перші 3 безкоштовно</li>
+                                    <li>Групи підтримки — щосуботи о 11:00, офлайн, Черкаси</li>
+                                </ul>
+                                <p>Запис через <strong>@Veteran_NovyShlyakh_Bot</strong> або особистий кабінет → Знайти спеціаліста → Психолог.</p>
+                            </div>
+                            <div class="news-body-actions">
+                                <a href="https://t.me/Veteran_NovyShlyakh_Bot" target="_blank" class="btn-primary" style="text-decoration:none;padding:10px 22px;border-radius:50px;font-size:13px;font-weight:600;">Записатись через Telegram</a>
+                                <button class="btn-collapse" onclick="toggleNews('news-4')">↑ Згорнути</button>
+                            </div>
+                        </div>
+                    </div>
                 </article>
 
-                <!-- НОВИНА 5 -->
-                <article id="news-5" class="news-card" data-category="event" onclick="openNewsModal('news-5')">
-                    <div class="news-card-icon">📅</div>
-                    <div class="news-card-body">
-                        <div class="news-card-meta">
-                            <span class="news-tag event">Захід</span>
-                            <span class="news-date">20 липня 2026</span>
+                <!-- ══ НОВИНА 5 ══ 20 липня 2026 ══ Захід ══ -->
+                <article id="news-5" class="news-item" data-category="event">
+                    <div class="news-item-header" onclick="toggleNews('news-5')">
+                        <div class="news-cover">
+                            <div class="news-cover-bg" style="background: linear-gradient(135deg,#1a1300 0%,#3d2e00 50%,#7a5c00 100%);"></div>
+                            <div class="news-cover-overlay"></div>
+                            <div class="news-cover-emoji">📅</div>
                         </div>
-                        <div class="news-card-title">Щотижневі безкоштовні юридичні консультації у ЦНАП Черкас</div>
-                        <div class="news-card-excerpt">Щопонеділка, середи та п'ятниці з 10:00 до 13:00 у ЦНАП Черкас працюють безкоштовні юридичні консультації для ветеранів — без запису.</div>
+                        <div class="news-item-content">
+                            <div class="news-item-meta">
+                                <span class="news-tag event">Захід</span>
+                                <span class="news-item-date">20 липня 2026</span>
+                            </div>
+                            <div class="news-item-title">Щотижневі безкоштовні юридичні консультації у ЦНАП Черкас</div>
+                            <div class="news-item-excerpt">Щопонеділка, середи та п'ятниці з 10:00 до 13:00 у ЦНАП Черкас — безкоштовні юридичні консультації для ветеранів без запису.</div>
+                            <span class="news-item-toggle">Читати повністю <i class="arrow">▾</i></span>
+                        </div>
                     </div>
-                    <div class="news-card-footer">Читати повністю →</div>
+                    <div class="news-item-body">
+                        <div class="news-item-body-inner">
+                            <div class="news-body-lead">Починаючи з 4 серпня 2026 року, у ЦНАП Черкас щотижня по понеділках, середах та п'ятницях з 10:00 до 13:00 працюють безкоштовні юридичні консультації для ветеранів.</div>
+                            <div class="news-body-text">
+                                <h4>Теми консультацій:</h4>
+                                <ul>
+                                    <li>Оформлення та поновлення статусу УБД, інвалідності</li>
+                                    <li>Пільги на комунальні послуги, транспорт та ліки</li>
+                                    <li>Земельні питання (безоплатне отримання ділянки)</li>
+                                    <li>Трудові права та реінтеграція на ринок праці</li>
+                                    <li>Соціальні виплати та компенсації</li>
+                                    <li>Питання спадщини та нерухомості</li>
+                                </ul>
+                                <h4>Де та коли:</h4>
+                                <ul>
+                                    <li>📍 ЦНАП Черкас, вул. Байди Вишневецького, 36</li>
+                                    <li>🗓 Понеділок, Середа, П'ятниця</li>
+                                    <li>🕙 10:00 — 13:00 (без запису)</li>
+                                </ul>
+                                <div class="info-box" style="background:rgba(245,158,11,0.07);border-color:#fbbf24;color:#fde68a;">💡 Візьміть з собою посвідчення УБД та паспорт для підтвердження статусу ветерана</div>
+                            </div>
+                            <div class="news-body-actions">
+                                <a href="index.html#specialists" class="btn-primary" style="text-decoration:none;padding:10px 22px;border-radius:50px;font-size:13px;font-weight:600;">Знайти спеціаліста онлайн</a>
+                                <button class="btn-collapse" onclick="toggleNews('news-5')">↑ Згорнути</button>
+                            </div>
+                        </div>
+                    </div>
                 </article>
 
-            </div><!-- /news-cards -->
+            </div><!-- /news-list -->
         </div>
     </section>
 
-    <!-- БЛОК ПІДПИСКИ -->
+    <!-- ПІДПИСКА НА TELEGRAM -->
     <section class="news-subscribe">
         <div class="container">
             <div class="subscribe-card">
                 <h3>Не пропускайте важливе</h3>
-                <p>Підпишіться на Telegram-бот «Новий Шлях» та отримуйте нові виплати, зміни в законодавстві та анонси заходів одразу у месенджер.</p>
-                <a href="https://t.me/Veteran_NovyShlyakh_Bot" target="_blank" class="btn-primary" style="text-decoration: none; display: inline-flex; align-items: center; gap: 10px; padding: 14px 30px; border-radius: 50px; font-weight: 600; font-size: 15px;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.48 13.82l-2.946-.924c-.64-.203-.654-.64.136-.954l11.5-4.433c.534-.194 1.001.13.392.739z"/></svg>
+                <p>Підпишіться на Telegram-бот та отримуйте нові виплати, зміни в законодавстві та анонси заходів одразу у месенджер.</p>
+                <a href="https://t.me/Veteran_NovyShlyakh_Bot" target="_blank" class="btn-primary" style="text-decoration:none;display:inline-flex;align-items:center;gap:10px;padding:13px 28px;border-radius:50px;font-weight:600;font-size:14px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.48 13.82l-2.946-.924c-.64-.203-.654-.64.136-.954l11.5-4.433c.534-.194 1.001.13.392.739z"/></svg>
                     Підписатися на Telegram-бот
                 </a>
             </div>
@@ -416,207 +540,48 @@
     <!-- ПІДВАЛ -->
     <footer class="footer">
         <div class="container">
-            <div style="display: flex; justify-content: space-around; flex-wrap: wrap; margin-bottom: 40px; text-align: left;">
-                <div style="margin-bottom: 20px;">
-                    <h4 style="color: var(--soft-white); font-size: 18px; margin-bottom: 10px;">ГО «ТАЛАН ЮА»</h4>
+            <div style="display:flex;justify-content:space-around;flex-wrap:wrap;margin-bottom:40px;text-align:left;">
+                <div style="margin-bottom:20px;">
+                    <h4 style="color:var(--soft-white);font-size:18px;margin-bottom:10px;">ГО «ТАЛАН ЮА»</h4>
                     <p>Координаційний центр «НОВИЙ ШЛЯХ»</p>
                     <p>м. Черкаси, вул. Центральна, 100</p>
                 </div>
                 <div>
-                    <h4 style="color: var(--soft-white); font-size: 18px; margin-bottom: 10px;">Контакти</h4>
+                    <h4 style="color:var(--soft-white);font-size:18px;margin-bottom:10px;">Контакти</h4>
                     <p>Тел: +38 (063) 656-89-99</p>
                 </div>
             </div>
-            <p style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">&copy; 2026 Новий Шлях | Всі права захищені. Проєкт ГО «Талан ЮА»</p>
+            <p style="border-top:1px solid rgba(255,255,255,0.1);padding-top:20px;">&copy; 2026 Новий Шлях | Всі права захищені. Проєкт ГО «Талан ЮА»</p>
         </div>
     </footer>
 
-    <!-- ===== МОДАЛЬНЕ ВІКНО НОВИНИ ===== -->
-    <div id="newsModalOverlay" class="news-modal-overlay" onclick="closeNewsModalOnOverlay(event)">
-        <div class="news-modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-            <button class="news-modal-close" onclick="closeNewsModal()" aria-label="Закрити">✕</button>
-            <div class="news-modal-header">
-                <div class="news-modal-tags" id="modalTags"></div>
-                <div class="news-modal-title" id="modalTitle"></div>
-                <div class="news-modal-lead" id="modalLead"></div>
-            </div>
-            <div class="news-modal-body" id="modalBody"></div>
-            <div class="news-modal-footer">
-                <a href="https://t.me/Veteran_NovyShlyakh_Bot" target="_blank" class="btn-primary" style="text-decoration:none; padding: 10px 22px; border-radius: 50px; font-size: 13px; font-weight: 600;">
-                    Отримати допомогу
-                </a>
-                <button onclick="closeNewsModal()" style="background: transparent; border: 1px solid var(--glass-border); color: #aaa; padding: 10px 22px; border-radius: 50px; font-size: 13px; cursor: pointer; font-family: 'Inter', sans-serif;">
-                    ← Назад до новин
-                </button>
-            </div>
-        </div>
-    </div>
-
     <script>
-        /* ===== ДАНІ НОВИН ===== */
-        const NEWS_DATA = {
-            'news-1': {
-                tags: '<span class="news-tag">Портал</span>',
-                date: '29 липня 2026',
-                title: 'Портал «Новий Шлях» розпочав роботу для ветеранів Черкащини',
-                lead: 'Координаційний центр реінтеграції ветеранів «Новий Шлях» офіційно запустив онлайн-портал підтримки для ветеранів Черкащини та їхніх родин.',
-                body: `
-                    <p>Портал об'єднує юридичну, психологічну та кар'єрну допомогу в одному місці. Ветеран може зареєструватись, описати свою ситуацію та отримати маршрут підтримки — без черг і зайвої бюрократії.</p>
-                    <h4>Що доступно на порталі:</h4>
-                    <ul>
-                        <li>AI-помічник для швидких відповідей на питання щодо виплат, прав та послуг</li>
-                        <li>Каталог перевірених спеціалістів: юристи, психологи, кар'єрні консультанти</li>
-                        <li>Особистий кабінет ветерана для зберігання документів та записів</li>
-                        <li>Партнерська мережа роботодавців та навчальних програм</li>
-                        <li>Telegram-бот для цілодобової підтримки</li>
-                    </ul>
-                    <h4>Як почати:</h4>
-                    <p>Натисніть кнопку «Кабінет» у верхньому правому куті порталу або напишіть у Telegram-бот <strong>@Veteran_NovyShlyakh_Bot</strong>. Реєстрація займає менше 3 хвилин.</p>
-                    <p style="margin-top:16px; color:#888; font-size:13px;">ГО «Талан ЮА» | м. Черкаси | Тел: +38 (063) 656-89-99</p>
-                `
-            },
-            'news-2': {
-                tags: '<span class="news-tag law">Законодавство</span>',
-                date: '27 липня 2026',
-                title: 'Нові правила оформлення статусу УБД — що змінилось у процедурі',
-                lead: 'Міністерство у справах ветеранів України затвердило оновлений порядок оформлення статусу учасника бойових дій. Зміни набрали чинності з 1 серпня 2026 року.',
-                body: `
-                    <p>Основна мета змін — спрощення процедури та скорочення строків розгляду заяв. Відтепер більшість документів можна подати через портал «Дія» або безпосередньо через ЦНАП.</p>
-                    <h4>Ключові зміни:</h4>
-                    <ul>
-                        <li>Строк розгляду заявки скорочено з 30 до 15 робочих днів</li>
-                        <li>Дозволено подання документів через «Дія» без особистого візиту</li>
-                        <li>Розширено перелік документів, що підтверджують участь у бойових діях</li>
-                        <li>Скасовано вимогу нотаріального засвідчення копій для окремих категорій документів</li>
-                    </ul>
-                    <h4>Необхідні документи (новий перелік):</h4>
-                    <ul>
-                        <li>Заява встановленого зразка</li>
-                        <li>Посвідчення особи (паспорт або ID-картка)</li>
-                        <li>Документи, що підтверджують участь у бойових діях (довідка військової частини, витяг із наказу)</li>
-                        <li>Фотографія 3×4 (якщо подається особисто)</li>
-                    </ul>
-                    <p>Якщо у вас є питання щодо оформлення — зверніться до юриста «Новий Шлях» через особистий кабінет або Telegram-бот.</p>
-                `
-            },
-            'news-3': {
-                tags: '<span class="news-tag grant">Грант</span>',
-                date: '25 липня 2026',
-                title: 'Відкрито прийом заявок на «єРобота: Власна Справа 2026» для ветеранів',
-                lead: 'Програма «єРобота: Власна Справа» надає ветеранам безповоротні гранти від 50 000 до 250 000 грн на відкриття власного бізнесу. Прийом заявок відкрито до 31 серпня 2026 року.',
-                body: `
-                    <p>Програма реалізується Міністерством економіки спільно з Фондом розвитку підприємництва. Для ветеранів передбачені пільгові умови та пріоритетний розгляд заявок.</p>
-                    <h4>Умови участі:</h4>
-                    <ul>
-                        <li>Статус УБД або ветерана (підтверджений документально)</li>
-                        <li>Наявність бізнес-ідеї або вже існуючого малого бізнесу (до 2 років)</li>
-                        <li>Проходження безкоштовного навчального модуля «Основи підприємництва» (16 годин онлайн)</li>
-                        <li>Готовність вкласти власні кошти у розмірі від 20% від суми гранту</li>
-                    </ul>
-                    <h4>Розміри грантів:</h4>
-                    <ul>
-                        <li>До 50 000 грн — на стартап-ідею без досвіду бізнесу</li>
-                        <li>До 150 000 грн — на розширення існуючого малого бізнесу</li>
-                        <li>До 250 000 грн — для ветеранів з інвалідністю або членів сімей загиблих</li>
-                    </ul>
-                    <h4>Як подати заявку:</h4>
-                    <p>Заявка подається через портал <strong>diia.gov.ua</strong> або через нашого кар'єрного консультанта в особистому кабінеті «Новий Шлях». Консультант безкоштовно допоможе оформити документи та підготувати бізнес-план.</p>
-                    <p style="margin-top:16px; padding: 12px 16px; background: rgba(139,92,246,0.08); border-radius: 10px; border-left: 3px solid #a78bfa;">⏰ <strong>Дедлайн подання заявок: 31 серпня 2026 року</strong></p>
-                `
-            },
-            'news-4': {
-                tags: '<span class="news-tag psych">Психологія</span>',
-                date: '22 липня 2026',
-                title: 'Нові безкоштовні психологічні сесії для ветеранів та їхніх родин',
-                lead: 'До команди «Новий Шлях» долучились три нові психологи зі спеціалізацією у ПТСР, адаптаційних розладах та сімейній терапії. Запис на сесії — через Telegram-бот.',
-                body: `
-                    <p>Тепер у базі порталу — більше 15 психологів та психотерапевтів, готових працювати з ветеранами та їхніми родинами в онлайн або офлайн форматі в Черкасах.</p>
-                    <h4>Нові спеціалісти:</h4>
-                    <ul>
-                        <li><strong>Олена Василенко</strong> — психотерапевт, CBT, EMDR, спеціалізація на ПТСР. Черкаси (офлайн + онлайн)</li>
-                        <li><strong>Максим Коваль</strong> — психолог-консультант, кризова інтервенція, сімейна терапія. Онлайн</li>
-                        <li><strong>Наталія Мороз</strong> — дитячий та сімейний психолог, адаптація дітей після повернення батька/матері. Черкаси (офлайн)</li>
-                    </ul>
-                    <h4>Формати роботи:</h4>
-                    <ul>
-                        <li>Індивідуальні сесії (45–60 хв) — безкоштовно для ветеранів з УБД</li>
-                        <li>Сімейні сесії — перші 3 безкоштовно, далі за символічну оплату</li>
-                        <li>Групи підтримки для ветеранів — щосуботи о 11:00 (офлайн, Черкаси)</li>
-                    </ul>
-                    <p>Запис через Telegram-бот <strong>@Veteran_NovyShlyakh_Bot</strong> або через особистий кабінет порталу → Знайти спеціаліста → Психолог.</p>
-                `
-            },
-            'news-5': {
-                tags: '<span class="news-tag event">Захід</span>',
-                date: '20 липня 2026',
-                title: 'Щотижневі безкоштовні юридичні консультації у ЦНАП Черкас',
-                lead: 'Починаючи з 4 серпня 2026 року, у ЦНАП Черкас щотижня по понеділках, середах та п\'ятницях з 10:00 до 13:00 проводяться безкоштовні юридичні консультації для ветеранів — без попереднього запису.',
-                body: `
-                    <p>Партнерство «Нового Шляху» з ЦНАП Черкас забезпечує постійну присутність юриста у державній установі. Консультації проводяться виключно для ветеранів та членів їхніх сімей.</p>
-                    <h4>Теми консультацій:</h4>
-                    <ul>
-                        <li>Оформлення та поновлення статусу УБД, інвалідності</li>
-                        <li>Пільги на комунальні послуги, транспорт та ліки</li>
-                        <li>Земельні питання (безоплатне отримання земельної ділянки)</li>
-                        <li>Трудові права та реінтеграція на ринок праці</li>
-                        <li>Соціальні виплати та компенсації</li>
-                        <li>Питання спадщини та нерухомості</li>
-                    </ul>
-                    <h4>Де та коли:</h4>
-                    <ul>
-                        <li>📍 ЦНАП Черкас, вул. Байди Вишневецького, 36</li>
-                        <li>🗓 Понеділок, Середа, П'ятниця</li>
-                        <li>🕙 10:00 — 13:00</li>
-                        <li>📋 Без попереднього запису, у порядку живої черги</li>
-                    </ul>
-                    <p style="margin-top:16px; padding: 12px 16px; background: rgba(245,158,11,0.07); border-radius: 10px; border-left: 3px solid #fbbf24;">💡 Рекомендуємо взяти з собою посвідчення УБД та паспорт для підтвердження статусу ветерана.</p>
-                `
+        /* ===== АКОРДЕОН ===== */
+        function toggleNews(id) {
+            const item = document.getElementById(id);
+            const isOpen = item.classList.contains('open');
+            // Закриваємо всі інші
+            document.querySelectorAll('.news-item.open').forEach(el => {
+                if (el.id !== id) el.classList.remove('open');
+            });
+            // Перемикаємо поточний
+            item.classList.toggle('open', !isOpen);
+            // Скролимо до заголовку якщо відкриваємо
+            if (!isOpen) {
+                setTimeout(() => item.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
             }
-        };
-
-        /* ===== ВІДКРИТИ МОДАЛЬНЕ ВІКНО ===== */
-        function openNewsModal(newsId) {
-            const data = NEWS_DATA[newsId];
-            if (!data) return;
-
-            document.getElementById('modalTags').innerHTML =
-                data.tags + `<span class="news-modal-date">${data.date}</span>`;
-            document.getElementById('modalTitle').textContent = data.title;
-            document.getElementById('modalLead').textContent = data.lead;
-            document.getElementById('modalBody').innerHTML = data.body;
-
-            const overlay = document.getElementById('newsModalOverlay');
-            overlay.classList.add('open');
-            document.body.style.overflow = 'hidden';
-
-            // Скрол наверх модального вікна
-            overlay.scrollTop = 0;
         }
 
-        /* ===== ЗАКРИТИ МОДАЛЬНЕ ВІКНО ===== */
-        function closeNewsModal() {
-            document.getElementById('newsModalOverlay').classList.remove('open');
-            document.body.style.overflow = '';
-        }
-        function closeNewsModalOnOverlay(e) {
-            if (e.target === document.getElementById('newsModalOverlay')) closeNewsModal();
-        }
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeNewsModal();
-        });
-
-        /* ===== ФІЛЬТРАЦІЯ КАРТОК ===== */
+        /* ===== ФІЛЬТРАЦІЯ ===== */
         document.querySelectorAll('.news-filter-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 document.querySelectorAll('.news-filter-btn').forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
                 const filter = this.dataset.filter;
-                document.querySelectorAll('.news-card').forEach(card => {
-                    if (filter === 'all' || card.dataset.category === filter) {
-                        card.style.display = 'flex';
-                    } else {
-                        card.style.display = 'none';
-                    }
+                document.querySelectorAll('.news-item').forEach(item => {
+                    const show = filter === 'all' || item.dataset.category === filter;
+                    item.style.display = show ? 'block' : 'none';
+                    if (!show) item.classList.remove('open'); // Закрити приховані
                 });
             });
         });
@@ -624,18 +589,14 @@
         /* ===== АВТО-ВІДКРИТТЯ З ХЕШУ (перехід з тікера) ===== */
         window.addEventListener('DOMContentLoaded', () => {
             const hash = window.location.hash.replace('#', '');
-            if (hash && NEWS_DATA[hash]) {
-                // Підсвічуємо картку
-                const card = document.getElementById(hash);
-                if (card) {
-                    card.classList.add('highlighted');
-                    setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'center' }), 200);
-                    setTimeout(() => openNewsModal(hash), 500);
-                }
+            if (hash && document.getElementById(hash)) {
+                setTimeout(() => {
+                    toggleNews(hash);
+                }, 300);
             }
         });
     </script>
 
-    <script src="accessibility.js?v=45"></script>
+    <script src="accessibility.js?v=46"></script>
 </body>
 </html>
