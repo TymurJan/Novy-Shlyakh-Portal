@@ -114,32 +114,17 @@ body.is-tg-app .hero {
             <div class="hero-content">
                 <h2 class="outfit-font">Твоя Безпечна Гавань <br> після повернення</h2>
                 <p>Координаційний центр реінтеграції ветеранів. <br> Юридична, психологічна та кар'єрна підтримка в одному місці.</p>
-                <div class="hero-actions">
-                    <a href="https://t.me/Veteran_Novy_Shlyakh_Bot" class="btn-main">Отримати допомогу (Intake)</a>
-                    <a href="#specialists" class="btn-secondary">Знайти спеціаліста</a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- БЛОК: AI-Пошук (як на Мінветі) -->
-    <section class="ai-search-section" style="padding: 60px 0; background: var(--glass-bg); border-bottom: 1px solid var(--glass-border);">
-        <div class="container">
-            <div class="ai-search-container" style="max-width: 800px; margin: 0 auto; text-align: center;">
-                <h3 style="margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 10px;">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary-green)" stroke-width="2"><path d="M12 2a2 2 0 0 1 2 2c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2zm0 15a5 5 0 0 1-5-5V7a5 5 0 0 1 10 0v5a5 5 0 0 1-5 5z"/></svg>
-                    Розумний пошук по базі знань
-                </h3>
-                <p style="color: #ccc; margin-bottom: 25px;">Задайте своє питання простою мовою. ШІ проаналізує закони та підбере відповідну програму чи фахівця.</p>
                 
-                <div class="ai-search-box" style="display: flex; gap: 10px; margin-bottom: 15px;">
-                    <input type="text" id="aiSearchInput" placeholder="Наприклад: Як отримати грант на власну справу?" style="flex: 1; padding: 18px 25px; border-radius: 50px; border: 1px solid var(--primary-green); background: #111; color: white; font-size: 16px; outline: none;">
-                    <button id="aiSearchBtn" class="btn-primary" style="padding: 0 30px; border: none; border-radius: 50px; cursor: pointer; font-size: 16px;">Запитати</button>
-                </div>
-                <span style="font-size: 11px; color: #888; display: block; font-style: italic;">Увага: AI-помічник має виключно інформаційний характер і не замінює консультацію реального фахівця.</span>
+                <div class="ai-search-container" style="max-width: 700px; margin-top: 30px; text-align: left;">
+                    <div class="ai-search-box" style="display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;">
+                        <input type="text" id="aiSearchInput" placeholder="Наприклад: Як отримати грант на власну справу?" style="flex: 1; min-width: 260px; padding: 16px 22px; border-radius: 50px; border: 1px solid var(--primary-green); background: rgba(17, 17, 17, 0.85); backdrop-filter: blur(10px); color: white; font-size: 16px; outline: none;">
+                        <button id="aiSearchBtn" class="btn-primary" style="padding: 0 28px; height: 54px; border: none; border-radius: 50px; cursor: pointer; font-size: 16px;">Запитати</button>
+                    </div>
+                    <span style="font-size: 11px; color: rgba(255, 255, 255, 0.7); display: block; font-style: italic;">Увага: AI-помічник має виключно інформаційний характер і не замінює консультацію реального фахівця.</span>
 
-                <div id="aiSearchResponse" class="ai-response-area" style="margin-top: 30px; text-align: left; background: #151715; border: 1px solid var(--glass-border); border-radius: 20px; padding: 25px; display: none;">
-                    <!-- Тут з'являтиметься відповідь -->
+                    <div id="aiSearchResponse" class="ai-response-area" style="margin-top: 20px; text-align: left; background: rgba(21, 23, 21, 0.95); backdrop-filter: blur(15px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 20px; display: none;">
+                        <!-- Тут з'являтиметься відповідь -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -177,15 +162,15 @@ body.is-tg-app .hero {
             <!-- Динамічна статистика соціального доказу -->
             <div class="stats-bar" style="display: flex; justify-content: space-around; flex-wrap: wrap; background: rgba(46, 139, 87, 0.05); border: 1px solid rgba(46, 139, 87, 0.25); border-radius: 25px; padding: 40px; margin-bottom: 50px; text-align: center; gap: 30px;">
                 <div class="stat-item">
-                    <span id="stat-specialists" style="display: block; font-size: 36px; font-weight: 700; color: var(--primary-green); font-family: 'Outfit', sans-serif;">...</span>
+                    <span id="stat-specialists" style="display: block; font-size: 36px; font-weight: 700; color: var(--primary-green); font-family: 'Outfit', sans-serif;">—</span>
                     <span style="color: #ccc; font-size: 14px;">верифікованих фахівців</span>
                 </div>
                 <div class="stat-item" style="border-left: 1px solid rgba(255,255,255,0.1); border-right: 1px solid rgba(255,255,255,0.1); padding: 0 40px;">
-                    <span id="stat-intake" style="display: block; font-size: 36px; font-weight: 700; color: var(--primary-green); font-family: 'Outfit', sans-serif;">...</span>
+                    <span id="stat-intake" style="display: block; font-size: 36px; font-weight: 700; color: var(--primary-green); font-family: 'Outfit', sans-serif;">—</span>
                     <span style="color: #ccc; font-size: 14px;">опрацьованих звернень</span>
                 </div>
                 <div class="stat-item">
-                    <span id="stat-veterans" style="display: block; font-size: 36px; font-weight: 700; color: var(--primary-green); font-family: 'Outfit', sans-serif;">...</span>
+                    <span id="stat-veterans" style="display: block; font-size: 36px; font-weight: 700; color: var(--primary-green); font-family: 'Outfit', sans-serif;">—</span>
                     <span style="color: #ccc; font-size: 14px;">зареєстрованих ветеранів</span>
                 </div>
             </div>
@@ -248,7 +233,7 @@ body.is-tg-app .hero {
                     <!-- Піднапрямок / Спеціалізація -->
                     <div style="display: flex; flex-direction: column; gap: 4px;">
                         <label style="font-size: 11px; color: #aaa; font-weight: 600; text-transform: uppercase;">Напрямок роботи</label>
-                        <input type="text" id="filterSpecialization" placeholder="Напр. житлові, ВЛК, ПТСР..." style="padding: 8px 12px; border-radius: 8px; background: #222; border: 1px solid #444; color: white; font-size: 13px; outline: none; width: 200px;">
+                        <input type="text" id="filterSpecialization" placeholder="Напр. житлові, ВЛК, ПТСР" style="padding: 8px 12px; border-radius: 8px; background: #222; border: 1px solid #444; color: white; font-size: 13px; outline: none; width: 200px;">
                     </div>
                 </div>
 
@@ -292,6 +277,12 @@ body.is-tg-app .hero {
                 <h4 style="margin-bottom: 10px;">Не знайшли потрібного напрямку?</h4>
                 <p style="color: #ccc; margin-bottom: 20px;">Наш AI-розвідник шукає нові програми 24/7. Напишіть нам, що саме ви шукаєте.</p>
                 <a href="https://t.me/Veteran_NovyShlyakh_Bot" class="btn-secondary">Подати запит на пошук</a>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px; padding: 30px; background: linear-gradient(135deg, rgba(46, 139, 87, 0.1) 0%, rgba(0, 0, 0, 0.4) 100%); border-radius: 20px; border: 1px solid rgba(46, 139, 87, 0.4);">
+                <h4 style="margin-bottom: 10px; color: var(--primary-green);">📋 Перевірити свої пільги на платформі «Єдність»</h4>
+                <p style="color: #ccc; margin-bottom: 20px;">Перейдіть на офіційний обласний портал для детального розрахунку ваших соціальних гарантій, пільг та державних виплат.</p>
+                <a href="https://ukrveteran.ck.gov.ua" target="_blank" class="btn-primary" style="text-decoration: none; display: inline-block;">Відкрити Єдність</a>
             </div>
         </div>
     </section>
@@ -403,7 +394,7 @@ body.is-tg-app .hero {
                     <div class="form-group">
                         <label style="font-weight: 600; display: block; margin-bottom: 6px;">Спеціалізація:</label>
                         <select id="regSpecialistField" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(46,139,87,0.25); font-size: 14px; margin-bottom: 12px;" required>
-                            <option value="" disabled selected>Оберіть напрям...</option>
+                            <option value="" disabled selected>Оберіть напрям</option>
                             <option value="psychologist">🧠 Психолог / психотерапевт</option>
                             <option value="rehabilitation">🦾 Реабілітолог / кінезіолог</option>
                             <option value="narcologist">💊 Нарколог / психіатр</option>
@@ -428,12 +419,12 @@ body.is-tg-app .hero {
                     <h5 style="margin-bottom: 15px; font-weight: 700; color: #2e8b57; border-bottom: 2px solid rgba(46,139,87,0.15); padding-bottom: 8px;">Крок 2: Професійний опис</h5>
                     <div class="form-group" style="margin-bottom: 15px;">
                         <label style="font-weight: 600; display: block; margin-bottom: 6px;">📍 Адреса кабінету (або "Онлайн")</label>
-                        <input type="text" id="regAddress" placeholder="м. Черкаси, вул. ..." required>
+                        <input type="text" id="regAddress" placeholder="м. Черкаси, вул. Шевченка" required>
                     </div>
 
                     <div class="form-group" style="margin-bottom: 15px;">
                         <label style="font-weight: 600; display: block; margin-bottom: 6px;">📝 Про професійний досвід (Біо)</label>
-                        <textarea id="regBio" rows="4" placeholder="Розкажіть про ваш досвід роботи з ветеранами..." required></textarea>
+                        <textarea id="regBio" rows="4" placeholder="Розкажіть про ваш досвід роботи з ветеранами" required></textarea>
                     </div>
 
                     <!-- Спеціальний блок запитань для юристів (Self-selection) -->
@@ -528,7 +519,7 @@ body.is-tg-app .hero {
 
                     <div class="form-group" style="margin-bottom: 15px;">
                         <label style="font-weight: 600; display: block; margin-bottom: 6px;">▶️ Посилання на відео-презентацію (YouTube, Drive, Telegram тощо) [Опціонально]</label>
-                        <input type="url" id="regVideoUrl" placeholder="https://..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(46,139,87,0.25); font-size: 14px; background: #111; color: white;">
+                        <input type="url" id="regVideoUrl" placeholder="https://youtube.com/watch?v=sample" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(46,139,87,0.25); font-size: 14px; background: #111; color: white;">
                     </div>
 
                     <!-- Підписання угоди: вибір методу -->
@@ -705,7 +696,7 @@ body.is-tg-app .hero {
 
                 <div class="form-group">
                     <label style="font-size: 12px; color: #aaa; display: block; margin-bottom: 4px;">💬 Коментар (українською мовою)</label>
-                    <textarea id="revComment" rows="3" placeholder="Розкажіть про свій досвід роботи з фахівцем..." style="width: 100%; padding: 10px; border-radius: 8px; background: #222; border: 1px solid #444; color: white; resize: none;" required></textarea>
+                    <textarea id="revComment" rows="3" placeholder="Розкажіть про свій досвід роботи з фахівцем" style="width: 100%; padding: 10px; border-radius: 8px; background: #222; border: 1px solid #444; color: white; resize: none;" required></textarea>
                 </div>
 
                 <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
@@ -798,9 +789,9 @@ body.is-tg-app .hero {
         <!-- Екран чату з ШІ (прихований спочатку) -->
         <div id="sw-chat-screen" style="display:none; flex-direction:column;">
             <div id="sw-messages" class="sw-body"></div>
-            <div class="sw-typing" id="sw-typing">🤖 Друкує...</div>
+            <div class="sw-typing" id="sw-typing">🤖 Друкує</div>
             <div class="sw-footer">
-                <textarea id="sw-input" class="sw-input" rows="1" placeholder="Опишіть проблему..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendSupportMessage();}"></textarea>
+                <textarea id="sw-input" class="sw-input" rows="1" placeholder="Опишіть проблему" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendSupportMessage();}"></textarea>
                 <button class="sw-send" onclick="sendSupportMessage()">➤</button>
             </div>
         </div>
@@ -875,7 +866,7 @@ body.is-tg-app .hero {
             browser: getBrowserName(),
         };
 
-        // Показуємо "друкує..."
+        // Показуємо "друкує"
         document.getElementById('sw-typing').style.display = 'block';
         scrollSupportChat();
 
