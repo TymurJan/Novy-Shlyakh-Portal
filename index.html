@@ -424,99 +424,99 @@ body.is-tg-app .hero {
         <div class="container">
             <h3 class="section-title">Три кроки до комплексної підтримки</h3>
             <p class="section-subtitle">Прозорий та захищений алгоритм реінтеграції</p>
-            <!-- Покрокова горизонтальна лінія (Variant A: Connecting Stepper) -->
-            <div class="steps-stepper-container" style="
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-                gap: 25px;
-                position: relative;
-                margin-bottom: 40px;
+            <!-- Компактні плашки один під одним (Variant B: Stacked Horizontal Rows) -->
+            <div class="steps-rows-container" style="
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+                max-width: 900px;
+                margin: 0 auto 40px auto;
             ">
                 <!-- КРОК 1 -->
                 <div style="
                     background: rgba(255, 255, 255, 0.03);
                     border: 1px solid rgba(46, 139, 87, 0.25);
-                    border-radius: 18px;
-                    padding: 24px;
-                    position: relative;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 12px;
-                    transition: transform 0.3s, border-color 0.3s;
-                " onmouseover="this.style.borderColor='var(--primary-green)'; this.style.transform='translateY(-3px)'" onmouseout="this.style.borderColor='rgba(46, 139, 87, 0.25)'; this.style.transform='none'">
-                    <div style="display: flex; align-items: center; justify-content: space-between;">
-                        <span style="
-                            font-family: 'Outfit', sans-serif;
-                            font-size: 14px;
-                            font-weight: 700;
-                            color: var(--primary-green);
-                            background: rgba(46, 139, 87, 0.15);
-                            padding: 4px 12px;
-                            border-radius: 50px;
-                            border: 1px solid rgba(46, 139, 87, 0.3);
-                        ">Крок 01</span>
-                        <span style="font-size: 22px;">🔒</span>
+                    border-radius: 16px;
+                    padding: 20px 24px;
+                    display: grid;
+                    grid-template-columns: auto 1fr;
+                    gap: 20px;
+                    align-items: center;
+                    transition: all 0.3s;
+                " onmouseover="this.style.borderColor='var(--primary-green)'; this.style.background='rgba(46, 139, 87, 0.06)'" onmouseout="this.style.borderColor='rgba(46, 139, 87, 0.25)'; this.style.background='rgba(255, 255, 255, 0.03)'">
+                    <div style="
+                        width: 52px; height: 52px; border-radius: 50%;
+                        background: rgba(46, 139, 87, 0.15);
+                        border: 1px solid var(--primary-green);
+                        display: flex; align-items: center; justify-content: center;
+                        font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 700;
+                        color: var(--primary-green); flex-shrink: 0;
+                    ">01</div>
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+                            <h4 style="font-family: 'Outfit', sans-serif; font-size: 17px; font-weight: 600; color: var(--soft-white); margin: 0;">Захищена Реєстрація</h4>
+                            <span style="font-size: 16px;">🔒</span>
+                        </div>
+                        <p style="font-size: 13px; color: #aaa; line-height: 1.5; margin: 0;">Створіть свій персональний кабінет за допомогою безпечної верифікації через державний сервіс Дія.Підпис. Ви автоматично отримаєте 10% знижки на послуги всіх верифікованих партнерів платформи (психологи, юристи, реабілітологи).</p>
                     </div>
-                    <h4 style="font-family: 'Outfit', sans-serif; font-size: 17px; font-weight: 600; color: var(--soft-white); margin: 0;">Захищена Реєстрація</h4>
-                    <p style="font-size: 13px; color: #aaa; line-height: 1.55; margin: 0;">Створіть свій персональний кабінет за допомогою безпечної верифікації через державний сервіс Дія.Підпис. Ви автоматично отримаєте 10% знижки на послуги всіх верифікованих партнерів платформи (психологи, юристи, реабілітологи).</p>
                 </div>
 
                 <!-- КРОК 2 -->
                 <div style="
                     background: rgba(255, 255, 255, 0.03);
                     border: 1px solid rgba(46, 139, 87, 0.25);
-                    border-radius: 18px;
-                    padding: 24px;
-                    position: relative;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 12px;
-                    transition: transform 0.3s, border-color 0.3s;
-                " onmouseover="this.style.borderColor='var(--primary-green)'; this.style.transform='translateY(-3px)'" onmouseout="this.style.borderColor='rgba(46, 139, 87, 0.25)'; this.style.transform='none'">
-                    <div style="display: flex; align-items: center; justify-content: space-between;">
-                        <span style="
-                            font-family: 'Outfit', sans-serif;
-                            font-size: 14px;
-                            font-weight: 700;
-                            color: var(--primary-green);
-                            background: rgba(46, 139, 87, 0.15);
-                            padding: 4px 12px;
-                            border-radius: 50px;
-                            border: 1px solid rgba(46, 139, 87, 0.3);
-                        ">Крок 02</span>
-                        <span style="font-size: 22px;">🎯</span>
+                    border-radius: 16px;
+                    padding: 20px 24px;
+                    display: grid;
+                    grid-template-columns: auto 1fr;
+                    gap: 20px;
+                    align-items: center;
+                    transition: all 0.3s;
+                " onmouseover="this.style.borderColor='var(--primary-green)'; this.style.background='rgba(46, 139, 87, 0.06)'" onmouseout="this.style.borderColor='rgba(46, 139, 87, 0.25)'; this.style.background='rgba(255, 255, 255, 0.03)'">
+                    <div style="
+                        width: 52px; height: 52px; border-radius: 50%;
+                        background: rgba(46, 139, 87, 0.15);
+                        border: 1px solid var(--primary-green);
+                        display: flex; align-items: center; justify-content: center;
+                        font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 700;
+                        color: var(--primary-green); flex-shrink: 0;
+                    ">02</div>
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+                            <h4 style="font-family: 'Outfit', sans-serif; font-size: 17px; font-weight: 600; color: var(--soft-white); margin: 0;">Оцінка персональних потреб</h4>
+                            <span style="font-size: 16px;">🎯</span>
+                        </div>
+                        <p style="font-size: 13px; color: #aaa; line-height: 1.5; margin: 0;">Сформуйте запит у захищеному просторі. Система автоматично підбере найкращого перевіреного профільного експерта під ваші потреби. Рекомендуватиме спеціалістів вашого району та сповіщатиме, як тільки з'явиться новий верифікований спеціаліст.</p>
                     </div>
-                    <h4 style="font-family: 'Outfit', sans-serif; font-size: 17px; font-weight: 600; color: var(--soft-white); margin: 0;">Оцінка персональних потреб</h4>
-                    <p style="font-size: 13px; color: #aaa; line-height: 1.55; margin: 0;">Сформуйте запит у захищеному просторі. Система автоматично підбере найкращого перевіреного профільного експерта під ваші потреби. Рекомендуватиме спеціалістів вашого району та сповіщатиме, як тільки з'явиться новий верифікований спеціаліст.</p>
                 </div>
 
                 <!-- КРОК 3 -->
                 <div style="
                     background: rgba(255, 255, 255, 0.03);
                     border: 1px solid rgba(46, 139, 87, 0.25);
-                    border-radius: 18px;
-                    padding: 24px;
-                    position: relative;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 12px;
-                    transition: transform 0.3s, border-color 0.3s;
-                " onmouseover="this.style.borderColor='var(--primary-green)'; this.style.transform='translateY(-3px)'" onmouseout="this.style.borderColor='rgba(46, 139, 87, 0.25)'; this.style.transform='none'">
-                    <div style="display: flex; align-items: center; justify-content: space-between;">
-                        <span style="
-                            font-family: 'Outfit', sans-serif;
-                            font-size: 14px;
-                            font-weight: 700;
-                            color: var(--primary-green);
-                            background: rgba(46, 139, 87, 0.15);
-                            padding: 4px 12px;
-                            border-radius: 50px;
-                            border: 1px solid rgba(46, 139, 87, 0.3);
-                        ">Крок 03</span>
-                        <span style="font-size: 22px;">🤝</span>
+                    border-radius: 16px;
+                    padding: 20px 24px;
+                    display: grid;
+                    grid-template-columns: auto 1fr;
+                    gap: 20px;
+                    align-items: center;
+                    transition: all 0.3s;
+                " onmouseover="this.style.borderColor='var(--primary-green)'; this.style.background='rgba(46, 139, 87, 0.06)'" onmouseout="this.style.borderColor='rgba(46, 139, 87, 0.25)'; this.style.background='rgba(255, 255, 255, 0.03)'">
+                    <div style="
+                        width: 52px; height: 52px; border-radius: 50%;
+                        background: rgba(46, 139, 87, 0.15);
+                        border: 1px solid var(--primary-green);
+                        display: flex; align-items: center; justify-content: center;
+                        font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 700;
+                        color: var(--primary-green); flex-shrink: 0;
+                    ">03</div>
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+                            <h4 style="font-family: 'Outfit', sans-serif; font-size: 17px; font-weight: 600; color: var(--soft-white); margin: 0;">Фаховий Супровід</h4>
+                            <span style="font-size: 16px;">🤝</span>
+                        </div>
+                        <p style="font-size: 13px; color: #aaa; line-height: 1.5; margin: 0;">Отримуйте кваліфіковану юридичну, психологічну або кар'єрну допомогу з повним збереженням конфіденційності.</p>
                     </div>
-                    <h4 style="font-family: 'Outfit', sans-serif; font-size: 17px; font-weight: 600; color: var(--soft-white); margin: 0;">Фаховий Супровід</h4>
-                    <p style="font-size: 13px; color: #aaa; line-height: 1.55; margin: 0;">Отримуйте кваліфіковану юридичну, психологічну або кар'єрну допомогу з повним збереженням конфіденційності.</p>
                 </div>
             </div>
 
