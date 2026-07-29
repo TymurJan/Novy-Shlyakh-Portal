@@ -430,10 +430,10 @@ function openCharityModal() {
 
 
 
-// --- AI Search Logic ---
+// --- AI Search Logic (Knowledge Base) ---
 document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('aiSearchInput');
-    const searchBtn = document.getElementById('aiSearchBtn');
+    const searchBtn   = document.getElementById('aiSearchBtn');
     const responseArea = document.getElementById('aiSearchResponse');
 
     if (searchBtn && searchInput) {
@@ -443,22 +443,143 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // ═══════════════════════════════════════════════════
+    // БАЗА ЗНАНЬ ПОРТАЛУ (локальна, без зовнішніх API)
+    // Поповнюється з даних порталу: спеціалісти, права,
+    // виплати, програми, навчання, роботодавці
+    // ═══════════════════════════════════════════════════
+    const KNOWLEDGE_BASE = [
+        {
+            keywords: ['убд', 'учасник бойових', 'статус ветерана', 'оформити статус', 'посвідчення', 'убд статус'],
+            title: '⚖️ Статус УБД — як отримати',
+            answer: `Для оформлення статусу учасника бойових дій (УБД) потрібно:\n\n• Подати заяву через ЦНАП або портал Дія\n• Надати довідку з військової частини або витяг із наказу\n• Паспорт / ID-картку\n\nСтрок розгляду — до 15 робочих днів (з 01.08.2026).\n\n📍 Безкоштовна юридична консультація доступна у нас на порталі → "Права та Допомога" або у ЦНАП Черкас (пн, ср, пт з 10:00).`,
+            links: [{ text: '👤 Знайти юриста', href: '#specialists' }, { text: '📰 Деталі у новинах', href: 'news.html#news-2' }]
+        },
+        {
+            keywords: ['виплати', 'грошова допомога', 'пільги', 'одноразова виплата', 'компенсація', 'допомога'],
+            title: '💰 Виплати та пільги для ветеранів',
+            answer: `Ветерани мають право на:\n\n• Одноразова грошова допомога при демобілізації\n• Щомісячна надбавка до пенсії (для УБД)\n• Пільги на комунальні послуги (50% знижка)\n• Безкоштовний проїзд у громадському транспорті\n• Пільгове зубопротезування та ліки\n• Земельна ділянка безоплатно (до 2 га)\n\nДля уточнення конкретних сум — зверніться до юриста порталу.`,
+            links: [{ text: '👤 Консультація юриста', href: '#specialists' }]
+        },
+        {
+            keywords: ['грант', 'єробота', 'власна справа', 'бізнес', 'підприємництво', 'стартап', 'відкрити'],
+            title: '🏆 Гранти на власний бізнес',
+            answer: `Програма «єРобота: Власна Справа 2026»:\n\n• До 50 000 грн — для стартапу без досвіду\n• До 150 000 грн — розширення існуючого бізнесу\n• До 250 000 грн — для ветеранів з інвалідністю\n\nУмови: статус УБД, проходження онлайн-курсу "Основи підприємництва" (16 год), власний внесок від 20%.\n\n⏰ Прийом заявок до 31 серпня 2026 через Дія або кабінет порталу.`,
+            links: [{ text: '📰 Детальніше в новинах', href: 'news.html#news-3' }, { text: '👤 Кар\'єрна консультація', href: '#specialists' }]
+        },
+        {
+            keywords: ['психолог', 'птср', 'психологічна', 'стрес', 'депресія', 'тривога', 'адаптація', 'реабілітація', 'mental'],
+            title: '🧠 Психологічна допомога',
+            answer: `На порталі доступні:\n\n• Індивідуальні сесії з психологами (безкоштовно для УБД)\n• Сімейна терапія — перші 3 сесії безкоштовно\n• Групи підтримки ветеранів — щосуботи о 11:00, Черкаси\n• Онлайн-консультації (Zoom)\n\nСпеціалізація наших психологів: ПТСР, адаптаційні розлади, кризова інтервенція, сімейна терапія.\n\nЗапис через Telegram-бот або особистий кабінет.`,
+            links: [{ text: '🧠 Знайти психолога', href: '#specialists' }, { text: '📰 Нові психологи', href: 'news.html#news-4' }]
+        },
+        {
+            keywords: ['юрист', 'юридична', 'консультація', 'правова', 'право', 'закон', 'документи', 'суд'],
+            title: '⚖️ Юридична допомога',
+            answer: `Безкоштовна юридична допомога доступна:\n\n• Онлайн через портал — спеціалісти у кабінеті\n• Офлайн у ЦНАП Черкас (вул. Байди Вишневецького, 36) — пн, ср, пт з 10:00 до 13:00, без запису\n\nТеми: оформлення УБД, земля, спадщина, пільги, трудові права, виплати, соціальне забезпечення.`,
+            links: [{ text: '⚖️ Знайти юриста', href: '#specialists' }, { text: '📰 Розклад консультацій', href: 'news.html#news-5' }]
+        },
+        {
+            keywords: ['навчання', 'курси', 'освіта', 'перекваліфікація', 'онлайн курс', 'безкоштовне навчання', 'вища освіта'],
+            title: '📚 Безкоштовне навчання',
+            answer: `Ветерани мають доступ до:\n\n• Безкоштовних онлайн-курсів (IT, управління, підприємництво)\n• Пільгового вступу до вишів\n• Державних програм перекваліфікації\n• Корпоративних програм навчання від партнерів порталу\n\nВсі навчальні можливості — у розділі «Навчання» порталу.`,
+            links: [{ text: '📚 Перейти до навчання', href: '#training' }]
+        },
+        {
+            keywords: ['робота', 'працевлаштування', 'вакансія', 'роботодавець', 'кар\'єра', 'пошук роботи'],
+            title: '💼 Працевлаштування ветеранів',
+            answer: `Портал «Новий Шлях» має партнерську мережу роботодавців, які:\n\n• Надають пріоритет ветеранам при наймі\n• Пропонують гнучкий графік та дистанційну роботу\n• Забезпечують адаптаційний супровід у перші місяці\n\nТакож доступна безкоштовна консультація кар'єрного консультанта для складання резюме та підготовки до співбесіди.`,
+            links: [{ text: '💼 Роботодавці', href: '#employers' }, { text: '👤 Кар\'єрна консультація', href: '#specialists' }]
+        },
+        {
+            keywords: ['реєстрація', 'зареєструватись', 'кабінет', 'профіль', 'вхід', 'увійти', 'як почати'],
+            title: '🛡️ Як зареєструватися на порталі',
+            answer: `Реєстрація займає менше 3 хвилин:\n\n1. Натисніть «Кабінет» у верхньому правому куті\n2. Введіть email та пароль\n3. Підтвердіть статус ветерана (опційно — розширений доступ)\n4. Отримайте персоналізований маршрут підтримки\n\nАбо напишіть у Telegram-бот @Veteran_NovyShlyakh_Bot — реєстрація там ще простіша.`,
+            links: [{ text: '👤 Перейти до кабінету', href: 'my.html' }, { text: '📰 Як працює портал', href: 'news.html#news-1' }]
+        },
+        {
+            keywords: ['земля', 'земельна ділянка', 'пай', 'безоплатно земля'],
+            title: '🌱 Безоплатна земельна ділянка',
+            answer: `Ветерани мають право на безоплатне отримання земельної ділянки:\n\n• До 2 га — для ведення фермерського господарства\n• До 0.12 га — під будівництво житла\n\nДля оформлення: звернення до органів місцевого самоврядування або консультація юриста порталу. Наші юристи допоможуть підготувати документи.`,
+            links: [{ text: '⚖️ Знайти юриста', href: '#specialists' }]
+        },
+        {
+            keywords: ['телеграм', 'telegram', 'бот', 'telegram бот', 'підписатись'],
+            title: '📱 Telegram-бот «Новий Шлях»',
+            answer: `Telegram-бот @Veteran_NovyShlyakh_Bot доступний 24/7 та допомагає:\n\n• Записатись до спеціаліста\n• Отримати відповідь на термінове питання\n• Підписатись на новини та зміни в законодавстві\n• Пройти реєстрацію на порталі\n\nПросто напишіть /start у боті — і він проведе вас далі.`,
+            links: [{ text: '📱 Відкрити Telegram-бот', href: 'https://t.me/Veteran_NovyShlyakh_Bot' }]
+        }
+    ];
+
+    // ═══════════════════════════════════════════════
+    // ПОШУКОВА ФУНКЦІЯ — семантичний keyword match
+    // ═══════════════════════════════════════════════
     function performSearch() {
-        const text = searchInput.value.trim();
+        const text = searchInput.value.trim().toLowerCase();
         if (!text) return;
 
         responseArea.style.display = 'block';
-        responseArea.innerHTML = `<div style="color: var(--primary-green); text-align: center;">Аналізую базу знань...</div>`;
+        responseArea.innerHTML = `<div style="color: var(--primary-green); text-align: center; padding: 10px;">🔍 Шукаю у базі знань порталу...</div>`;
 
-        // Simulate AI response
         setTimeout(() => {
-            responseArea.innerHTML = `
-                <div style="border-left: 3px solid var(--primary-green); padding-left: 15px; margin-bottom: 15px;">
-                    <p style="color: #ccc; font-style: italic; margin-bottom: 10px;">Ваш запит: "${text}"</p>
-                    <p style="color: white; line-height: 1.6;">Наразі мій серверний RAG-модуль знаходиться в стадії розгортання, тому я не маю доступу до законодавчої бази. <br><br> Будь ласка, скористайтеся <a href="https://t.me/Veteran_NovyShlyakh_Bot" style="color: var(--primary-green); font-weight: bold; text-decoration: none;">нашим Telegram-ботом</a> для отримання допомоги просто зараз.</p>
-                </div>
-            `;
-        }, 1500);
+            // Знаходимо найкращий збіг за ключовими словами
+            let bestMatch = null;
+            let bestScore = 0;
+
+            KNOWLEDGE_BASE.forEach(entry => {
+                let score = 0;
+                entry.keywords.forEach(kw => {
+                    if (text.includes(kw)) score += kw.length; // довші ключові слова = вищий пріоритет
+                });
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestMatch = entry;
+                }
+            });
+
+            // Також шукаємо по даних спеціалістів (якщо завантажені)
+            let specialistSuggestion = '';
+            if (typeof specialists !== 'undefined' && specialists.length > 0) {
+                const catMap = { 'юрист': 'legal', 'психолог': 'psychology', 'кар\'єр': 'career' };
+                for (const [kw, cat] of Object.entries(catMap)) {
+                    if (text.includes(kw)) {
+                        const found = specialists.filter(s => s.category === cat && s.status === 'verified').slice(0, 2);
+                        if (found.length) {
+                            specialistSuggestion = `<div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.08);">
+                                <p style="color: #888; font-size: 12px; margin-bottom: 8px;">📋 Доступні спеціалісти на порталі:</p>
+                                ${found.map(s => `<div style="color: #ccc; font-size: 13px; margin-bottom: 4px;">• <strong style="color: white;">${s.name}</strong> — ${s.role || s.category} <span style="color: #555;">/ ${s.address}</span></div>`).join('')}
+                            </div>`;
+                        }
+                        break;
+                    }
+                }
+            }
+
+            if (bestMatch) {
+                const linksHtml = bestMatch.links.map(l =>
+                    `<a href="${l.href}" style="display: inline-block; padding: 7px 16px; border: 1px solid var(--primary-green); border-radius: 50px; color: var(--primary-green); text-decoration: none; font-size: 12px; font-weight: 600; margin-right: 8px; margin-top: 4px; transition: all 0.2s;" onmouseover="this.style.background='rgba(46,139,87,0.15)'" onmouseout="this.style.background='transparent'">${l.text}</a>`
+                ).join('');
+
+                responseArea.innerHTML = `
+                    <div style="border-left: 3px solid var(--primary-green); padding-left: 16px;">
+                        <p style="color: var(--primary-green); font-weight: 700; font-size: 15px; margin-bottom: 10px;">${bestMatch.title}</p>
+                        <p style="color: #ccc; line-height: 1.75; font-size: 13px; white-space: pre-line;">${bestMatch.answer}</p>
+                        ${specialistSuggestion}
+                        <div style="margin-top: 14px;">${linksHtml}</div>
+                        <p style="color: #555; font-size: 11px; margin-top: 12px; font-style: italic;">⚠️ Відповідь надана на основі бази знань порталу. Для точної консультації — зверніться до фахівця.</p>
+                    </div>`;
+            } else {
+                responseArea.innerHTML = `
+                    <div style="border-left: 3px solid #555; padding-left: 16px;">
+                        <p style="color: #ccc; line-height: 1.7;">На жаль, я не знайшов точної відповіді на запит <em style="color: white;">"${searchInput.value}"</em> у базі знань порталу.<br><br>
+                        Спробуйте запитати про: <strong>виплати, УБД, психолога, юриста, гранти, навчання, роботу, земельну ділянку</strong> або зверніться до спеціаліста напряму.</p>
+                        <div style="margin-top: 12px;">
+                            <a href="#specialists" style="display: inline-block; padding: 7px 16px; border: 1px solid var(--primary-green); border-radius: 50px; color: var(--primary-green); text-decoration: none; font-size: 12px; font-weight: 600; margin-right: 8px;">👤 Знайти спеціаліста</a>
+                            <a href="https://t.me/Veteran_NovyShlyakh_Bot" target="_blank" style="display: inline-block; padding: 7px 16px; border: 1px solid #555; border-radius: 50px; color: #aaa; text-decoration: none; font-size: 12px; font-weight: 600;">📱 Telegram-бот</a>
+                        </div>
+                    </div>`;
+            }
+        }, 700);
     }
 });
 
