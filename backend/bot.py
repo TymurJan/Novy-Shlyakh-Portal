@@ -8,7 +8,8 @@ from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton, WebAppInfo, ReplyKeyboardRemove, MenuButtonWebApp, MenuButtonDefault
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton, WebAppInfo, ReplyKeyboardRemove, MenuButtonWebApp, MenuButtonDefault, MenuButtonCommands
+from aiogram.types import BotCommand, BotCommandScopeDefault
 from dotenv import load_dotenv
 
 # Завантаження налаштувань
@@ -33,7 +34,17 @@ class ThrottlingMiddleware(BaseMiddleware):
     async def __call__(self, handler, event, data):
         if not hasattr(event, "from_user") or not event.from_user:
             return await handler(event, data)
-        
+
+        # Навігаційні команди ЗАВЖДИ пропускаються (substring-перевірка стійка до emoji-варіацій)
+        msg_text = getattr(event, "text", None) or ""
+        nav_keywords = [
+            "Вийти з підтримки",
+            "Повернутися до вибору",
+            "/start",
+        ]
+        if any(kw in msg_text for kw in nav_keywords):
+            return await handler(event, data)
+
         user_id = event.from_user.id
         now = time.time()
         if user_id in self.users:
@@ -199,13 +210,26 @@ def validate_text(text, min_words=1, min_len=2, allow_latin=False):
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message, state: FSMContext = None):
     logging.info(f"DEBUG: /start command received from {message.from_user.id}")
-    # Обробка параметрів старту (наприклад, ?start=login з сайту)
-    args = message.text.split()
+
+    # ☰ Оновлюємо кнопку меню для цього конкретного чату (список команд)
+    try:
+        await bot.set_chat_menu_button(
+            chat_id=message.chat.id,
+            menu_button=MenuButtonCommands()
+        )
+    except Exception:
+        pass  # Не критично — не блокуємо головну логіку
+
+    args = message.text.split() if message.text else []
     is_login_redirect = len(args) > 1 and args[1] == "login"
     is_reg_vet_redirect = len(args) > 1 and args[1] == "reg_vet"
     is_spec_redirect = len(args) > 1 and args[1].startswith("spec_")
     is_support_redirect = len(args) > 1 and args[1] == "support"
     
+    # Скидаємо стан, якщо це звичайний старт (не підтримка і не логін)
+    if state and not (is_support_redirect or is_reg_vet_redirect):
+        await state.clear()
+        
     if is_reg_vet_redirect:
         if state:
             await start_veteran_registration_flow(message, state)
@@ -220,6 +244,7 @@ async def cmd_start(message: types.Message, state: FSMContext = None):
             support_platform="bot",
             support_user_id=str(message.from_user.id),
             support_bug_reported=False,
+            return_context="start"
         )
         await message.answer(
             "🤖 *ШІ-асистент підтримки автоматично підключено (перехід з порталу).*\n\n"
@@ -235,18 +260,16 @@ async def cmd_start(message: types.Message, state: FSMContext = None):
 
     # Якщо перейшов з порталу на конкретного спеціаліста
     if is_spec_redirect:
-        spec_param = args[1]  # наприклад "spec_123" або "spec_user_456"
-        spec_id = spec_param[5:]  # прибираємо префікс "spec_"
+        spec_param = args[1]  
+        spec_id = spec_param[5:]  
         db = await load_db_async()
-        spec = next((s for s in db if str(s.get("id")) == str(spec_id) or str(s.get("tg_id")) == str(spec_id)), None)
+        
+        spec = next((s for s in db if str(s.get("id")) == spec_id or str(s.get("tg_id")) == spec_id), None)
         if spec:
-            def get_cat_name(cat):
-                names = {"legal": "Юрист", "psychology": "Психолог", "rehab": "Реабілітолог", "career": "Кар'єра/Бізнес"}
-                return names.get(cat, cat)
             text = (
-                f"👤 **{spec.get('name', 'Без імені')}**\n"
-                f"🎓 {get_cat_name(spec.get('category'))}\n"
-                f"📍 {spec.get('address', 'Черкаси')}\n"
+                f"👤 **{spec.get('name')}**\n"
+                f"🏷 Категорія: {spec.get('category')}\n"
+                f"📍 Адреса: {spec.get('address')}\n\n"
                 f"🎁 Пільги: {spec.get('discount', 'Уточнюйте')}\n\n"
                 f"📝 {spec.get('bio', '')}"
             )
@@ -258,59 +281,80 @@ async def cmd_start(message: types.Message, state: FSMContext = None):
             )
         else:
             await message.answer("На жаль, спеціаліста не знайдено. Можливо, він вже не активний.")
-        # Після показу спеціаліста — показуємо звичайне меню
     
+    # --- АВТОМАТИЧНИЙ ВХІД ДО КАБІНЕТУ ---
     db = await load_db_async()
-    # Перевіряємо, чи є цей користувач серед спеціалістів (шукаємо tg_id або префікс в id)
     user_id_str = str(message.from_user.id)
-    is_specialist = any(
-        str(s.get("tg_id")) == user_id_str or 
-        str(s.get("id", "")).startswith(f"user_{user_id_str}") 
-        for s in db
-    )
     
+    # Перевіряємо партнера
+    partner = next((
+        s for s in db 
+        if str(s.get("tg_id")) == user_id_str or 
+        str(s.get("id", "")).startswith(f"user_{user_id_str}") 
+    ), None)
+    
+    # Перевіряємо ветерана
     vet = db_manager.get_veteran(message.from_user.id)
     is_veteran = vet is not None and vet.get("name") is not None
     
-    kb = [[KeyboardButton(text="Ветеран / Родина")]]
-    
-    state_data = await state.get_data() if state else {}
-    if not is_veteran and state_data.get("skipped_reg"):
-        kb.append([KeyboardButton(text="🎖️ Реєстрація ветерана (знижка 10%)")])
+    if partner:
+        # Авто-редирект партнера до його кабінету
+        await route_partner_cabinet(message, partner, state)
+        return
     elif is_veteran:
-        kb.append([KeyboardButton(text="👤 Мій профіль / 📋 Мої запити")])
+        # Авто-редирект ветерана до його кабінету
+        await show_vet_profile(message, state)
+        return
         
-    if is_specialist:
-        kb.append([KeyboardButton(text="👤 Мій Кабінет")])
-    else:
-        kb.append([KeyboardButton(text="Партнер")])
-        
-    import time
-    timestamp = int(time.time())
-    kb.append([KeyboardButton(text="🌐 Перейти на Портал", web_app=WebAppInfo(url=f"{PORTAL_URL}?v={timestamp}"))])
+    # --- ЯКЩО НЕ ЗАРЕЄСТРОВАНИЙ - МЕНЮ ВИБОРУ ---
+    kb = [
+        [KeyboardButton(text="Ветеран / Родина")],
+        [KeyboardButton(text="Партнер")]
+    ]
     
     if str(message.from_user.id).strip() == str(ADMIN_ID).strip():
         kb.append([KeyboardButton(text="🛡️ Адмін-панель")])
 
-    kb.append([KeyboardButton(text="🆘 Техпідтримка")])
-
     reply_markup = ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
     
     welcome_text = "Вітаємо у координаційному центрі **'Новий Шлях'**!\n\nЦей бот допоможе вам знайти фахівця або долучитися до нашої мережі підтримки."
-    if is_veteran:
-        welcome_text = f"Вітаємо, {vet.get('name')}! Раді бачити вас у координаційному центрі **'Новий Шлях'**!\n\nЦей бот допоможе вам знайти фахівця або долучитися до нашої мережі підтримки."
         
     if is_login_redirect:
         welcome_text = "🔐 **Ви успішно авторизувалися через портал!**\n\nВаше меню керування активоване нижче 👇"
-        # Примусове оновлення UI: видаляємо і повертаємо клавіатуру
-        tmp = await message.answer("Оновлення інтерфейсу...", reply_markup=ReplyKeyboardRemove())
+        tmp = await message.answer("Оновлення інтерфейсу", reply_markup=ReplyKeyboardRemove())
         await tmp.delete()
 
     await message.answer(welcome_text, reply_markup=reply_markup, parse_mode="Markdown")
 
 @dp.message(F.text == "🌐 Перейти на Портал")
 async def portal_redirect(message: types.Message):
-    kb = [[InlineKeyboardButton(text="🚀 Відкрити Портал", web_app=WebAppInfo(url=f"{PORTAL_URL}?v=24"))]]
+    user_id_str = str(message.from_user.id)
+    db = await load_db_async()
+    partner = next((
+        s for s in db 
+        if str(s.get("tg_id")) == user_id_str or 
+        str(s.get("id", "")).startswith(f"user_{user_id_str}") 
+    ), None)
+    vet = db_manager.get_veteran(message.from_user.id)
+    is_veteran = vet is not None and vet.get("name") is not None
+    
+    import time
+    ts = int(time.time())
+    base = PORTAL_URL.rstrip("/")
+    if base.endswith("index.html"):
+        base = base[:-len("index.html")].rstrip("/")
+
+    if partner:
+        target_url = f"{base}/cabinet.html?tg_id={user_id_str}&role=spec&v={ts}"
+        button_text = "🚀 Відкрити свій кабінет на Порталі"
+    elif is_veteran:
+        target_url = f"{base}/index.html?tg_id={user_id_str}&role=vet&v={ts}"
+        button_text = "🚀 Відкрити свій кабінет на Порталі"
+    else:
+        target_url = f"{base}/index.html?v={ts}"
+        button_text = "🚀 Відкрити Портал"
+
+    kb = [[InlineKeyboardButton(text=button_text, web_app=WebAppInfo(url=target_url))]]
     await message.answer(
         "🌐 **Наш Веб-портал «Новий Шлях»** — це зручний інтерактивний каталог допомоги Черкащини.\n\n"
         "**Переваги порталу:**\n"
@@ -347,14 +391,14 @@ async def veteran_menu(message: types.Message, state: FSMContext = None):
     if not is_veteran and state_data.get("skipped_reg"):
         nav_kb.append([KeyboardButton(text="🎖️ Реєстрація ветерана (знижка 10%)")])
     elif is_veteran:
-        nav_kb.append([KeyboardButton(text="👤 Мій профіль / 📋 Мої запити")])
+        nav_kb.append([KeyboardButton(text="🎖️ Кабінет Ветерана")])
         
     nav_kb.append([KeyboardButton(text="⬅️ Повернутися до вибору ролі")])
-    import time
-    timestamp = int(time.time())
-    nav_kb.append([KeyboardButton(text="🌐 Перейти на Портал", web_app=WebAppInfo(url=f"{PORTAL_URL}?v={timestamp}"))])
-    
     nav_markup = ReplyKeyboardMarkup(keyboard=nav_kb, resize_keyboard=True)
+    
+    # Зберігаємо контекст для повернення після техпідтримки
+    if state:
+        await state.update_data(return_context="veteran_menu")
     
     # Зберігаємо ID повідомлення з меню, щоб видалити його потім
     msg = await message.answer("Яка допомога вам потрібна зараз?", reply_markup=markup)
@@ -417,7 +461,7 @@ async def show_specialists(callback: types.CallbackQuery, state: FSMContext = No
     # Миттєво оновлюємо клавіатуру (прибираємо кнопку порталу)
     nav_kb = [[KeyboardButton(text="⬅️ Повернутися до вибору послуг")]]
     nav_markup = ReplyKeyboardMarkup(keyboard=nav_kb, resize_keyboard=True)
-    await callback.message.answer("Завантажую список фахівців... 🔎", reply_markup=nav_markup)
+    await callback.message.answer("Завантажую список фахівців… 🔎", reply_markup=nav_markup)
     
     db = await load_db_async()
     # Показуємо тільки верифікованих
@@ -1055,8 +1099,10 @@ async def process_vet_consent(callback: types.CallbackQuery, state: FSMContext):
 
 # --- ОСОБИСТИЙ ПРОФІЛЬ ВЕТЕРАНА ---
 
-@dp.message(F.text.in_({"👤 Мій профіль", "👤 Мій профіль / 📋 Мої запити"}))
-async def show_vet_profile(message: types.Message):
+@dp.message(F.text.in_({"👤 Мій профіль", "👤 Мій профіль / 📋 Мої запити", "🎖️ Кабінет Ветерана"}))
+async def show_vet_profile(message: types.Message, state: FSMContext = None):
+    if state:
+        await state.update_data(return_context="veteran_cabinet")
     from datetime import datetime
     vet = db_manager.get_veteran(message.from_user.id)
     if not vet:
@@ -1128,18 +1174,30 @@ async def show_vet_profile(message: types.Message):
     # Значок для тих хто з іншого регіону
     region_note = ""
     if vet.get("region_request_only"):
-        region_note = "\n⏳ _Ваш регіон у черзі на підключення_"
- 
-    text = (
-        f"🎖️ **Ваш профіль ветерана**\n\n"
-        f"👤 **Ім'я:** {vet.get('name')}\n"
-        f"📞 **Телефон:** {vet.get('phone')}\n"
-        f"🏷️ **Статус:** {status_label}\n"
-        f"📍 **Місцезнаходження:** {location_str}{region_note}\n"
-        f"💡 **Потреби:** {needs_label}"
-        f"{logs_text}\n\n"
-        f"Ви можете видалити свій профіль відповідно до GDPR (Право бути забутим)."
-    )
+        region_note = "\n⏳ _Ваш регіон у черзі на підключення_"
+
+ 
+
+    text = (
+
+        f"🎖️ **Ваш профіль ветерана**\n\n"
+
+        f"👤 **Ім'я:** {vet.get('name')}\n"
+
+        f"📞 **Телефон:** {vet.get('phone')}\n"
+
+        f"🏷️ **Статус:** {status_label}\n"
+
+        f"📍 **Місцезнаходження:** {location_str}{region_note}\n"
+
+        f"💡 **Потреби:** {needs_label}"
+
+        f"{logs_text}\n\n"
+
+        f"Ви можете видалити свій профіль відповідно до GDPR (Право бути забутим)."
+
+    )
+
     
     kb.append([InlineKeyboardButton(text="❌ Видалити профіль ветерана", callback_data="vet_delete_profile_confirm")])
     await message.answer(text, reply_markup=InlineKeyboardMarkup(inline_keyboard=kb), parse_mode="Markdown")
@@ -1180,6 +1238,8 @@ async def vet_delete_cancel(callback: types.CallbackQuery):
 @dp.message(F.text.in_({"💼 Я Спеціаліст (Реєстрація)", "Партнер"}))
 async def spec_reg_start(message: types.Message, state: FSMContext):
     await state.set_state(Registration.partner_role)
+    # Зберігаємо контекст для повернення після техпідтримки
+    await state.update_data(return_context="partner_menu")
     kb = [
         [InlineKeyboardButton(text="👨‍⚕️ Приватний фахівець", callback_data="partner_role:specialist")],
         [InlineKeyboardButton(text="🏢 Організація / установа / бюро", callback_data="partner_role:partner")],
@@ -1785,43 +1845,258 @@ async def reject_specialist(callback: types.CallbackQuery):
         pass
     await callback.answer()
 
-# --- ОСОБИСТИЙ КАБІНЕТ СПЕЦІАЛІСТА ---
+# --- ОСОБИСТІ КАБІНЕТИ ПАРТНЕРІВ ---
 @dp.message(F.text == "👤 Мій Кабінет")
-async def show_cabinet(message: types.Message, user_id=None):
+async def show_cabinet_handler(message: types.Message, state: FSMContext, user_id=None):
     db = await load_db_async()
-    # Якщо user_id не передано (це пряме повідомлення), беремо його з message.from_user.id
-    # Якщо передано (це callback), використовуємо переданий ID
-    user_id_str = str(user_id if user_id else message.from_user.id)
+    uid = str(user_id if user_id else message.from_user.id)
+    partner = next((s for s in db if str(s.get("tg_id")) == uid or s.get("id", "").startswith(f"user_{uid}")), None)
     
-    spec = next((
-        s for s in db 
-        if str(s.get("tg_id")) == user_id_str or 
-        s.get("id", "").startswith(f"user_{user_id_str}")
-    ), None)
-    
-    if not spec:
-        await message.answer(f"Ваш профіль не знайдено (ID: {user_id_str}). Спробуйте зареєструватися.")
+    if not partner:
+        await message.answer("Ваш профіль не знайдено.")
         return
         
+    await route_partner_cabinet(message, partner, state)
+
+async def route_partner_cabinet(message: types.Message, partner: dict, state: FSMContext = None):
+    role = partner.get("role", "specialist")
+    
+    if state:
+        await state.update_data(return_context=f"cabinet_{role}")
+    
+    if role == "ngo":
+        await show_ngo_cabinet(message, partner)
+    elif role == "state":
+        await show_state_cabinet(message, partner)
+    else:
+        # specialist, partner fallback
+        await show_specialist_cabinet(message, partner)
+
+async def show_specialist_cabinet(message: types.Message, spec: dict):
     status_emoji = "✅" if spec.get("status") == "verified" else "⏳"
     status_text = "Верифіковано" if spec.get("status") == "verified" else "На модерації"
     
     text = (
-        f"👤 **Ваш Профіль**\n\n"
+        f"👨‍⚕️ **Кабінет Спеціаліста**\n\n"
         f"Статус: {status_emoji} {status_text}\n"
         f"ПІБ: {spec.get('name')}\n"
-        f"Категорія: {spec.get('category')}\n"
-        f"Адреса: {spec.get('address')}\n"
-        f"Телефон: {spec.get('phone')}\n\n"
-        "Ви можете оновити дані або видалити профіль."
+        f"Категорія: {spec.get('category')}\n\n"
+        "Тут ви можете переглядати звернення від ветеранів, бачити свій рейтинг та оновлювати послуги."
     )
     
+    import time
+    timestamp = int(time.time())
     kb = [
-        [InlineKeyboardButton(text="💰 Звітувати про оплату (25%)", callback_data="report_payment")],
-        [InlineKeyboardButton(text="📝 Редагувати анкету", callback_data="edit_profile")],
-        [InlineKeyboardButton(text="❌ Видалити профіль", callback_data="delete_profile_confirm")]
+        [KeyboardButton(text="📩 Мої звернення"), KeyboardButton(text="✏️ Редагувати профіль")],
+        [KeyboardButton(text="💰 Звітувати про оплату (25%)")],
+        [KeyboardButton(text="❌ Видалити профіль")]
     ]
-    await message.answer(text, reply_markup=InlineKeyboardMarkup(inline_keyboard=kb), parse_mode="Markdown")
+    await message.answer(text, reply_markup=ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True), parse_mode="Markdown")
+
+async def show_ngo_cabinet(message: types.Message, spec: dict):
+    status_emoji = "✅" if spec.get("status") == "verified" else "⏳"
+    status_text = "Верифіковано" if spec.get("status") == "verified" else "На модерації"
+    
+    text = (
+        f"💚 **Кабінет ГО / БФ / Спонсора**\n\n"
+        f"Статус: {status_emoji} {status_text}\n"
+        f"Організація: {spec.get('name')}\n\n"
+        "Тут ви можете переглядати партнерські угоди, пожертви та статистику."
+    )
+    
+    import time
+    timestamp = int(time.time())
+    kb = [
+        [KeyboardButton(text="🤝 Партнерські угоди"), KeyboardButton(text="📊 Статистика")],
+        [KeyboardButton(text="✏️ Редагувати профіль")]
+    ]
+    await message.answer(text, reply_markup=ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True), parse_mode="Markdown")
+
+async def show_state_cabinet(message: types.Message, spec: dict):
+    status_emoji = "✅" if spec.get("status") == "verified" else "⏳"
+    status_text = "Верифіковано" if spec.get("status") == "verified" else "На модерації"
+    
+    text = (
+        f"🏛️ **Кабінет Державної Установи**\n\n"
+        f"Статус: {status_emoji} {status_text}\n"
+        f"Установа: {spec.get('name')}\n\n"
+        "Тут ви можете обробляти інформаційні запити та переглядати статус меморандумів."
+    )
+    
+    import time
+    timestamp = int(time.time())
+    kb = [
+        [KeyboardButton(text="📜 Меморандуми"), KeyboardButton(text="✉️ Запити ветеранів")],
+        [KeyboardButton(text="✏️ Редагувати профіль")]
+    ]
+    await message.answer(text, reply_markup=ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True), parse_mode="Markdown")
+
+@dp.message(F.text == "❌ Видалити профіль")
+async def delete_profile_btn(message: types.Message):
+    kb = [
+        [InlineKeyboardButton(text="✅ Так, видалити", callback_data="delete_profile_final")],
+        [InlineKeyboardButton(text="🔙 Скасувати", callback_data="to_cabinet")]
+    ]
+    await message.answer("⚠️ Ви впевнені, що хочете видалити свій профіль? Цю дію неможливо скасувати.", reply_markup=InlineKeyboardMarkup(inline_keyboard=kb))
+
+# ══════════════════════════════════════════════════════════════════
+# КАБІНЕТНІ КНОПКИ — ХЕНДЛЕРИ (раніше були «мертвими»)
+# ══════════════════════════════════════════════════════════════════
+
+@dp.message(F.text == "📩 Мої звернення")
+async def my_requests_handler(message: types.Message):
+    """Спеціаліст переглядає звернення від ветеранів зі своєї БД."""
+    db = await load_db_async()
+    uid = str(message.from_user.id)
+    spec = next((s for s in db if str(s.get("tg_id")) == uid or
+                 s.get("id", "").startswith(f"user_{uid}")), None)
+    if not spec:
+        await message.answer("Профіль спеціаліста не знайдено.")
+        return
+
+    conn = db_manager.get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('''
+        SELECT v.name, v.phone, l.created_at, l.status
+        FROM intake_logs l
+        JOIN veterans v ON l.veteran_id = v.id
+        WHERE l.specialist_id = ?
+        ORDER BY l.created_at DESC LIMIT 10
+    ''', (spec['id'],))
+    rows = cursor.fetchall()
+    conn.close()
+
+    if not rows:
+        await message.answer(
+            "📭 Поки що звернень від ветеранів не було.\n\n"
+            "Переконайтесь, що ваш профіль **верифіковано** та видимий на порталі.",
+            parse_mode="Markdown"
+        )
+        return
+
+    text = "📩 **Останні звернення ветеранів:**\n\n"
+    for row in rows:
+        name = row['name'] or "Анонімний ветеран"
+        date_str = row['created_at'][:10] if row['created_at'] else "—"
+        status_icon = "✅" if row['status'] == 'completed' else "⏳"
+        text += f"{status_icon} {name} — {date_str}\n"
+    text += "\n_Для зв'язку скористайтесь контактом у профілі ветерана._"
+    await message.answer(text, parse_mode="Markdown")
+
+
+@dp.message(F.text == "✏️ Редагувати профіль")
+async def edit_profile_btn_handler(message: types.Message):
+    """Bridge: ReplyKeyboard → InlineKeyboard (хендлер edit_profile вже є)."""
+    kb = [[InlineKeyboardButton(text="✏️ Перейти до редагування", callback_data="edit_profile")]]
+    await message.answer(
+        "Оберіть, що ви хочете змінити у своєму профілі 👇",
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=kb)
+    )
+
+
+@dp.message(F.text == "💰 Звітувати про оплату (25%)")
+async def report_payment_btn_handler(message: types.Message):
+    """Bridge: ReplyKeyboard → InlineKeyboard (хендлер report_payment вже є)."""
+    kb = [[InlineKeyboardButton(text="💰 Розпочати звітування", callback_data="report_payment")]]
+    await message.answer(
+        "📊 **Звітування про оплату (25% внесок)**\n\n"
+        "Після надання послуги ветерану ви зобов'язані перерахувати **25%** від "
+        "отриманої суми на статутну діяльність ГО «Талан ЮА».\n\n"
+        "Натисніть кнопку нижче, щоб вказати суму та надіслати квитанцію:",
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=kb),
+        parse_mode="Markdown"
+    )
+
+
+@dp.message(F.text == "🤝 Партнерські угоди")
+async def ngo_agreements_handler(message: types.Message):
+    """Кнопка кабінету ГО / БФ — інформація про партнерські угоди."""
+    await message.answer(
+        "🤝 **Партнерські угоди**\n\n"
+        "Для перегляду або підписання нового партнерського меморандуму зверніться "
+        "до координатора проєкту «Новий Шлях»:\n\n"
+        "📧 Email: ngo.talan.ua@gmail.com\n"
+        "🆘 Або скористайтесь: /support\n\n"
+        "_Укладені угоди відображаються в офісі ГО «Талан ЮА»._",
+        parse_mode="Markdown"
+    )
+
+
+@dp.message(F.text == "📊 Статистика")
+async def ngo_stats_handler(message: types.Message):
+    """Кнопка кабінету ГО / БФ — загальна статистика порталу."""
+    try:
+        conn = db_manager.get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) as total FROM intake_logs")
+        total_intakes = cursor.fetchone()['total']
+        cursor.execute("SELECT COUNT(*) as cnt FROM specialists WHERE status='verified'")
+        active_specs = cursor.fetchone()['cnt']
+        cursor.execute("SELECT COUNT(*) as cnt FROM veterans WHERE name IS NOT NULL")
+        veterans_count = cursor.fetchone()['cnt']
+        conn.close()
+    except Exception:
+        total_intakes = 0
+        active_specs = 0
+        veterans_count = 0
+
+    await message.answer(
+        "📊 **Статистика порталу «Новий Шлях»**\n\n"
+        f"🧑‍⚕️ Верифікованих спеціалістів: **{active_specs}**\n"
+        f"🎖️ Зареєстрованих ветеранів: **{veterans_count}**\n"
+        f"📩 Всього звернень: **{total_intakes}**\n\n"
+        "_Дані оновлюються в режимі реального часу._",
+        parse_mode="Markdown"
+    )
+
+
+@dp.message(F.text == "📜 Меморандуми")
+async def state_memorandums_handler(message: types.Message):
+    """Кнопка кабінету Держустанови — інформація про меморандуми."""
+    await message.answer(
+        "📜 **Меморандуми про співпрацю**\n\n"
+        "Для укладання або ознайомлення з меморандумом про співпрацю між "
+        "вашою установою та ГО «Талан ЮА» зверніться до керівництва організації:\n\n"
+        "📧 Email: ngo.talan.ua@gmail.com\n"
+        "🆘 Техпідтримка: /support",
+        parse_mode="Markdown"
+    )
+
+
+@dp.message(F.text == "✉️ Запити ветеранів")
+async def state_vet_requests_handler(message: types.Message):
+    """Кнопка кабінету Держустанови — переглянути запити ветеранів у регіоні."""
+    try:
+        conn = db_manager.get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT region, raion, needs, created_at
+            FROM regional_requests
+            ORDER BY created_at DESC LIMIT 10
+        ''')
+        rows = cursor.fetchall()
+        conn.close()
+    except Exception:
+        rows = []
+
+    if not rows:
+        await message.answer(
+            "📭 Наразі запитів від ветеранів у системі не зафіксовано.\n\n"
+            "_Нові звернення з'являться тут після того, як ветерани заповнять анкету._",
+            parse_mode="Markdown"
+        )
+        return
+
+    text = "✉️ **Останні запити ветеранів у регіоні:**\n\n"
+    for row in rows:
+        region = row['region'] or "—"
+        needs = row['needs'] or "не вказано"
+        date_str = row['created_at'][:10] if row['created_at'] else "—"
+        text += f"• {region} | {needs} ({date_str})\n"
+    text += "\n_Для отримання деталей зверніться до ГО «Талан ЮА»._"
+    await message.answer(text, parse_mode="Markdown")
+
+# ══════════════════════════════════════════════════════════════════
 
 @dp.callback_query(F.data == "delete_profile_confirm")
 async def delete_profile_confirm(callback: types.CallbackQuery):
@@ -2084,12 +2359,22 @@ async def to_admin_panel(callback: types.CallbackQuery):
 
 # ЗАПУСК
 async def main():
-    # Очищуємо системні команди
-    await bot.delete_my_commands()
-    
-    # Скидаємо кнопку меню до стандартної
-    await bot.set_chat_menu_button(menu_button=MenuButtonDefault())
-    
+    # ══════════════════════════════════════════
+    # БІЧНА ПАНЕЛЬ (Persistent Menu) A + C
+    # Варіант A: set_my_commands — список команд через кнопку "/"
+    # Варіант C: MenuButtonCommands — ☰ у верхньому лівому куті відкриває цей список
+    # ══════════════════════════════════════════
+    static_commands = [
+        BotCommand(command="portal",  description="🌐 Портал"),
+        BotCommand(command="start",   description="🏠 Головне меню"),
+        BotCommand(command="cabinet", description="👤 Мій кабінет"),
+        BotCommand(command="support", description="🆘 Техпідтримка"),
+    ]
+    await bot.set_my_commands(static_commands, scope=BotCommandScopeDefault())
+
+    # Кнопка ☰ (ліворуч від поля вводу) відкриває список команд (/support, /portal, /start, /cabinet)
+    await bot.set_chat_menu_button(menu_button=MenuButtonCommands())
+
     await dp.start_polling(bot)
 
 @dp.message(Command("admin"))
@@ -2099,6 +2384,24 @@ async def cmd_admin_direct(message: types.Message):
 @dp.message(Command("cabinet"))
 async def cmd_cabinet_direct(message: types.Message):
     await show_cabinet(message)
+
+# ══════════════════════════════════════════
+# КОМАНДИ БІЧНОЇ ПАНЕЛІ (Persistent Menu)
+# ══════════════════════════════════════════
+
+@dp.message(Command("support"))
+async def cmd_support(message: types.Message, state: FSMContext):
+    """Команда /support — аліас кнопки 🆘 Техпідтримка.
+    Доступна з бічної панелі (☰) незалежно від поточного місця навігації.
+    """
+    await support_entry(message, state)
+
+@dp.message(Command("portal"))
+async def cmd_portal(message: types.Message):
+    """Команда /portal — аліас кнопки 🌐 Перейти на Портал.
+    Доступна з бічної панелі (☰) незалежно від поточного місця навігації.
+    """
+    await portal_redirect(message)
 
 # --- ЛОГІКА ВІДГУКІВ (Feedback Loop) ---
 
@@ -2299,10 +2602,9 @@ async def ai_analyze_request(query: str, specialists: list) -> dict:
     Повертає JSON:
     {
         "categories": ["psychology", "legal"],   // відсортовані за релевантністю
-        "summary": "Коротко: ветеран має ...",    // що GPT зрозумів
+        "summary": "Коротко: опис запиту",       // що GPT зрозумів
         "matches": [
-            {"id": "...", "score": 92, "reason": "..."},
-            ...
+            {"id": "ід_спеціаліста", "score": 92, "reason": "пояснення"},
         ]
     }
     """
@@ -2393,7 +2695,7 @@ async def process_ai_query(message: types.Message, state: FSMContext):
 
     # ── Голосове повідомлення → Whisper ──
     if message.voice:
-        processing_msg = await message.answer("🎙️ Розпізнаю голосове повідомлення...")
+        processing_msg = await message.answer("🎙️ Розпізнаю голосове повідомлення")
         try:
             file_info = await bot.get_file(message.voice.file_id)
             with tempfile.NamedTemporaryFile(suffix=".ogg", delete=False) as tmp:
@@ -2438,7 +2740,7 @@ async def process_ai_query(message: types.Message, state: FSMContext):
 
     # ── GPT-4o аналізує запит ──
     thinking_msg = await message.answer(
-        "🧠 *ШІ аналізує ваш запит...*\n"
+        "🧠 *ШІ аналізує ваш запит*\n"
         "_Це займе кілька секунд_",
         parse_mode="Markdown"
     )
@@ -2539,58 +2841,17 @@ async def new_ai_search(message: types.Message, state: FSMContext):
 
 
 # ══════════════════════════════════════════
-# CATCH-ALL: будь-яке невідоме повідомлення
-# ══════════════════════════════════════════
-@dp.message()
-async def catch_all_handler(message: types.Message, state: FSMContext):
-    """Спрацьовує на будь-яке повідомлення, яке не обробив жоден хендлер.
-    Якщо є активний FSM-стан — не втручаємось.
-    Якщо незнайомий/незареєстрований — показуємо стартове меню.
-    Якщо відомий — нагадуємо про кнопки меню.
-    """
-    current_state = await state.get_state()
-    if current_state is not None:
-        # Є активний FSM (реєстрація, пошук тощо) — не чіпаємо
-        return
-    
-    db = await load_db_async()
-    user_id_str = str(message.from_user.id)
-    is_specialist = any(
-        str(s.get("tg_id")) == user_id_str or
-        str(s.get("id", "")).startswith(f"user_{user_id_str}")
-        for s in db
-    )
-    vet = db_manager.get_veteran(message.from_user.id)
-    is_veteran = vet is not None and vet.get("name") is not None
-    
-    if is_veteran or is_specialist:
-        # Відомий користувач — нагадуємо про кнопки
-        await message.answer("Скористайся кнопками меню нижче 👇")
-    else:
-        # Новий або невідомий — показуємо вибір ролі
-        kb = [
-            [KeyboardButton(text="Ветеран / Родина")],
-            [KeyboardButton(text="Партнер")],
-        ]
-        import time
-        timestamp = int(time.time())
-        kb.append([KeyboardButton(text="🌐 Перейти на Портал", web_app=WebAppInfo(url=f"{PORTAL_URL}?v={timestamp}"))])
-        if str(message.from_user.id).strip() == str(ADMIN_ID).strip():
-            kb.append([KeyboardButton(text="🛡️ Адмін-панель")])
-        reply_markup = ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
-        await message.answer(
-            "Вітаємо! Оберіть, будь ласка, хто ви:",
-            reply_markup=reply_markup
-        )
-
-
-# ══════════════════════════════════════════
 # ТЕХПІДТРИМКА (шІ-асистент)
 # ══════════════════════════════════════════
 @dp.message(F.text == "🆘 Техпідтримка")
 async def support_entry(message: types.Message, state: FSMContext):
     """Перша точка входу в систему підтримки."""
+    # Зберігаємо контекст повернення ДО переходу в support-стан
+    current_data = await state.get_data()
+    return_context = current_data.get("return_context", "start")
     await state.set_state(SupportDialog.choosing_option)
+    # Відновлюємо збережений контекст після set_state (який скидає дані)
+    await state.update_data(return_context=return_context)
     kb = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="💬 Почати діалог (ШІ-асистент)", callback_data="support_chat")],
         [InlineKeyboardButton(text="✉️ Написати на Email", callback_data="support_email")],
@@ -2606,24 +2867,37 @@ async def support_entry(message: types.Message, state: FSMContext):
     )
 
 
+
 @dp.callback_query(F.data == "support_chat")
 async def support_start_chat(callback: types.CallbackQuery, state: FSMContext):
     """Запускаємо діалог з ШІ."""
     await callback.message.edit_text(
         "🤖 *ШІ-асистент підтримки підключено.*\n\n"
         "Опишіть вашу проблему текстом. Я допоможу або передам звіт розробникам.\n"
-        "_Щоб завершити діалог — напишіть /start_",
+        "_Щоб завершити діалог — натисніть кнопку нижче або напишіть /start_",
         parse_mode="Markdown"
     )
     # Зберігаємо сесію
     import uuid
     session_id = str(uuid.uuid4())
+    # Читаємо return_context ДО set_state (щоб не загубити)
+    prev_data = await state.get_data()
+    saved_return_context = prev_data.get("return_context", "start")
     await state.set_state(SupportDialog.in_dialogue)
     await state.update_data(
         support_session_id=session_id,
         support_platform="bot",
         support_user_id=str(callback.from_user.id),
         support_bug_reported=False,
+        return_context=saved_return_context,  # відновлюємо після set_state
+    )
+    # Надсилаємо нову клавіатуру, де ТІЛЬКИ одна кнопка виходу
+    await callback.message.answer(
+        "Напишіть ваше повідомлення:",
+        reply_markup=ReplyKeyboardMarkup(
+            keyboard=[[KeyboardButton(text="❌ Вийти з підтримки")]],
+            resize_keyboard=True
+        )
     )
     await callback.answer()
 
@@ -2647,19 +2921,55 @@ async def support_show_email(callback: types.CallbackQuery, state: FSMContext):
 @dp.callback_query(F.data == "support_cancel")
 async def support_cancel(callback: types.CallbackQuery, state: FSMContext):
     await state.clear()
-    await callback.message.edit_text("❌ Підтримку скасовано. Поверніться до меню /start")
+    await callback.message.edit_text("❌ Підтримку скасовано.")
+    # Відновлюємо повну клавіатуру меню
+    await cmd_start(callback.message, state)
     await callback.answer()
 
+
+from aiogram.filters import StateFilter
+
+@dp.message(F.text.contains("Вийти з підтримки"))
+async def support_global_exit(message: types.Message, state: FSMContext):
+    """Глобальний вихід з техпідтримки — повертає туди, звідки зайшов."""
+    current_data = await state.get_data()
+    return_context = current_data.get("return_context", "start")
+
+    await state.clear()
+    
+    if return_context == "veteran_menu":
+        await message.answer("🚪 Повертаємося до меню послуг.", reply_markup=ReplyKeyboardRemove())
+        await veteran_menu(message, state)
+    elif return_context == "veteran_cabinet":
+        await message.answer("🚪 Повертаємося до вашого кабінету.", reply_markup=ReplyKeyboardRemove())
+        await show_vet_profile(message, state)
+    elif return_context == "partner_menu":
+        await message.answer("🚪 Повертаємося до реєстрації партнера.", reply_markup=ReplyKeyboardRemove())
+        await spec_reg_start(message, state)
+    elif return_context.startswith("cabinet_"):
+        await message.answer("🚪 Повертаємося до вашого кабінету.", reply_markup=ReplyKeyboardRemove())
+        # Імітуємо команду старт, яка завдяки новому коду автоматично перекине в кабінет
+        await cmd_start(message, state)
+    else:
+        tmp = await message.answer("🚪 Повертаємося до головного меню.", reply_markup=ReplyKeyboardRemove())
+        await tmp.delete()
+        await cmd_start(message, state)
 
 @dp.message(SupportDialog.in_dialogue)
 async def support_handle_message(message: types.Message, state: FSMContext):
     """Обробка повідомлень у діалозі з ШІ-асистентом."""
+    
+    # Дозволяємо вихід через /start або ключові слова
+    if message.text in ["/start", "вихід", "вийти", "exit", "❌ Вийти з підтримки"]:
+        await support_global_exit(message, state)
+        return
+
     data = await state.get_data()
     session_id = data.get("support_session_id", "unknown")
     user_id = str(message.from_user.id)
 
-    # Показуємо "..."
-    typing_msg = await message.answer("🤖 Друкує...")
+    # Показуємо статус друку
+    typing_msg = await message.answer("🤖 Друкує")
 
     try:
         import aiohttp
@@ -2748,6 +3058,50 @@ async def support_collect_device(message: types.Message, state: FSMContext):
         "Продовжуйте писати, якщо є інші запитання, \n"
         "або /start для повернення до меню."
     )
+
+
+# ══════════════════════════════════════════
+# CATCH-ALL: будь-яке невідоме повідомлення
+# ══════════════════════════════════════════
+@dp.message()
+async def catch_all_handler(message: types.Message, state: FSMContext):
+    """Спрацьовує на будь-яке повідомлення, яке не обробив жоден хендлер.
+    Якщо є активний FSM-стан — не втручаємось.
+    Якщо незнайомий/незареєстрований — показуємо стартове меню.
+    Якщо відомий — нагадуємо про кнопки меню.
+    """
+    current_state = await state.get_state()
+    if current_state is not None:
+        # Є активний FSM (реєстрація, пошук тощо) — не чіпаємо
+        return
+    
+    db = await load_db_async()
+    user_id_str = str(message.from_user.id)
+    is_specialist = any(
+        str(s.get("tg_id")) == user_id_str or
+        str(s.get("id", "")).startswith(f"user_{user_id_str}")
+        for s in db
+    )
+    vet = db_manager.get_veteran(message.from_user.id)
+    is_veteran = vet is not None and vet.get("name") is not None
+    
+    if is_veteran or is_specialist:
+        # Відомий користувач — нагадуємо про кнопки
+        await message.answer("Скористайся кнопками меню нижче 👇")
+    else:
+        # Новий або невідомий — показуємо вибір ролі
+        kb = [
+            [KeyboardButton(text="Ветеран / Родина")],
+            [KeyboardButton(text="Партнер")],
+        ]
+        import time
+        if str(message.from_user.id).strip() == str(ADMIN_ID).strip():
+            kb.append([KeyboardButton(text="🛡️ Адмін-панель")])
+        reply_markup = ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
+        await message.answer(
+            "Вітаємо! Оберіть, будь ласка, хто ви:",
+            reply_markup=reply_markup
+        )
 
 
 # ══════════════════════════════════════════

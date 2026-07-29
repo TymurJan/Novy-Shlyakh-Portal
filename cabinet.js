@@ -25,6 +25,25 @@ document.addEventListener('DOMContentLoaded', () => {
         { id: "REQ-003", type: "Кар'єра", desc: "Грант на власний бізнес", date: "Вчора, 18:30" },
     ];
 
+    // Авто-авторизація при переході з Telegram бота по tg_id або token
+    const urlParams = new URLSearchParams(window.location.search);
+    const tgId = urlParams.get('tg_id') || urlParams.get('token');
+    if (tgId) {
+        if (tokenInput) tokenInput.value = tgId;
+        // Одразу ховаємо екран логіну
+        screenLogin.classList.remove('active');
+        
+        // Перевіряємо чи підписано NDA раніше в цій сесії/пам'яті
+        const ndaSigned = localStorage.getItem(`nda_signed_${tgId}`);
+        if (ndaSigned === 'true') {
+            screenDashboard.classList.add('active');
+            renderRequests();
+        } else {
+            // Переходимо на Юридичний шлюз NDA
+            screenNda.classList.add('active');
+        }
+    }
+
     // Логіка Логіну
     btnLogin.addEventListener('click', () => {
         const token = tokenInput.value.trim();
@@ -47,6 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
             signatureStatus.textContent = "КЕП успішно верифіковано. Завантаження даних...";
             
             setTimeout(() => {
+                if (tgId) localStorage.setItem(`nda_signed_${tgId}`, 'true');
                 screenNda.classList.remove('active');
                 screenDashboard.classList.add('active');
                 renderRequests();
