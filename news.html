@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Новини — Новий Шлях | Ветеранський портал Черкащини</title>
+    <meta name="description" content="Актуальні новини, зміни в законодавстві, анонси заходів та важлива інформація для ветеранів Черкащини від порталу «Новий Шлях».">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Outfit:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=44">
+    <link rel="stylesheet" href="accessibility.css?v=44">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+        (function() {
+            var tg = window.Telegram && window.Telegram.WebApp;
+            if (tg) { tg.ready(); tg.expand(); }
+        })();
+    </script>
+    <style>
+        .news-hero {
+            padding: 80px 0 50px;
+            background: linear-gradient(180deg, #0d0f0d 0%, #151715 100%);
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .news-hero h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: clamp(28px, 5vw, 48px);
+            font-weight: 700;
+            color: var(--soft-white);
+            margin-bottom: 12px;
+        }
+        .news-hero p {
+            color: #aaa;
+            font-size: 16px;
+            max-width: 600px;
+        }
+        .news-grid {
+            padding: 60px 0;
+            background: #151715;
+        }
+        .news-filter-bar {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
+        }
+        .news-filter-btn {
+            padding: 8px 20px;
+            border-radius: 50px;
+            border: 1px solid rgba(255,255,255,0.12);
+            background: transparent;
+            color: #ccc;
+            font-size: 13px;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .news-filter-btn.active,
+        .news-filter-btn:hover {
+            border-color: var(--primary-green);
+            color: var(--primary-green);
+            background: rgba(46,139,87,0.08);
+        }
+        .news-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr));
+            gap: 28px;
+        }
+        .news-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: border-color 0.25s, transform 0.25s;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+        }
+        .news-card:hover {
+            border-color: var(--primary-green);
+            transform: translateY(-4px);
+        }
+        .news-card-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            background: linear-gradient(135deg, #1a2a1a 0%, #2d4f3a 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+        }
+        .news-card-body {
+            padding: 20px 22px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .news-card-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .news-tag {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 3px 10px;
+            border-radius: 50px;
+            background: rgba(46,139,87,0.12);
+            color: var(--primary-green);
+            border: 1px solid rgba(46,139,87,0.2);
+        }
+        .news-tag.law { background: rgba(59,130,246,0.1); color: #60a5fa; border-color: rgba(59,130,246,0.2); }
+        .news-tag.event { background: rgba(245,158,11,0.1); color: #fbbf24; border-color: rgba(245,158,11,0.2); }
+        .news-tag.grant { background: rgba(139,92,246,0.1); color: #a78bfa; border-color: rgba(139,92,246,0.2); }
+        .news-date {
+            font-size: 12px;
+            color: #666;
+            margin-left: auto;
+        }
+        .news-card-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--soft-white);
+            line-height: 1.45;
+        }
+        .news-card-excerpt {
+            font-size: 13px;
+            color: #aaa;
+            line-height: 1.6;
+            flex: 1;
+        }
+        .news-card-footer {
+            padding: 14px 22px;
+            border-top: 1px solid var(--glass-border);
+            font-size: 12px;
+            color: var(--primary-green);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .empty-news {
+            text-align: center;
+            padding: 80px 20px;
+            color: #555;
+        }
+        .empty-news .icon { font-size: 56px; margin-bottom: 20px; }
+        .empty-news h3 { color: #777; font-size: 20px; margin-bottom: 12px; font-family: 'Outfit', sans-serif; }
+        .empty-news p { font-size: 14px; line-height: 1.6; max-width: 400px; margin: 0 auto; }
+        .news-subscribe {
+            background: var(--glass-bg);
+            border-top: 1px solid var(--glass-border);
+            padding: 60px 0;
+        }
+        .subscribe-card {
+            max-width: 560px;
+            margin: 0 auto;
+            text-align: center;
+            padding: 40px;
+            background: linear-gradient(135deg, rgba(46,139,87,0.06) 0%, rgba(0,0,0,0.4) 100%);
+            border: 1px solid rgba(46,139,87,0.25);
+            border-radius: 24px;
+        }
+        .subscribe-card h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--soft-white);
+        }
+        .subscribe-card p { color: #aaa; font-size: 14px; margin-bottom: 25px; line-height: 1.6; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <span class="ngo-badge">Проєкт ГО ТАЛАН ЮА</span>
+                <h1>НОВИЙ ШЛЯХ</h1>
+            </div>
+            <nav class="nav" style="display: flex; align-items: center;">
+                <a href="news.html" style="color: var(--primary-green);">Новини</a>
+                <a href="index.html#state-resources">Держресурси</a>
+                <a href="index.html#specialists">Права та Допомога</a>
+                <a href="index.html#training">Навчання</a>
+                <a href="index.html#employers">Робота та Бізнес</a>
+                <a href="my.html" class="btn-primary" style="margin-left: 15px; border-radius: 8px; font-weight: 600; display: flex; align-items: center; gap: 8px; padding: 10px 20px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    Кабінет
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Герой-заголовок сторінки -->
+    <section class="news-hero">
+        <div class="container">
+            <h1>📰 Новини та Оголошення</h1>
+            <p>Актуальні зміни в законодавстві, анонси заходів для ветеранів, нові гранти та важливі оголошення від «Новий Шлях».</p>
+        </div>
+    </section>
+
+    <!-- Стрічка новин -->
+    <section class="news-grid">
+        <div class="container">
+            <!-- Фільтри категорій -->
+            <div class="news-filter-bar">
+                <button class="news-filter-btn active" data-filter="all">Всі новини</button>
+                <button class="news-filter-btn" data-filter="law">⚖️ Законодавство</button>
+                <button class="news-filter-btn" data-filter="event">📅 Заходи</button>
+                <button class="news-filter-btn" data-filter="grant">🏆 Гранти</button>
+                <button class="news-filter-btn" data-filter="portal">🛡️ Портал</button>
+            </div>
+
+            <!-- Сітка карток -->
+            <div class="news-cards" id="newsCardsGrid">
+                <!-- Заглушка — порожній стан до появи реального контенту -->
+                <div class="empty-news" style="grid-column: 1 / -1;">
+                    <div class="icon">📭</div>
+                    <h3>Новини скоро з'являться</h3>
+                    <p>Ми вже налаштовуємо автоматичне наповнення новинами зі змінами в законодавстві, анонсами заходів та грантовими можливостями для ветеранів Черкащини.</p>
+                    <p style="margin-top: 15px; color: #444;">Підпишіться на Telegram-бот, щоб отримувати оновлення першими.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Блок підписки на Telegram -->
+    <section class="news-subscribe">
+        <div class="container">
+            <div class="subscribe-card">
+                <h3>Не пропускайте важливе</h3>
+                <p>Підпишіться на Telegram-бот «Новий Шлях» та отримуйте нові виплати, зміни в законодавстві та анонси заходів одразу у месенджер.</p>
+                <a href="https://t.me/Veteran_NovyShlyakh_Bot" target="_blank" class="btn-primary" style="text-decoration: none; display: inline-flex; align-items: center; gap: 10px; padding: 14px 30px; border-radius: 50px; font-weight: 600; font-size: 15px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.48 13.82l-2.946-.924c-.64-.203-.654-.64.136-.954l11.5-4.433c.534-.194 1.001.13.392.739z"/></svg>
+                    Підписатися на Telegram-бот
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Підвал -->
+    <footer class="footer">
+        <div class="container">
+            <div style="display: flex; justify-content: space-around; flex-wrap: wrap; margin-bottom: 40px; text-align: left;">
+                <div style="margin-bottom: 20px;">
+                    <h4 style="color: var(--soft-white); font-size: 18px; margin-bottom: 10px;">ГО «ТАЛАН ЮА»</h4>
+                    <p>Координаційний центр «НОВИЙ ШЛЯХ»</p>
+                    <p>м. Черкаси, вул. Центральна, 100 (Офлайн-хаб)</p>
+                </div>
+                <div>
+                    <h4 style="color: var(--soft-white); font-size: 18px; margin-bottom: 10px;">Контакти</h4>
+                    <p>Тел: +38 (063) 656-89-99</p>
+                </div>
+            </div>
+            <p style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">&copy; 2026 Новий Шлях | Всі права захищені. Проєкт ГО «Талан ЮА»</p>
+        </div>
+    </footer>
+
+    <script>
+        // Фільтрація карток (на майбутнє)
+        document.querySelectorAll('.news-filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.news-filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                // TODO: Фільтрація карток за data-filter категорією при появі реального контенту
+            });
+        });
+    </script>
+
+    <script src="accessibility.js?v=44"></script>
+</body>
+</html>
