@@ -139,13 +139,12 @@ body.is-tg-app .hero {
         border-top: 1px solid rgba(46,139,87,0.12);
         overflow: hidden;
         position: relative;
-        cursor: pointer;
         height: 42px;
         display: flex;
         align-items: center;
-    " onclick="window.location.href='news.html'">
-        <!-- Лівий бейдж -->
-        <div style="
+    ">
+        <!-- Лівий бейдж — веде на сторінку всіх новин -->
+        <a href="news.html" style="
             flex-shrink: 0;
             padding: 0 18px;
             background: rgba(46,139,87,0.15);
@@ -156,11 +155,12 @@ body.is-tg-app .hero {
             gap: 7px;
             white-space: nowrap;
             z-index: 2;
+            text-decoration: none;
         ">
             <span style="font-size: 10px; font-weight: 700; color: var(--primary-green); text-transform: uppercase; letter-spacing: 1px;">📰 Новини</span>
-        </div>
+        </a>
 
-        <!-- Рухома стрічка -->
+        <!-- Рухома стрічка — кожна новина клікабельна -->
         <div style="flex: 1; overflow: hidden; position: relative;">
             <div id="ticker-inner" style="
                 display: flex;
@@ -168,21 +168,22 @@ body.is-tg-app .hero {
                 width: max-content;
                 animation: tickerScroll 40s linear infinite;
                 padding-left: 30px;
+                align-items: center;
             ">
-                <span class="ticker-item" style="white-space: nowrap; font-size: 13px; color: #ccc; font-family: 'Inter', sans-serif;">🔔 Портал «Новий Шлях» розпочав роботу — ветерани Черкащини можуть реєструватись та отримувати підтримку</span>
-                <span class="ticker-item" style="white-space: nowrap; font-size: 13px; color: #ccc; font-family: 'Inter', sans-serif;">⚖️ Нові правила оформлення статусу УБД — дізнайтеся про зміни у процедурі</span>
-                <span class="ticker-item" style="white-space: nowrap; font-size: 13px; color: #ccc; font-family: 'Inter', sans-serif;">🏆 Відкрито прийом заявок на грантову програму «єРобота: Власна Справа 2026» для ветеранів</span>
-                <span class="ticker-item" style="white-space: nowrap; font-size: 13px; color: #ccc; font-family: 'Inter', sans-serif;">🧠 Нові безкоштовні сесії з психологами для ветеранів та їхніх родин — звертайтесь до бота</span>
-                <span class="ticker-item" style="white-space: nowrap; font-size: 13px; color: #ccc; font-family: 'Inter', sans-serif;">📅 Щотижневі юридичні консультації у ЦНАП Черкас — пн, ср, пт з 10:00</span>
+                <a href="news.html#news-1" class="ticker-item" style="white-space: nowrap; font-size: 13px; color: #ccc; font-family: 'Inter', sans-serif; text-decoration: none; transition: color 0.2s;">🔔 Портал «Новий Шлях» розпочав роботу — ветерани Черкащини можуть реєструватись та отримувати підтримку</a>
+                <a href="news.html#news-2" class="ticker-item" style="white-space: nowrap; font-size: 13px; color: #ccc; font-family: 'Inter', sans-serif; text-decoration: none; transition: color 0.2s;">⚖️ Нові правила оформлення статусу УБД — дізнайтеся про зміни у процедурі</a>
+                <a href="news.html#news-3" class="ticker-item" style="white-space: nowrap; font-size: 13px; color: #ccc; font-family: 'Inter', sans-serif; text-decoration: none; transition: color 0.2s;">🏆 Відкрито прийом заявок на грантову програму «єРобота: Власна Справа 2026» для ветеранів</a>
+                <a href="news.html#news-4" class="ticker-item" style="white-space: nowrap; font-size: 13px; color: #ccc; font-family: 'Inter', sans-serif; text-decoration: none; transition: color 0.2s;">🧠 Нові безкоштовні сесії з психологами для ветеранів та їхніх родин — звертайтесь до бота</a>
+                <a href="news.html#news-5" class="ticker-item" style="white-space: nowrap; font-size: 13px; color: #ccc; font-family: 'Inter', sans-serif; text-decoration: none; transition: color 0.2s;">📅 Щотижневі юридичні консультації у ЦНАП Черкас — пн, ср, пт з 10:00</a>
                 <!-- Дублюємо для безперервного ефекту -->
-                <span class="ticker-item" style="white-space: nowrap; font-size: 13px; color: #ccc; font-family: 'Inter', sans-serif;">🔔 Портал «Новий Шлях» розпочав роботу — ветерани Черкащини можуть реєструватись та отримувати підтримку</span>
-                <span class="ticker-item" style="white-space: nowrap; font-size: 13px; color: #ccc; font-family: 'Inter', sans-serif;">⚖️ Нові правила оформлення статусу УБД — дізнайтеся про зміни у процедурі</span>
-                <span class="ticker-item" style="white-space: nowrap; font-size: 13px; color: #ccc; font-family: 'Inter', sans-serif;">🏆 Відкрито прийом заявок на грантову програму «єРобота: Власна Справа 2026» для ветеранів</span>
+                <a href="news.html#news-1" class="ticker-item" style="white-space: nowrap; font-size: 13px; color: #ccc; font-family: 'Inter', sans-serif; text-decoration: none; transition: color 0.2s;">🔔 Портал «Новий Шлях» розпочав роботу — ветерани Черкащини можуть реєструватись та отримувати підтримку</a>
+                <a href="news.html#news-2" class="ticker-item" style="white-space: nowrap; font-size: 13px; color: #ccc; font-family: 'Inter', sans-serif; text-decoration: none; transition: color 0.2s;">⚖️ Нові правила оформлення статусу УБД — дізнайтеся про зміни у процедурі</a>
+                <a href="news.html#news-3" class="ticker-item" style="white-space: nowrap; font-size: 13px; color: #ccc; font-family: 'Inter', sans-serif; text-decoration: none; transition: color 0.2s;">🏆 Відкрито прийом заявок на грантову програму «єРобота: Власна Справа 2026» для ветеранів</a>
             </div>
         </div>
 
-        <!-- Правий індикатор -->
-        <div style="
+        <!-- Правий індикатор — веде на всі новини -->
+        <a href="news.html" style="
             flex-shrink: 0;
             padding: 0 16px;
             border-left: 1px solid rgba(46,139,87,0.25);
@@ -191,9 +192,10 @@ body.is-tg-app .hero {
             align-items: center;
             gap: 5px;
             white-space: nowrap;
+            text-decoration: none;
         ">
             <span style="font-size: 11px; color: var(--primary-green); font-weight: 600;">Читати всі →</span>
-        </div>
+        </a>
     </div>
 
     <style>
@@ -204,9 +206,8 @@ body.is-tg-app .hero {
         #news-ticker-bar:hover #ticker-inner {
             animation-play-state: paused;
         }
-        #news-ticker-bar:hover {
-            background: linear-gradient(90deg, #0f150f 0%, #172217 50%, #0f150f 100%);
-        }
+        #news-ticker-bar { cursor: default; }
+        .ticker-item:hover { color: var(--primary-green) !important; }
     </style>
 
     <!-- БЛОК: Три кроки + Переваги реєстрації (об'єднано) -->
