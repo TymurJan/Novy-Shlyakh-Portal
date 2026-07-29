@@ -248,10 +248,20 @@
     <!-- ХЕДЕР -->
     <header class="header">
         <div class="container">
-            <a href="index.html" class="logo" style="text-decoration: none;">
+            <a href="index.html" id="logo-link" class="logo" style="text-decoration: none;">
                 <span class="ngo-badge">Проєкт ГО ТАЛАН ЮА</span>
                 <h1>НОВИЙ ШЛЯХ</h1>
             </a>
+            <script>
+                // Розумна навігація: залогінений → кабінет, ні → портал
+                (function() {
+                    var link = document.getElementById('logo-link');
+                    if (localStorage.getItem('current_veteran')) {
+                        link.href = 'my.html';
+                        link.title = 'Повернутись до кабінету';
+                    }
+                })();
+            </script>
             <nav class="nav" style="display:flex;align-items:center;">
                 <a href="news.html" style="color:var(--primary-green);">Новини</a>
                 <a href="index.html#state-resources">Держресурси</a>
