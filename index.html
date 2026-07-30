@@ -101,6 +101,8 @@ body.is-tg-app .hero {
                 <a href="#specialists">Фахова допомога</a>
                 <a href="#training">Навчання</a>
                 <a href="#employers">Робота та Бізнес</a>
+                <!-- TODO: замінити # на реальний якір після підтвердження -->
+                <a href="#communities">Спільноти та простори</a>
 
                 <!-- Єдина кнопка входу (Single Gateway) -->
                 <a href="my.html" class="btn-primary" style="margin-left: 15px; border-radius: 8px; font-weight: 600; display: flex; align-items: center; gap: 8px; padding: 10px 20px;">
@@ -419,9 +421,208 @@ body.is-tg-app .hero {
         })();
     </script>
 
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- БЛОК: Державні безкоштовні послуги (Акордеон) -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <section id="state-resources" style="padding: 40px 0; background: #111411; border-top: 1px solid rgba(46,139,87,0.12);">
+        <div class="container">
+            <h3 class="section-title" style="margin-bottom: 8px;">🏛️ Державні безкоштовні послуги</h3>
+            <p class="section-subtitle" style="margin-bottom: 28px;">Хто, де і що надає — без жодної оплати</p>
+
+            <div id="state-accordion" style="display: flex; flex-direction: column; gap: 10px; max-width: 900px; margin: 0 auto;">
+
+                <!-- ПУНКТ 1: ЦНАП -->
+                <div class="acc-item" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(46,139,87,0.2); border-radius: 12px; overflow: hidden;">
+                    <button class="acc-header" onclick="toggleAcc(this)" style="width:100%; display:flex; align-items:center; gap:14px; padding:16px 20px; background:none; border:none; cursor:pointer; text-align:left; color:var(--soft-white);">
+                        <span style="font-size:24px; flex-shrink:0;">🏢</span>
+                        <div style="flex:1;">
+                            <div style="font-family:'Outfit',sans-serif; font-size:15px; font-weight:600;">ЦНАП — Центр надання адміністративних послуг</div>
+                            <div style="font-size:12px; color:#888; margin-top:2px;">Документи, довідки, реєстрація</div>
+                        </div>
+                        <span style="font-size:11px; background:rgba(46,139,87,0.15); color:var(--primary-green); padding:3px 10px; border-radius:50px; border:1px solid rgba(46,139,87,0.3); white-space:nowrap;">Безкоштовно</span>
+                        <span class="acc-arrow" style="font-size:16px; color:#666; transition:transform 0.3s; margin-left:10px;">▾</span>
+                    </button>
+                    <div class="acc-body" style="display:none; padding:0 20px 18px 58px;">
+                        <p style="font-size:13px; color:#bbb; line-height:1.6; margin:0 0 10px;">Оформлення довідок, реєстрація місця проживання, отримання виплат. Пріоритетне обслуговування для ветеранів та УБД.</p>
+                        <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                            <span style="font-size:12px; color:#aaa;">📍 м. Черкаси, вул. Байди Вишневецького, 36</span>
+                        </div>
+                        <a href="https://cnap.ck.gov.ua" target="_blank" style="display:inline-block; margin-top:12px; font-size:12px; color:var(--primary-green); text-decoration:none; border:1px solid rgba(46,139,87,0.4); padding:5px 14px; border-radius:50px;">Офіційний сайт →</a>
+                    </div>
+                </div>
+
+                <!-- ПУНКТ 2: Служба зайнятості -->
+                <div class="acc-item" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(46,139,87,0.2); border-radius: 12px; overflow: hidden;">
+                    <button class="acc-header" onclick="toggleAcc(this)" style="width:100%; display:flex; align-items:center; gap:14px; padding:16px 20px; background:none; border:none; cursor:pointer; text-align:left; color:var(--soft-white);">
+                        <span style="font-size:24px; flex-shrink:0;">💼</span>
+                        <div style="flex:1;">
+                            <div style="font-family:'Outfit',sans-serif; font-size:15px; font-weight:600;">Служба зайнятості — єРобота та перекваліфікація</div>
+                            <div style="font-size:12px; color:#888; margin-top:2px;">Гранти, навчання, працевлаштування</div>
+                        </div>
+                        <span style="font-size:11px; background:rgba(46,139,87,0.15); color:var(--primary-green); padding:3px 10px; border-radius:50px; border:1px solid rgba(46,139,87,0.3); white-space:nowrap;">Безкоштовно</span>
+                        <span class="acc-arrow" style="font-size:16px; color:#666; transition:transform 0.3s; margin-left:10px;">▾</span>
+                    </button>
+                    <div class="acc-body" style="display:none; padding:0 20px 18px 58px;">
+                        <p style="font-size:13px; color:#bbb; line-height:1.6; margin:0 0 10px;">Програма «єРобота: Власна Справа» — гранти до 250 000 грн для ветеранів-підприємців. Безкоштовні курси перекваліфікації. Допомога з пошуком роботодавця.</p>
+                        <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                            <span style="font-size:12px; color:#aaa;">📍 Черкаська обласна служба зайнятості</span>
+                        </div>
+                        <a href="https://www.dcz.gov.ua" target="_blank" style="display:inline-block; margin-top:12px; font-size:12px; color:var(--primary-green); text-decoration:none; border:1px solid rgba(46,139,87,0.4); padding:5px 14px; border-radius:50px;">Портал єРобота →</a>
+                    </div>
+                </div>
+
+                <!-- ПУНКТ 3: ТЦК / Статус УБД -->
+                <div class="acc-item" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(46,139,87,0.2); border-radius: 12px; overflow: hidden;">
+                    <button class="acc-header" onclick="toggleAcc(this)" style="width:100%; display:flex; align-items:center; gap:14px; padding:16px 20px; background:none; border:none; cursor:pointer; text-align:left; color:var(--soft-white);">
+                        <span style="font-size:24px; flex-shrink:0;">🎖️</span>
+                        <div style="flex:1;">
+                            <div style="font-family:'Outfit',sans-serif; font-size:15px; font-weight:600;">ТЦК — Статус УБД та виплати</div>
+                            <div style="font-size:12px; color:#888; margin-top:2px;">Посвідчення учасника бойових дій, пільги, компенсації</div>
+                        </div>
+                        <span style="font-size:11px; background:rgba(46,139,87,0.15); color:var(--primary-green); padding:3px 10px; border-radius:50px; border:1px solid rgba(46,139,87,0.3); white-space:nowrap;">Безкоштовно</span>
+                        <span class="acc-arrow" style="font-size:16px; color:#666; transition:transform 0.3s; margin-left:10px;">▾</span>
+                    </button>
+                    <div class="acc-body" style="display:none; padding:0 20px 18px 58px;">
+                        <p style="font-size:13px; color:#bbb; line-height:1.6; margin:0 0 10px;">Оформлення посвідчення УБД, довідок про участь у бойових діях. Направлення на санаторно-курортне лікування. Консультації щодо пільг та одноразових виплат.</p>
+                        <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                            <span style="font-size:12px; color:#aaa;">📍 Районні ТЦК та СП Черкащини</span>
+                        </div>
+                        <a href="https://tck.mil.gov.ua" target="_blank" style="display:inline-block; margin-top:12px; font-size:12px; color:var(--primary-green); text-decoration:none; border:1px solid rgba(46,139,87,0.4); padding:5px 14px; border-radius:50px;">Знайти ТЦК →</a>
+                    </div>
+                </div>
+
+                <!-- ПУНКТ 4: Безоплатна правова допомога -->
+                <div class="acc-item" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(46,139,87,0.2); border-radius: 12px; overflow: hidden;">
+                    <button class="acc-header" onclick="toggleAcc(this)" style="width:100%; display:flex; align-items:center; gap:14px; padding:16px 20px; background:none; border:none; cursor:pointer; text-align:left; color:var(--soft-white);">
+                        <span style="font-size:24px; flex-shrink:0;">⚖️</span>
+                        <div style="flex:1;">
+                            <div style="font-family:'Outfit',sans-serif; font-size:15px; font-weight:600;">ЦБВПД — Безоплатна правова допомога</div>
+                            <div style="font-size:12px; color:#888; margin-top:2px;">Юридичні консультації, захист у суді</div>
+                        </div>
+                        <span style="font-size:11px; background:rgba(46,139,87,0.15); color:var(--primary-green); padding:3px 10px; border-radius:50px; border:1px solid rgba(46,139,87,0.3); white-space:nowrap;">Безкоштовно</span>
+                        <span class="acc-arrow" style="font-size:16px; color:#666; transition:transform 0.3s; margin-left:10px;">▾</span>
+                    </button>
+                    <div class="acc-body" style="display:none; padding:0 20px 18px 58px;">
+                        <p style="font-size:13px; color:#bbb; line-height:1.6; margin:0 0 10px;">Консультації юриста з питань пільг, майна, сім'ї, трудових спорів. Представництво в суді для ветеранів. Складання позовів та скарг.</p>
+                        <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                            <span style="font-size:12px; color:#aaa;">📍 вул. Смілянська, 130, Черкаси</span>
+                        </div>
+                        <a href="https://legalaid.gov.ua" target="_blank" style="display:inline-block; margin-top:12px; font-size:12px; color:var(--primary-green); text-decoration:none; border:1px solid rgba(46,139,87,0.4); padding:5px 14px; border-radius:50px;">Офіційний портал →</a>
+                    </div>
+                </div>
+
+                <!-- ПУНКТ 5: Психологічна допомога -->
+                <div class="acc-item" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(46,139,87,0.2); border-radius: 12px; overflow: hidden;">
+                    <button class="acc-header" onclick="toggleAcc(this)" style="width:100%; display:flex; align-items:center; gap:14px; padding:16px 20px; background:none; border:none; cursor:pointer; text-align:left; color:var(--soft-white);">
+                        <span style="font-size:24px; flex-shrink:0;">🧠</span>
+                        <div style="flex:1;">
+                            <div style="font-family:'Outfit',sans-serif; font-size:15px; font-weight:600;">Психологічна служба — МОЗ / DSS</div>
+                            <div style="font-size:12px; color:#888; margin-top:2px;">Індивідуальна та групова підтримка</div>
+                        </div>
+                        <span style="font-size:11px; background:rgba(46,139,87,0.15); color:var(--primary-green); padding:3px 10px; border-radius:50px; border:1px solid rgba(46,139,87,0.3); white-space:nowrap;">Безкоштовно</span>
+                        <span class="acc-arrow" style="font-size:16px; color:#666; transition:transform 0.3s; margin-left:10px;">▾</span>
+                    </button>
+                    <div class="acc-body" style="display:none; padding:0 20px 18px 58px;">
+                        <p style="font-size:13px; color:#bbb; line-height:1.6; margin:0 0 10px;">Психологічні консультації для ветеранів та їхніх сімей у центрах соціальних служб. Групи підтримки, кризова допомога. Телефон психологічної підтримки: 1545.</p>
+                        <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                            <span style="font-size:12px; color:#aaa;">📍 Центри соціальних служб у громадах Черкащини</span>
+                        </div>
+                        <a href="https://www.msp.gov.ua" target="_blank" style="display:inline-block; margin-top:12px; font-size:12px; color:var(--primary-green); text-decoration:none; border:1px solid rgba(46,139,87,0.4); padding:5px 14px; border-radius:50px;">Мінсоцполітики →</a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <script>
+    function toggleAcc(btn) {
+        var body = btn.parentElement.querySelector('.acc-body');
+        var arrow = btn.querySelector('.acc-arrow');
+        var isOpen = body.style.display === 'block';
+        // Закрити всі
+        document.querySelectorAll('.acc-body').forEach(function(b){ b.style.display='none'; });
+        document.querySelectorAll('.acc-arrow').forEach(function(a){ a.style.transform='rotate(0deg)'; });
+        document.querySelectorAll('.acc-item').forEach(function(item){ item.style.borderColor='rgba(46,139,87,0.2)'; });
+        // Відкрити поточний (якщо був закритий)
+        if (!isOpen) {
+            body.style.display = 'block';
+            arrow.style.transform = 'rotate(180deg)';
+            btn.parentElement.style.borderColor = 'var(--primary-green)';
+        }
+    }
+    </script>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- БЛОК: НГО-партнери — безкоштовна допомога -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <section id="ngo-partners" style="padding: 40px 0; background: #0f1210; border-top: 1px solid rgba(46,139,87,0.12);">
+        <div class="container">
+            <h3 class="section-title" style="margin-bottom: 8px;">💚 НГО-партнери — безкоштовна допомога</h3>
+            <p class="section-subtitle" style="margin-bottom: 28px;">Громадські організації, які допомагають ветеранам без оплати</p>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; max-width: 1000px; margin: 0 auto;">
+
+                <!-- НГО 1: ГО Талан ЮА -->
+                <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(46,139,87,0.25); border-radius: 14px; padding: 20px; display:flex; flex-direction:column; gap:12px; transition: all 0.3s;" onmouseover="this.style.borderColor='var(--primary-green)'; this.style.transform='translateY(-3px)'" onmouseout="this.style.borderColor='rgba(46,139,87,0.25)'; this.style.transform='none'">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <div style="width:48px; height:48px; border-radius:10px; background:rgba(46,139,87,0.15); border:1px solid rgba(46,139,87,0.3); display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0;">🟢</div>
+                        <div>
+                            <div style="font-family:'Outfit',sans-serif; font-size:14px; font-weight:700; color:var(--soft-white);">ГО «Талан ЮА»</div>
+                            <div style="font-size:11px; color:var(--primary-green);">Оператор порталу</div>
+                        </div>
+                    </div>
+                    <p style="font-size:12px; color:#aaa; line-height:1.5; margin:0;">Координація реінтеграції, психологічна та юридична підтримка ветеранів Черкащини. Направлення до спеціалістів.</p>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                        <span style="font-size:11px; background:rgba(46,139,87,0.1); color:#6abf8a; padding:3px 10px; border-radius:50px; border:1px solid rgba(46,139,87,0.25);">Психологія</span>
+                        <span style="font-size:11px; background:rgba(46,139,87,0.1); color:#6abf8a; padding:3px 10px; border-radius:50px; border:1px solid rgba(46,139,87,0.25);">Юридична</span>
+                        <span style="font-size:11px; background:rgba(46,139,87,0.1); color:#6abf8a; padding:3px 10px; border-radius:50px; border:1px solid rgba(46,139,87,0.25);">Координація</span>
+                    </div>
+                    <a href="https://t.me/NovyShlyakhBot" target="_blank" style="display:block; text-align:center; font-size:12px; font-weight:600; color:var(--primary-green); text-decoration:none; border:1px solid rgba(46,139,87,0.4); padding:8px; border-radius:8px; transition:background 0.2s;" onmouseover="this.style.background='rgba(46,139,87,0.15)'" onmouseout="this.style.background='none'">Звернутись у бот →</a>
+                </div>
+
+                <!-- НГО 2: Заглушка -->
+                <div style="background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.1); border-radius: 14px; padding: 20px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; min-height:180px; text-align:center;">
+                    <div style="width:48px; height:48px; border-radius:10px; background:rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center; font-size:22px;">🤝</div>
+                    <div style="font-size:13px; color:#666;">Місце для партнера</div>
+                    <a href="https://t.me/NovyShlyakhBot" target="_blank" style="font-size:11px; color:var(--primary-green); text-decoration:none; border:1px solid rgba(46,139,87,0.3); padding:4px 14px; border-radius:50px;">Стати партнером</a>
+                </div>
+
+                <!-- НГО 3: Заглушка -->
+                <div style="background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.1); border-radius: 14px; padding: 20px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; min-height:180px; text-align:center;">
+                    <div style="width:48px; height:48px; border-radius:10px; background:rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center; font-size:22px;">🤝</div>
+                    <div style="font-size:13px; color:#666;">Місце для партнера</div>
+                    <a href="https://t.me/NovyShlyakhBot" target="_blank" style="font-size:11px; color:var(--primary-green); text-decoration:none; border:1px solid rgba(46,139,87,0.3); padding:4px 14px; border-radius:50px;">Стати партнером</a>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
     <!-- БЛОК: Три кроки + Переваги реєстрації (об'єднано) -->
     <section class="how-it-works" style="padding: 50px 0; background: #151715;">
         <div class="container-fluid" style="width: 100%; max-width: 100%; padding: 0 40px; box-sizing: border-box;">
+            <div style="display:flex; justify-content:center; margin-bottom:16px;">
+                <span style="
+                    display: inline-flex; align-items: center; gap: 8px;
+                    background: rgba(229,62,62,0.12);
+                    border: 1px solid rgba(229,62,62,0.45);
+                    color: #fc8181;
+                    font-family: 'Outfit', sans-serif;
+                    font-size: 11px; font-weight: 700;
+                    letter-spacing: 1.5px; text-transform: uppercase;
+                    padding: 5px 16px; border-radius: 50px;
+                ">
+                    <span style="width:7px;height:7px;border-radius:50%;background:#fc8181;display:inline-block;animation:pulse-dot 1.4s ease-in-out infinite;"></span>
+                    Важливо прочитати
+                </span>
+            </div>
+            <style>
+            @keyframes pulse-dot {
+                0%,100%{opacity:1;transform:scale(1);}
+                50%{opacity:0.4;transform:scale(1.4);}
+            }
+            </style>
             <h3 class="section-title">Три кроки до комплексної підтримки</h3>
             <p class="section-subtitle" style="margin-bottom: 30px;">Прозорий та захищений алгоритм реінтеграції</p>
             <!-- Покрокова горизонтальна лінія (Full-Screen Edge-to-Edge 3 Columns) -->
