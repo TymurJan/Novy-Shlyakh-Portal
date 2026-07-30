@@ -1877,17 +1877,21 @@ async def reject_specialist(callback: types.CallbackQuery):
     await callback.answer()
 
 # --- ОСОБИСТІ КАБІНЕТИ ПАРТНЕРІВ ---
-@dp.message(F.text == "👤 Мій Кабінет")
-async def show_cabinet_handler(message: types.Message, state: FSMContext, user_id=None):
+async def show_cabinet(message: types.Message, state: FSMContext = None, user_id=None):
     db = await load_db_async()
     uid = str(user_id if user_id else message.from_user.id)
-    partner = next((s for s in db if str(s.get("tg_id")) == uid or s.get("id", "").startswith(f"user_{uid}")), None)
+    partner = next((s for s in db if str(s.get("tg_id")) == uid or
+                 str(s.get("id") or "").startswith(f"user_{uid}")), None)
     
     if not partner:
         await message.answer("Ваш профіль не знайдено.")
         return
         
     await route_partner_cabinet(message, partner, state)
+
+@dp.message(F.text == "👤 Мій Кабінет")
+async def show_cabinet_handler(message: types.Message, state: FSMContext):
+    await show_cabinet(message, state)
 
 async def route_partner_cabinet(message: types.Message, partner: dict, state: FSMContext = None):
     role = partner.get("role", "specialist")
@@ -1979,7 +1983,7 @@ async def my_requests_handler(message: types.Message):
     db = await load_db_async()
     uid = str(message.from_user.id)
     spec = next((s for s in db if str(s.get("tg_id")) == uid or
-                 s.get("id", "").startswith(f"user_{uid}")), None)
+                 str(s.get("id") or "").startswith(f"user_{uid}")), None)
     if not spec:
         await message.answer("Профіль спеціаліста не знайдено.")
         return
@@ -2430,6 +2434,63 @@ async def cmd_admin_direct(message: types.Message):
 @dp.message(Command("cabinet"))
 async def cmd_cabinet_direct(message: types.Message):
     await show_cabinet(message)
+
+# ══════════════════════════════════════════
+# /dev — АДМІН РЕЖИМ ПЕРЕМИКАННЯ РОЛЕЙ
+# Тільки для ADMIN_ID. Дозволяє зайти під будь-якою роллю.
+# ══════════════════════════════════════════
+@dp.message(Command("dev"))
+async def cmd_dev_mode(message: types.Message, state: FSMContext):
+    """Команда /dev — тільки для адміна. Перемикач ролей без видалення даних."""
+    if str(message.from_user.id).strip() != str(ADMIN_ID).strip():
+        return  # мовчки ігноруємо для всіх крім адміна
+
+    await state.clear()
+    kb = [
+        [InlineKeyboardButton(text="🏠 Головне меню (без ролі)", callback_data="dev_main_menu")],
+        [InlineKeyboardButton(text="🎖️ Увійти як Ветеран", callback_data="dev_as_veteran")],
+        [InlineKeyboardButton(text="👨‍⚕️ Увійти як Спеціаліст", callback_data="dev_as_specialist")],
+        [InlineKeyboardButton(text="🛡️ Адмін-панель", callback_data="dev_as_admin")],
+    ]
+    await message.answer(
+        "🔧 **DEV MODE** — Перемикач ролей\n\n"
+        "Оберіть, як увійти. Дані в БД не змінюються.",
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=kb),
+        parse_mode="Markdown"
+    )
+
+@dp.callback_query(F.data.startswith("dev_"))
+async def dev_role_switch(callback: types.CallbackQuery, state: FSMContext):
+    if str(callback.from_user.id).strip() != str(ADMIN_ID).strip():
+        await callback.answer("⛔ Недоступно", show_alert=True)
+        return
+
+    action = callback.data
+    await callback.message.delete()
+
+    if action == "dev_main_menu":
+        # Показуємо головне меню як незареєстрований
+        kb = [
+            [KeyboardButton(text="Ветеран / Родина")],
+            [KeyboardButton(text="Партнер")],
+            [KeyboardButton(text="🛡️ Адмін-панель")],
+        ]
+        await callback.message.answer(
+            "🏠 Головне меню (DEV — незареєстрований вид)",
+            reply_markup=ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
+        )
+    elif action == "dev_as_veteran":
+        vet = db_manager.get_veteran(callback.from_user.id)
+        if vet and vet.get("name"):
+            await show_vet_profile(callback.message, state)
+        else:
+            await callback.message.answer("⚠️ Профіль ветерана не знайдено в БД.")
+    elif action == "dev_as_specialist":
+        await show_cabinet(callback.message, user_id=callback.from_user.id)
+    elif action == "dev_as_admin":
+        await show_admin_panel(callback.message)
+
+    await callback.answer()
 
 # ══════════════════════════════════════════
 # КОМАНДИ БІЧНОЇ ПАНЕЛІ (Persistent Menu)
