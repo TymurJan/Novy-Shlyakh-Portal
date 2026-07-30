@@ -2439,6 +2439,48 @@ async def cmd_cabinet_direct(message: types.Message):
 # /dev — АДМІН РЕЖИМ ПЕРЕМИКАННЯ РОЛЕЙ
 # Тільки для ADMIN_ID. Дозволяє зайти під будь-якою роллю.
 # ══════════════════════════════════════════
+
+# Тестові профілі для ролей що не мають реального запису в БД
+DEV_MOCK_PROFILES = {
+    "ngo": {
+        "id": "dev_ngo_test",
+        "name": "ГО «Тест НГО»",
+        "role": "ngo",
+        "category": "ngo",
+        "status": "verified",
+        "phone": "+380000000001",
+        "address": "вул. Тестова, 1, Черкаси",
+        "bio": "Тестовий профіль НГО для перевірки кабінету.",
+        "tg_id": None,
+        "rating": 5.0,
+    },
+    "state": {
+        "id": "dev_state_test",
+        "name": "ЦНАП м. Черкаси (TEST)",
+        "role": "state",
+        "category": "state",
+        "status": "verified",
+        "phone": "+380000000002",
+        "address": "вул. Байди Вишневецького, 36",
+        "bio": "Тестовий профіль державної установи.",
+        "tg_id": None,
+        "rating": 5.0,
+    },
+    "specialist": {
+        "id": "dev_spec_test",
+        "name": "Тест Спеціаліст",
+        "role": "career",
+        "category": "career",
+        "status": "verified",
+        "phone": "+380000000003",
+        "address": "вул. Хрещатик, 1, Черкаси",
+        "bio": "Тестовий профіль спеціаліста.",
+        "tg_id": None,
+        "rating": 4.5,
+        "discount": "10%",
+    },
+}
+
 @dp.message(Command("dev"))
 async def cmd_dev_mode(message: types.Message, state: FSMContext):
     """Команда /dev — тільки для адміна. Перемикач ролей без видалення даних."""
@@ -2447,14 +2489,18 @@ async def cmd_dev_mode(message: types.Message, state: FSMContext):
 
     await state.clear()
     kb = [
-        [InlineKeyboardButton(text="🏠 Головне меню (без ролі)", callback_data="dev_main_menu")],
-        [InlineKeyboardButton(text="🎖️ Увійти як Ветеран", callback_data="dev_as_veteran")],
-        [InlineKeyboardButton(text="👨‍⚕️ Увійти як Спеціаліст", callback_data="dev_as_specialist")],
+        [InlineKeyboardButton(text="🏠 Головне меню (незареєстрований)", callback_data="dev_main_menu")],
+        [InlineKeyboardButton(text="🎖️ Ветеран", callback_data="dev_as_veteran")],
+        [InlineKeyboardButton(text="👨‍⚕️ Спеціаліст (реальний профіль)", callback_data="dev_as_specialist")],
+        [InlineKeyboardButton(text="💚 НГО / БФ (тест-профіль)", callback_data="dev_as_ngo")],
+        [InlineKeyboardButton(text="🏛️ Держустанова (тест-профіль)", callback_data="dev_as_state")],
+        [InlineKeyboardButton(text="👤 Спеціаліст (тест-профіль)", callback_data="dev_as_spec_mock")],
         [InlineKeyboardButton(text="🛡️ Адмін-панель", callback_data="dev_as_admin")],
     ]
     await message.answer(
         "🔧 **DEV MODE** — Перемикач ролей\n\n"
-        "Оберіть, як увійти. Дані в БД не змінюються.",
+        "Оберіть, як увійти. Реальні дані в БД не змінюються.\n"
+        "_Тест-профілі — лише для перегляду UI кабінетів._",
         reply_markup=InlineKeyboardMarkup(inline_keyboard=kb),
         parse_mode="Markdown"
     )
@@ -2469,24 +2515,45 @@ async def dev_role_switch(callback: types.CallbackQuery, state: FSMContext):
     await callback.message.delete()
 
     if action == "dev_main_menu":
-        # Показуємо головне меню як незареєстрований
         kb = [
             [KeyboardButton(text="Ветеран / Родина")],
             [KeyboardButton(text="Партнер")],
             [KeyboardButton(text="🛡️ Адмін-панель")],
         ]
         await callback.message.answer(
-            "🏠 Головне меню (DEV — незареєстрований вид)",
-            reply_markup=ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
+            "🏠 **Головне меню** _(DEV — вид незареєстрованого)_",
+            reply_markup=ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True),
+            parse_mode="Markdown"
         )
+
     elif action == "dev_as_veteran":
         vet = db_manager.get_veteran(callback.from_user.id)
         if vet and vet.get("name"):
             await show_vet_profile(callback.message, state)
         else:
-            await callback.message.answer("⚠️ Профіль ветерана не знайдено в БД.")
+            # Створюємо тимчасовий mock для перегляду UI
+            await callback.message.answer(
+                "⚠️ Реального ветеранського профілю немає в БД.\n\n"
+                "Щоб протестувати — пройди реєстрацію ветерана через «Ветеран / Родина» → "
+                "потім /dev → Ветеран."
+            )
+
     elif action == "dev_as_specialist":
+        # Реальний профіль з БД
         await show_cabinet(callback.message, user_id=callback.from_user.id)
+
+    elif action == "dev_as_ngo":
+        mock = DEV_MOCK_PROFILES["ngo"]
+        await show_ngo_cabinet(callback.message, mock)
+
+    elif action == "dev_as_state":
+        mock = DEV_MOCK_PROFILES["state"]
+        await show_state_cabinet(callback.message, mock)
+
+    elif action == "dev_as_spec_mock":
+        mock = DEV_MOCK_PROFILES["specialist"]
+        await show_specialist_cabinet(callback.message, mock)
+
     elif action == "dev_as_admin":
         await show_admin_panel(callback.message)
 
