@@ -1919,8 +1919,7 @@ async def show_specialist_cabinet(message: types.Message, spec: dict):
     timestamp = int(time.time())
     kb = [
         [KeyboardButton(text="📩 Мої звернення"), KeyboardButton(text="✏️ Редагувати профіль")],
-        [KeyboardButton(text="💰 Звітувати про оплату (25%)")],
-        [KeyboardButton(text="❌ Видалити профіль")]
+        [KeyboardButton(text="💰 Звітувати про оплату (25%)")]
     ]
     await message.answer(text, reply_markup=ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True), parse_mode="Markdown")
 
@@ -2157,9 +2156,24 @@ async def edit_profile_menu(callback: types.CallbackQuery):
         [InlineKeyboardButton(text="📍 Змінити адресу", callback_data="edit_address")],
         [InlineKeyboardButton(text="📝 Оновити біо", callback_data="edit_bio")],
         [InlineKeyboardButton(text="🎁 Змінити пільги", callback_data="edit_discount")],
+        [InlineKeyboardButton(text="❌ Видалити профіль", callback_data="delete_profile_confirm")],
         [InlineKeyboardButton(text="🔙 Назад", callback_data="to_cabinet")]
     ]
     await callback.message.edit_text("Оберіть, що ви хочете змінити:", reply_markup=InlineKeyboardMarkup(inline_keyboard=kb))
+    await callback.answer()
+
+@dp.callback_query(F.data == "delete_profile_confirm")
+async def delete_profile_confirm(callback: types.CallbackQuery):
+    kb = [
+        [InlineKeyboardButton(text="✅ Так, видалити", callback_data="delete_profile_final")],
+        [InlineKeyboardButton(text="🔙 Скасувати", callback_data="edit_profile")]
+    ]
+    await callback.message.edit_text(
+        "⚠️ Ви впевнені, що хочете **видалити свій профіль**?\n\n"
+        "🗑️ Цю дію неможливо скасувати. Усі ваші дані будуть видалені.",
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=kb),
+        parse_mode="Markdown"
+    )
     await callback.answer()
 
 @dp.callback_query(F.data.startswith("edit_"))
