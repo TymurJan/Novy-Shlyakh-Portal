@@ -97,9 +97,7 @@ body.is-tg-app .hero {
             </a>
             <nav class="nav" style="display: flex; align-items: center;">
                 <a href="news.html">Новини</a>
-                <a href="#state-resources">Держресурси</a>
-                <a href="#specialists">Фахова допомога</a>
-                <a href="#training">Навчання</a>
+                <a href="#catalog">Послуги та можливості</a>
                 <a href="#employers">Робота та Бізнес</a>
                 <!-- TODO: замінити # на реальний якір після підтвердження -->
                 <a href="#communities">Спільноти та простори</a>
@@ -748,58 +746,65 @@ body.is-tg-app .hero {
         </div>
     </section>
 
-    <section id="specialists" class="specialists">
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- ЄДИНИЙ БЛОК: Каталог послуг та можливостей -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <section id="catalog" class="specialists" style="padding: 60px 0; background: #0f1210; border-top: 1px solid rgba(46,139,87,0.15);">
         <div class="container">
-            <h3 class="section-title">Спеціалісти</h3>
-            <p class="section-subtitle">Оберіть перевіреного фахівця, що надає підтримку за пільговими або комерційними умовами</p>
+            <h3 class="section-title" style="margin-bottom: 8px;">Каталог послуг та можливостей</h3>
+            <p class="section-subtitle" style="margin-bottom: 28px;">Єдиний реєстр державних програм, ініціатив НГО, освітніх ваучерів та перевірених фахівців</p>
             
-            <div class="specialist-tabs" id="specTabs">
-                <button class="tab-btn active" data-category="all" id="btn-all">Всі</button>
-                <button class="tab-btn" data-category="legal" id="btn-legal">Юристи</button>
-                <button class="tab-btn" data-category="psychology" id="btn-psychology">Психологи</button>
-                <button class="tab-btn" data-category="rehab" id="btn-rehab">Реабілітація та протезування</button>
-                <button class="tab-btn" data-category="career" id="btn-career">Кар'єра та Бізнес</button>
-                <button class="tab-btn" data-category="social" id="btn-social">Соціальний хаб</button>
+            <!-- Таби основних напрямків -->
+            <div class="specialist-tabs" id="specTabs" style="margin-bottom: 20px;">
+                <button class="tab-btn active" data-category="all" id="btn-all">Всі напрямки</button>
+                <button class="tab-btn" data-category="legal" id="btn-legal">⚖️ Юристи</button>
+                <button class="tab-btn" data-category="psychology" id="btn-psychology">🧠 Психологи</button>
+                <button class="tab-btn" data-category="rehab" id="btn-rehab">🦾 Реабілітація та протезування</button>
+                <button class="tab-btn" data-category="edu" id="btn-edu">🎓 Освіта та перекваліфікація</button>
+                <button class="tab-btn" data-category="career" id="btn-career">💼 Працевлаштування та бізнес</button>
+                <button class="tab-btn" data-category="social" id="btn-social">🏛️ Соціальний супровід / ЦНАП</button>
             </div>
 
-            <!-- Панель фільтрів пошуку -->
-            <div class="filters-panel" style="display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; background: rgba(255,255,255,0.02); padding: 15px 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); justify-content: space-between; align-items: center;">
+            <!-- Панель мульти-фільтрів -->
+            <div class="filters-panel" style="display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; background: rgba(255,255,255,0.03); padding: 16px 22px; border-radius: 16px; border: 1px solid rgba(46,139,87,0.25); justify-content: space-between; align-items: center;">
                 <div style="display: flex; gap: 15px; flex-wrap: wrap; flex: 1;">
-                    <!-- Стать -->
+                    <!-- Хто надає (Надавач) -->
                     <div style="display: flex; flex-direction: column; gap: 4px;">
-                        <label style="font-size: 11px; color: #aaa; font-weight: 600; text-transform: uppercase;">Стать</label>
-                        <select id="filterGender" style="padding: 8px 12px; border-radius: 8px; background: #222; border: 1px solid #444; color: white; font-size: 13px; outline: none; cursor: pointer;">
-                            <option value="all">Всі статі</option>
-                            <option value="male">Чоловік</option>
-                            <option value="female">Жінка</option>
+                        <label style="font-size: 11px; color: var(--primary-green); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Надавач послуги</label>
+                        <select id="filterProvider" style="padding: 8px 12px; border-radius: 8px; background: #1a1a1a; border: 1px solid rgba(46,139,87,0.3); color: white; font-size: 13px; outline: none; cursor: pointer;">
+                            <option value="all">Всі надавачі</option>
+                            <option value="state">🏛️ Держава / ЦНАП / ТЦК</option>
+                            <option value="ngo">💚 НГО / Фонди (ГО «Талан ЮА»)</option>
+                            <option value="private">👨‍⚕️ Приватні спеціалісти</option>
                         </select>
                     </div>
 
-                    <!-- Ціна -->
+                    <!-- Умови / Вартість -->
                     <div style="display: flex; flex-direction: column; gap: 4px;">
-                        <label style="font-size: 11px; color: #aaa; font-weight: 600; text-transform: uppercase;">Вартість</label>
-                        <select id="filterPrice" style="padding: 8px 12px; border-radius: 8px; background: #222; border: 1px solid #444; color: white; font-size: 13px; outline: none; cursor: pointer;">
+                        <label style="font-size: 11px; color: var(--primary-green); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Умови / Вартість</label>
+                        <select id="filterPrice" style="padding: 8px 12px; border-radius: 8px; background: #1a1a1a; border: 1px solid rgba(46,139,87,0.3); color: white; font-size: 13px; outline: none; cursor: pointer;">
                             <option value="all">Будь-яка ціна</option>
-                            <option value="discount">Пільгові ціни</option>
-                            <option value="paid">Комерційні ціни</option>
+                            <option value="free">🟢 Безкоштовно / Ваучер / Грант</option>
+                            <option value="discount">🏷️ Пільгова ціна для ветеранів</option>
+                            <option value="paid">💳 Комерційна ціна</option>
                         </select>
                     </div>
 
                     <!-- Локація -->
                     <div style="display: flex; flex-direction: column; gap: 4px;">
-                        <label style="font-size: 11px; color: #aaa; font-weight: 600; text-transform: uppercase;">Локація</label>
-                        <select id="filterLocation" style="padding: 8px 12px; border-radius: 8px; background: #222; border: 1px solid #444; color: white; font-size: 13px; outline: none; cursor: pointer;">
-                            <option value="all">Черкаська область</option>
-                            <option value="cherkasy">м. Черкаси</option>
+                        <label style="font-size: 11px; color: #aaa; font-weight: 600; text-transform: uppercase;">Формат / Локація</label>
+                        <select id="filterLocation" style="padding: 8px 12px; border-radius: 8px; background: #1a1a1a; border: 1px solid #444; color: white; font-size: 13px; outline: none; cursor: pointer;">
+                            <option value="all">Всі локації</option>
+                            <option value="cherkasy">м. Черкаси (Офлайн)</option>
                             <option value="raions">Райони / ОТГ області</option>
-                            <option value="online">Онлайн / Дистанційно</option>
+                            <option value="online">💻 Онлайн / Дистанційно</option>
                         </select>
                     </div>
 
-                    <!-- Піднапрямок / Спеціалізація -->
+                    <!-- Пошук за тегами / назвою -->
                     <div style="display: flex; flex-direction: column; gap: 4px;">
-                        <label style="font-size: 11px; color: #aaa; font-weight: 600; text-transform: uppercase;">Напрямок роботи</label>
-                        <input type="text" id="filterSpecialization" placeholder="Напр. житлові, ВЛК, ПТСР" style="padding: 8px 12px; border-radius: 8px; background: #222; border: 1px solid #444; color: white; font-size: 13px; outline: none; width: 200px;">
+                        <label style="font-size: 11px; color: #aaa; font-weight: 600; text-transform: uppercase;">Пошук послуги</label>
+                        <input type="text" id="filterSpecialization" placeholder="Напр. ВЛК, єРобота, курси IT, ПТСР" style="padding: 8px 12px; border-radius: 8px; background: #1a1a1a; border: 1px solid #444; color: white; font-size: 13px; outline: none; width: 220px;">
                     </div>
                 </div>
 
@@ -808,47 +813,18 @@ body.is-tg-app .hero {
                 </button>
             </div>
 
+            <!-- Грід виводу послуг та спеціалістів -->
             <div class="specialist-grid" id="specialistGrid">
-                <!-- Картки спеціалістів будуть згенеровані через JS -->
+                <!-- Картки генерації через JS -->
             </div>
 
-            <div class="specialist-cta">
+            <!-- CTA для надавачів послуг -->
+            <div class="specialist-cta" style="margin-top: 40px;">
                 <div class="cta-content">
-                    <h3>Ви фахівець і хочете допомогти?</h3>
-                    <p>Приєднуйтесь до нашої спільноти незалежних експертів Черкащини. Отримайте рекламний майданчик та потік клієнтів.</p>
-                    <button class="btn-primary" id="btn-join-specialist">Стати частиною спільноти</button>
+                    <h3>Ви надаєте послуги для ветеранів чи бажаєте додати організацію?</h3>
+                    <p>Долучайтеся до єдиної системи координації Черкащини. Додайте свій сервіс, ваучерну програму чи приватний кабінет.</p>
+                    <button class="btn-primary" id="btn-join-specialist">Подати заявку на включення в каталог</button>
                 </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="training" class="training-section" style="padding: 100px 0; background: var(--deep-charcoal);">
-        <div class="container">
-            <h3 class="section-title">Освіта та Перекваліфікація</h3>
-            <p class="section-subtitle">Ми моніторимо державні та приватні програми, щоб ви могли безкоштовно здобути нову професію</p>
-            
-            <div class="specialist-tabs" id="eduTabs" style="margin-bottom: 40px; justify-content: center;">
-                <button class="tab-btn active" data-edu="all">Всі можливості</button>
-                <button class="tab-btn" data-edu="vouchers">Держваучери</button>
-                <button class="tab-btn" data-edu="it">IT-сфера</button>
-                <button class="tab-btn" data-edu="grants">Гранти на навчання</button>
-                <button class="tab-btn" data-edu="uni">ВНЗ та перепідготовка</button>
-            </div>
-
-            <div class="training-grid" id="trainingGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 350px), 1fr)); gap: 30px;">
-                <!-- Дані завантажуються асинхронно з education.json -->
-            </div>
-            
-            <div style="text-align: center; margin-top: 50px; padding: 30px; background: var(--glass-bg); border-radius: 20px; border: 1px solid var(--primary-green);">
-                <h4 style="margin-bottom: 10px;">Не знайшли потрібного напрямку?</h4>
-                <p style="color: #ccc; margin-bottom: 20px;">Наш AI-розвідник шукає нові програми 24/7. Напишіть нам, що саме ви шукаєте.</p>
-                <a href="https://t.me/Veteran_NovyShlyakh_Bot" class="btn-secondary">Подати запит на пошук</a>
-            </div>
-
-            <div style="text-align: center; margin-top: 30px; padding: 30px; background: linear-gradient(135deg, rgba(46, 139, 87, 0.1) 0%, rgba(0, 0, 0, 0.4) 100%); border-radius: 20px; border: 1px solid rgba(46, 139, 87, 0.4);">
-                <h4 style="margin-bottom: 10px; color: var(--primary-green);">📋 Перевірити свої пільги на платформі «Єдність»</h4>
-                <p style="color: #ccc; margin-bottom: 20px;">Перейдіть на офіційний обласний портал для детального розрахунку ваших соціальних гарантій, пільг та державних виплат.</p>
-                <a href="https://ukrveteran.ck.gov.ua" target="_blank" class="btn-primary" style="text-decoration: none; display: inline-block;">Відкрити Єдність</a>
             </div>
         </div>
     </section>
