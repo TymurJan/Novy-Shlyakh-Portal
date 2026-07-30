@@ -919,3 +919,122 @@ body.is-tg-app .tg-floating-btn {
     background: rgba(0, 0, 0, 0.25);
     border: 1px solid var(--glass-border);
 }
+
+/* ═══════════════════════════════════════════════════════════════ */
+/* ПОЛНОЦЕННА АДАПТИВНІСТЬ (TABLET & MOBILE RESPONSIVENESS)       */
+/* ═══════════════════════════════════════════════════════════════ */
+
+/* Захист від горизонтального скролу */
+html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+/* Планшети (до 1024px) */
+@media (max-width: 1024px) {
+    .header {
+        height: auto;
+        padding: 12px 0;
+    }
+    
+    .header .container {
+        flex-direction: column;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .nav {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px 14px;
+    }
+
+    .nav a {
+        font-size: 12px;
+    }
+
+    .hero h2 {
+        font-size: 36px;
+    }
+
+    .hero p {
+        font-size: 16px;
+    }
+
+    .specialist-tabs {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .filters-panel {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    div[style*="grid-template-columns"] {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* Смартфони (до 768px) */
+@media (max-width: 768px) {
+    .container {
+        padding: 0 16px;
+    }
+
+    .logo h1 {
+        font-size: 20px;
+    }
+
+    .ngo-badge {
+        font-size: 8px;
+    }
+
+    .nav a {
+        font-size: 11px;
+    }
+
+    #nav-cabinet-btn {
+        margin-left: 0 !important;
+        padding: 8px 14px !important;
+        font-size: 12px !important;
+    }
+
+    .accessibility-header-btn {
+        margin-left: 0 !important;
+        padding: 8px 10px !important;
+    }
+
+    .hero {
+        padding: 120px 0 60px 0;
+    }
+
+    .hero h2 {
+        font-size: 26px;
+        line-height: 1.2;
+    }
+
+    .hero p {
+        font-size: 14px;
+    }
+
+    .hero-stats {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .section-title {
+        font-size: 24px !important;
+    }
+
+    .section-subtitle {
+        font-size: 13px !important;
+    }
+
+    /* Рядки спільнот адаптуємо під вертикальний формат */
+    div[style*="display: flex; align-items: center; justify-content: space-between"] {
+        flex-direction: column;
+        align-items: flex-start !alignment;
+        gap: 10px;
+    }
+}
