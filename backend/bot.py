@@ -2397,6 +2397,7 @@ async def main():
     # ══════════════════════════════════════════
     static_commands = [
         BotCommand(command="portal",  description="🌐 Портал"),
+        BotCommand(command="news",    description="📰 Новини та Оголошення"),
         BotCommand(command="start",   description="🏠 Головне меню"),
         BotCommand(command="cabinet", description="👤 Мій кабінет"),
         BotCommand(command="support", description="🆘 Техпідтримка"),
@@ -2433,6 +2434,15 @@ async def cmd_portal(message: types.Message):
     Доступна з бічної панелі (☰) незалежно від поточного місця навігації.
     """
     await portal_redirect(message)
+
+@dp.message(Command("news"))
+async def cmd_news(message: types.Message):
+    """Команда /news — новини та оголошення «Нового Шляху».
+    Доступна з бічної панелі (☰) для всіх користувачів незалежно від ролі.
+    Персоналізована версія: ветерани та зареєстровані користувачі
+    отримують ту саму стрічку, але з підказкою про записи до спеціалістів.
+    """
+    await show_bot_news(message)
 
 # --- ЛОГІКА ВІДГУКІВ (Feedback Loop) ---
 
