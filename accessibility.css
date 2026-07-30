@@ -124,21 +124,20 @@
     cursor: pointer;
 }
 
-/* --- Кнопка Доступності в Хедері --- */
+/* --- Кнопка Доступності в Хедері (Око) --- */
 .accessibility-header-btn {
-    margin-left: 10px;
+    margin-left: 8px;
     background: rgba(16, 185, 129, 0.15);
     color: var(--access-accent);
     border: 1px solid rgba(16, 185, 129, 0.3);
-    padding: 10px 16px;
+    padding: 9px 12px;
     border-radius: 8px;
-    font-weight: 600;
-    font-size: 13px;
     cursor: pointer;
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 8px;
+    justify-content: center;
     transition: all 0.2s ease;
+    flex-shrink: 0;
 }
 
 .accessibility-header-btn:hover {

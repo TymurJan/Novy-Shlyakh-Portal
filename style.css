@@ -103,31 +103,40 @@ body.is-desktop-tg .logo h1 {
 .logo {
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    padding-top: 2px;
 }
 
 .ngo-badge {
-    font-size: 10px;
+    font-size: 9px;
     color: var(--secondary-green);
     letter-spacing: 1px;
-    font-weight: 600;
+    font-weight: 700;
+    line-height: 1.2;
+    text-transform: uppercase;
 }
 
 .logo h1 {
     font-family: 'Outfit', sans-serif;
-    font-size: 24px;
-    letter-spacing: 2px;
+    font-size: 22px;
+    letter-spacing: 1.5px;
+    margin: 0;
+    line-height: 1.1;
 }
 
 .nav {
     display: flex;
     align-items: center;
+    gap: 16px;
+    flex-wrap: nowrap;
 }
 
 .nav a {
     color: var(--soft-white);
     text-decoration: none;
-    margin-left: 30px;
-    font-size: 14px;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
     transition: 0.3s;
 }
 
