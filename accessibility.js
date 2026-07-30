@@ -1,15 +1,20 @@
 /* accessibility.js */
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Створюємо HTML структуру панелі
+    // 1. Панель налаштувань доступності
     const panelHTML = `
-        <button class="accessibility-toggle" id="accessOpen" title="Налаштування доступності">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            <span class="access-text-btn">Доступність</span>
-        </button>
-
         <div class="accessibility-panel" id="accessPanel">
             <button class="close-access" id="accessClose">&times;</button>
-            <h3>Налаштування доступності</h3>
+            <h3>Налаштування доступності та тем</h3>
+
+            <div class="access-group">
+                <label>Колірна тема</label>
+                <div class="access-btns">
+                    <button class="a-btn active" data-type="theme" data-val="theme-normal">🌙 Темна (Фірмова)</button>
+                    <button class="a-btn" data-type="theme" data-val="theme-light">☀️ Світла</button>
+                    <button class="a-btn" data-type="theme" data-val="theme-contrast">⚡ Контрастна</button>
+                    <button class="a-btn" data-type="theme" data-val="theme-monochrome">🔲 Чорно-біла</button>
+                </div>
+            </div>
 
             <div class="access-group">
                 <label>Розмір шрифту</label>
@@ -18,15 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     <button class="a-btn active" data-type="font" data-val="font-normal">A</button>
                     <button class="a-btn" data-type="font" data-val="font-large">A+</button>
                     <button class="a-btn" data-type="font" data-val="font-xlarge">A++</button>
-                </div>
-            </div>
-
-            <div class="access-group">
-                <label>Колірна схема</label>
-                <div class="access-btns">
-                    <button class="a-btn active" data-type="theme" data-val="theme-normal">Звичайна</button>
-                    <button class="a-btn" data-type="theme" data-val="theme-contrast">Контрастна</button>
-                    <button class="a-btn" data-type="theme" data-val="theme-monochrome">Чорно-біла</button>
                 </div>
             </div>
 
@@ -57,6 +53,17 @@ document.addEventListener('DOMContentLoaded', () => {
             <button class="btn-primary" id="resetAccess" style="width: 100%; margin-top: 20px;">Скинути налаштування</button>
         </div>
     `;
+
+    // Якщо кнопки у хедері ще немає, створюємо плаваючу
+    if (!document.getElementById('accessOpen')) {
+        const floatBtnHTML = `
+            <button class="accessibility-toggle" id="accessOpen" title="Налаштування доступності">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                <span class="access-text-btn">Доступність</span>
+            </button>
+        `;
+        document.body.insertAdjacentHTML('beforeend', floatBtnHTML);
+    }
 
     document.body.insertAdjacentHTML('beforeend', panelHTML);
 
