@@ -2041,6 +2041,87 @@ async def report_payment_btn_handler(message: types.Message):
         parse_mode="Markdown"
     )
 
+DEV_MOCK_PROFILES = {
+    "veteran": {
+        "id": "dev_vet_test",
+        "name": "Тестовий Ветеран (DEV)",
+        "phone": "+380000000000",
+        "status": "Ветеран війни / УБД",
+        "needs": ["Юридична допомога", "Психологічна підтримка"],
+        "geo_region": "Черкаська область",
+        "geo_raion": "Черкаський район",
+        "geo_otg": "Черкаська ТГ",
+    },
+    "ngo": {
+        "id": "dev_ngo_test",
+        "name": "ГО «Тест НГО»",
+        "role": "ngo",
+        "category": "ngo",
+        "status": "verified",
+        "phone": "+380000000001",
+        "address": "вул. Тестова, 1, Черкаси",
+        "bio": "Тестовий профіль НГО для перевірки кабінету.",
+        "tg_id": None,
+        "rating": 5.0,
+    },
+    "state": {
+        "id": "dev_state_test",
+        "name": "ЦНАП м. Черкаси (TEST)",
+        "role": "state",
+        "category": "state",
+        "status": "verified",
+        "phone": "+380000000002",
+        "address": "вул. Байди Вишневецького, 36",
+        "bio": "Тестовий профіль державної установи.",
+        "tg_id": None,
+        "rating": 5.0,
+    },
+    "specialist": {
+        "id": "dev_spec_test",
+        "name": "Тест Спеціаліст",
+        "role": "career",
+        "category": "career",
+        "status": "verified",
+        "phone": "+380000000003",
+        "address": "вул. Хрещатик, 1, Черкаси",
+        "bio": "Тестовий профіль спеціаліста.",
+        "tg_id": None,
+        "rating": 4.5,
+        "discount": "10%",
+    },
+}
+
+@dp.message(Command("dev"))
+async def cmd_dev_mode(message: types.Message, state: FSMContext):
+    """Команда /dev — тільки для адмінів. Перемикач ролей без видалення даних."""
+    DEV_ALLOWED = {str(ADMIN_ID).strip(), "531215718", "8343156417"}
+    if str(message.from_user.id).strip() not in DEV_ALLOWED:
+        return  # мовчки ігноруємо для всіх крім адмінів
+
+    await state.clear()
+    kb = [
+        [InlineKeyboardButton(text="🏠 Головне меню (незареєстрований)", callback_data="dev_main_menu")],
+        [InlineKeyboardButton(text="🎖️ Ветеран (тест-профіль)", callback_data="dev_as_vet_mock")],
+        [InlineKeyboardButton(text="👨‍⚕️ Спеціаліст (твій реальний профіль)", callback_data="dev_as_specialist")],
+        [InlineKeyboardButton(text="💚 НГО / БФ (тест-профіль)", callback_data="dev_as_ngo")],
+        [InlineKeyboardButton(text="🏛️ Держустанова (тест-профіль)", callback_data="dev_as_state")],
+        [InlineKeyboardButton(text="👤 Спеціаліст (тест-профіль)", callback_data="dev_as_spec_mock")],
+        [InlineKeyboardButton(text="🛡️ Адмін-панель", callback_data="dev_as_admin")],
+    ]
+    await message.answer(
+        "🔧 **DEV MODE** — Перемикач ролей\n\n"
+        "Оберіть, як увійти. Реальні дані в БД не змінюються.\n"
+        "_Тест-профілі — лише для перегляду UI кабінетів._",
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=kb),
+        parse_mode="Markdown"
+    )
+
+@dp.callback_query(F.data.startswith("dev_"))
+async def dev_role_switch(callback: types.CallbackQuery, state: FSMContext):
+    DEV_ALLOWED = {str(ADMIN_ID).strip(), "531215718", "8343156417"}
+    if str(callback.from_user.id).strip() not in DEV_ALLOWED:
+        await callback.answer("⛔ Недоступно", show_alert=True)
+        return
 
 @dp.message(F.text == "🤝 Партнерські угоди")
 async def ngo_agreements_handler(message: types.Message):
