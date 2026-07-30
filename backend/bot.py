@@ -2483,9 +2483,10 @@ DEV_MOCK_PROFILES = {
 
 @dp.message(Command("dev"))
 async def cmd_dev_mode(message: types.Message, state: FSMContext):
-    """Команда /dev — тільки для адміна. Перемикач ролей без видалення даних."""
-    if str(message.from_user.id).strip() != str(ADMIN_ID).strip():
-        return  # мовчки ігноруємо для всіх крім адміна
+    """Команда /dev — тільки для адмінів. Перемикач ролей без видалення даних."""
+    DEV_ALLOWED = {str(ADMIN_ID).strip(), "531215718"}
+    if str(message.from_user.id).strip() not in DEV_ALLOWED:
+        return  # мовчки ігноруємо для всіх крім адмінів
 
     await state.clear()
     kb = [
@@ -2507,7 +2508,8 @@ async def cmd_dev_mode(message: types.Message, state: FSMContext):
 
 @dp.callback_query(F.data.startswith("dev_"))
 async def dev_role_switch(callback: types.CallbackQuery, state: FSMContext):
-    if str(callback.from_user.id).strip() != str(ADMIN_ID).strip():
+    DEV_ALLOWED = {str(ADMIN_ID).strip(), "531215718"}
+    if str(callback.from_user.id).strip() not in DEV_ALLOWED:
         await callback.answer("⛔ Недоступно", show_alert=True)
         return
 
