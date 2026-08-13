@@ -3,15 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Новини — Новий Шлях | Ветеранський портал Черкащини</title>
     <meta name="description" content="Актуальні новини, зміни в законодавстві, анонси заходів та важлива інформація для ветеранів Черкащини від порталу «Новий Шлях».">
+    <title>Новини — Ветеранський портал "Новий Шлях" (v46) — Координаційний центр реінтеграції ветеранів</title>
+    <!-- Open Graph / SEO (Для правильного відображення в Telegram/Facebook) -->
+    <meta name="description" content="Координаційний центр реінтеграції ветеранів Черкащини. Юридична, психологічна та кар'єрна підтримка.">
+    <meta property="og:title" content="Новий Шлях — Центр реінтеграції ветеранів">
+    <meta property="og:description" content="Захищений портал підтримки ветеранів: юристи, психологи, кар'єра та освіта. Проєкт ГО «Талан ЮА».">
+    <meta property="og:image" content="https://novy-shlyakh.org/assets/og-image.jpg">
+    <meta property="og:url" content="https://novy-shlyakh.org">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Outfit:wght@300;400;700&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="style.css?v=46">
     <link rel="stylesheet" href="accessibility.css?v=46">
+    <!-- Leaflet CSS for Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <!-- Telegram Web App Script -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script>(function(){var t=window.Telegram&&window.Telegram.WebApp;if(t){t.ready();t.expand();}}());</script>
+    <script>
+        (function() {
+            var tg = window.Telegram && window.Telegram.WebApp;
+            if (tg) {
+                tg.ready();
+                tg.expand();
+            }
+
+            function detectPlatform() {
+                var ua = navigator.userAgent.toLowerCase();
+                var isDesktop = false;
+                
+                if (tg && tg.platform && ['tdesktop', 'macos', 'weba', 'webk', 'web'].indexOf(tg.platform) !== -1) {
+                    isDesktop = true;
+                } else if (ua.indexOf('telegramdesktop') !== -1 || ((ua.indexOf('windows') !== -1 || ua.indexOf('macintosh') !== -1) && ua.indexOf('android') === -1 && ua.indexOf('iphone') === -1)) {
+                    isDesktop = true;
+                }
+
+                if (isDesktop) {
+                    if (tg && tg.requestFullscreen) {
+                        tg.requestFullscreen();
+                    }
+                    document.documentElement.classList.add('is-desktop-tg');
+                    document.body.classList.add('is-desktop-tg');
+                    var vp = document.querySelector('meta[name="viewport"]');
+                    if (vp) {
+                        vp.setAttribute('content', 'width=device-width, initial-scale=1.0');
+                    }
+                }
+            }
+            window.addEventListener('DOMContentLoaded', detectPlatform);
+        })();
+    </script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         /* ===== ГЕРОЙ ===== */
         .news-hero {
@@ -241,37 +286,78 @@
         }
         .subscribe-card h3 { font-family:'Outfit',sans-serif; font-size:20px; font-weight:700; margin-bottom:8px; color:var(--soft-white); }
         .subscribe-card p { color:#aaa; font-size:13px; margin-bottom:22px; line-height:1.6; }
+        
+        /* Примусові стилі для обходу кешу CSS на мобільних */
+        @media (max-width: 768px) {
+            body.is-tg-app .header {
+                display: flex;
+                position: relative; /* Дозволяємо хедеру скролитися разом зі сторінкою */
+                width: 100%;
+                background: transparent; /* Робимо його прозорим, бо він тепер не "літає" */
+                backdrop-filter: none;
+                z-index: 10;
+                border-bottom: none; /* Прибираємо лінію */
+            }
+
+            body.is-tg-app main, 
+            body.is-tg-app .hero {
+                padding-top: 20px !important; /* Повертаємо нормальний відступ, бо хедер більше не fixed */
+            }
+            .accessibility-toggle {
+                top: auto !important;
+                bottom: 30px !important;
+                right: 20px !important;
+                width: 55px !important;
+                height: 55px !important;
+                z-index: 9999 !important;
+                display: flex !important;
+                visibility: visible !important;
+                border-radius: 50% !important; /* Робимо ідеальне коло */
+                padding: 0 !important; /* Прибираємо зайві відступи */
+                justify-content: center !important; /* Центруємо іконку */
+            }
+        }
     </style>
 </head>
 <body>
-
-    <!-- ХЕДЕР -->
     <header class="header">
         <div class="container">
-            <a href="index.html" id="logo-link" class="logo" style="text-decoration: none; color: inherit;">
+            <a href="index.html" class="logo" style="text-decoration: none; color: inherit; cursor: pointer;">
                 <span class="ngo-badge">Проєкт ГО ТАЛАН ЮА</span>
                 <h1>НОВИЙ ШЛЯХ</h1>
             </a>
-            <script>
-                // Розумна навігація: залогінений → кабінет, ні → портал
+            <nav class="nav" style="display: flex; align-items: center;">
+                <a href="news.html">Новини</a>
+                <a href="resources.html">Держресурси</a>
+                <a href="catalog.html">Послуги та можливості</a>
+                <a href="employers.html">Робота та Бізнес</a>
+                <a href="communities.html">Спільноти та простори</a>
+
+                <!-- Єдина кнопка входу (Single Gateway) -->
+                <a id="nav-cabinet-btn" href="my.html" class="btn-primary" style="margin-left: 15px; border-radius: 8px; font-weight: 600; display: flex; align-items: center; gap: 8px; padding: 10px 20px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <span id="nav-cabinet-label">Кабінет</span>
+                </a>
+
+                <!-- Кнопка Доступності (Око доступності) в Хедері -->
+                <button class="accessibility-header-btn" id="accessOpen" title="Версія для людей з порушенням зору (Налаштування доступності)">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+
+                <script>
                 (function() {
-                    var link = document.getElementById('logo-link');
-                    if (localStorage.getItem('current_veteran')) {
-                        link.href = 'my.html';
-                        link.title = 'Повернутись до кабінету';
+                    var p = new URLSearchParams(window.location.search);
+                    var hasTgId = p.get('tg_id');
+                    var hasRole = p.get('role');
+                    if (!hasTgId && !hasRole) {
+                        // Незареєстрований — кнопка веде на вхід
+                        var btn = document.getElementById('nav-cabinet-btn');
+                        var lbl = document.getElementById('nav-cabinet-label');
+                        if (lbl) lbl.textContent = 'Увійти';
+                        if (btn) btn.href = 'my.html';
                     }
                 })();
-            </script>
-            <nav class="nav" style="display:flex;align-items:center;">
-                <a href="news.html" style="color:var(--primary-green);">Новини</a>
-                <a href="index.html#state-resources">Держресурси</a>
-                <a href="index.html#specialists">Фахова допомога</a>
-                <a href="index.html#training">Навчання</a>
-                <a href="index.html#employers">Робота та Бізнес</a>
-                <a href="my.html" class="btn-primary" style="margin-left:15px;border-radius:8px;font-weight:600;display:flex;align-items:center;gap:8px;padding:10px 20px;">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                    Кабінет
-                </a>
+                </script>
             </nav>
         </div>
     </header>
@@ -558,7 +644,7 @@
                 </div>
                 <div>
                     <h4 style="color:var(--soft-white);font-size:18px;margin-bottom:10px;">Контакти</h4>
-                    <p>Тел: +38 (063) 656-89-99</p>
+                    <p><a href="tel:+380636568999" style="color: unset; text-decoration: auto;">📞 +38 (063) 656-89-99</a></p>
                 </div>
             </div>
             <p style="border-top:1px solid rgba(255,255,255,0.1);padding-top:20px;">&copy; 2026 Новий Шлях | Всі права захищені. Проєкт ГО «Талан ЮА»</p>

@@ -198,7 +198,7 @@ def generate_main_proposal():
     add_table_row(table, ["Організація-заявник", "Громадська організація «ТАЛАН ЮА» (ЄДРПОУ: 45119390)"])
     add_table_row(table, ["Сума запиту / Тривалість", "$100,000 USD / 12 місяців"])
     add_table_row(table, ["Географія проєкту", "Черкаська область (м. Черкаси та територіальні громади)"])
-    add_table_row(table, ["Веб-портал / Бот", "https://novyshlyakh.ua | @Veteran_NovyShlyakh_Bot"])
+    add_table_row(table, ["Веб-портал / Бот", "https://novy-shlyakh.org | @Veteran_NovyShlyakh_Bot"])
     doc.add_paragraph().paragraph_format.space_after = Pt(12)
 
     add_section_heading(doc, "1. Анотація проєкту (Executive Summary)")

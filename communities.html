@@ -4,22 +4,50 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ветеранський портал "Новий Шлях" (v46) — Координаційний центр реінтеграції ветеранів</title>
+    <style>
+        /* Примусові стилі для обходу кешу CSS на мобільних */
+        @media (max-width: 768px) {
+            body.is-tg-app .header {
+    display: flex;
+    position: relative; /* Дозволяємо хедеру скролитися разом зі сторінкою */
+    width: 100%;
+    background: transparent; /* Робимо його прозорим, бо він тепер не "літає" */
+    backdrop-filter: none;
+    z-index: 10;
+    border-bottom: none; /* Прибираємо лінію */
+}
+
+body.is-tg-app main, 
+body.is-tg-app .hero {
+    padding-top: 20px !important; /* Повертаємо нормальний відступ, бо хедер більше не fixed */
+}
+            .accessibility-toggle {
+                top: auto !important;
+                bottom: 30px !important;
+                right: 20px !important;
+                width: 55px !important;
+                height: 55px !important;
+                z-index: 9999 !important;
+                display: flex !important;
+                visibility: visible !important;
+                border-radius: 50% !important; /* Робимо ідеальне коло */
+                padding: 0 !important; /* Прибираємо зайві відступи */
+                justify-content: center !important; /* Центруємо іконку */
+            }
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Outfit:wght@300;400;700&display=swap" rel="stylesheet">
     <!-- Open Graph / SEO (Для правильного відображення в Telegram/Facebook) -->
-    <meta name="description" content="Координаційний центр реінтеграції ветеранів Черкащини. Юридична, психологічна та кар'єрна підтримка.">
     <meta property="og:title" content="Новий Шлях — Центр реінтеграції ветеранів">
     <meta property="og:description" content="Захищений портал підтримки ветеранів: юристи, психологи, кар'єра та освіта. Проєкт ГО «Талан ЮА».">
     <meta property="og:image" content="https://novy-shlyakh.org/assets/og-image.jpg">
     <meta property="og:url" content="https://novy-shlyakh.org">
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Outfit:wght@300;400;700&display=swap" rel="stylesheet">
+    <meta name="description" content="Координаційний центр реінтеграції ветеранів Черкащини. Юридична, психологічна та кар'єрна підтримка.">
 
     <link rel="stylesheet" href="style.css?v=46">
     <link rel="stylesheet" href="accessibility.css?v=46">
-    <!-- Leaflet CSS for Map -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
     <!-- Telegram Web App Script -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
@@ -55,39 +83,9 @@
             window.addEventListener('DOMContentLoaded', detectPlatform);
         })();
     </script>
+    <!-- Leaflet CSS for Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <style>
-        /* Примусові стилі для обходу кешу CSS на мобільних */
-        @media (max-width: 768px) {
-            body.is-tg-app .header {
-                display: flex;
-                position: relative; /* Дозволяємо хедеру скролитися разом зі сторінкою */
-                width: 100%;
-                background: transparent; /* Робимо його прозорим, бо він тепер не "літає" */
-                backdrop-filter: none;
-                z-index: 10;
-                border-bottom: none; /* Прибираємо лінію */
-            }
-
-            body.is-tg-app main, 
-            body.is-tg-app .hero {
-                padding-top: 20px !important; /* Повертаємо нормальний відступ, бо хедер більше не fixed */
-            }
-            .accessibility-toggle {
-                top: auto !important;
-                bottom: 30px !important;
-                right: 20px !important;
-                width: 55px !important;
-                height: 55px !important;
-                z-index: 9999 !important;
-                display: flex !important;
-                visibility: visible !important;
-                border-radius: 50% !important; /* Робимо ідеальне коло */
-                padding: 0 !important; /* Прибираємо зайві відступи */
-                justify-content: center !important; /* Центруємо іконку */
-            }
-        }
-    </style>
 </head>
 <body>
     <header class="header">
@@ -132,463 +130,122 @@
         </div>
     </header>
 
-    <section class="hero">
-        <div class="hero-overlay"></div>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- БЛОК: Спільноти та Ветеранські Простори -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <section id="communities" style="padding: 90px 0 50px; background: #0e110e; border-top: 1px solid rgba(46,139,87,0.15);">
         <div class="container">
-            <div class="hero-content">
-                <h2 class="outfit-font">Твоя Безпечна Гавань <br> після повернення</h2>
-                <p>Координаційний центр реінтеграції ветеранів. <br> Юридична, психологічна та кар'єрна підтримка в одному місці.</p>
-                
-                <div class="ai-search-container" style="max-width: 850px; margin: 30px auto 0; text-align: center;">
-                    <div class="ai-search-box" style="display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;">
-                        <input type="text" id="aiSearchInput" placeholder="ШІ-асистент допоможе знайти відповідь, спеціаліста чи необхідну можливість..." style="flex: 1; min-width: 260px; padding: 16px 22px; border-radius: 50px; border: 1px solid var(--primary-green); background: rgba(17, 17, 17, 0.85); backdrop-filter: blur(10px); color: white; font-size: 14px; outline: none;">
-                        <button id="aiSearchBtn" class="btn-primary" style="padding: 0 28px; height: 54px; border: none; border-radius: 50px; cursor: pointer; font-size: 16px;">Запитати</button>
-                    </div>
-                    <span style="font-size: 11px; color: rgba(255, 255, 255, 0.7); display: block; font-style: italic; text-align: center;">Увага: AI-помічник має виключно інформаційний характер і не замінює консультацію реального фахівця.</span>
+            <h3 class="section-title">Спільноти та ветеранські простори — знайди своїх</h3>
+            <p class="section-subtitle" style="margin-bottom: 40px;">Мережа ветеранських хабів, центрів підтримки, спільнот та онлайн-ресурсів Черкащини</p>
 
-                    <div id="aiSearchResponse" class="ai-response-area" style="margin-top: 20px; text-align: left; background: rgba(21, 23, 21, 0.95); backdrop-filter: blur(15px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 20px; display: none;">
-                        <!-- Тут з'являтиметься відповідь -->
+            <!-- Компактний перелік спільнот та просторів у вигляді рядків -->
+            <div style="display: flex; flex-direction: column; gap: 12px; max-width: 1000px; margin: 0 auto;">
+
+                <!-- Рядок 1: Ветеранський простір Черкащани -->
+                <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(46,139,87,0.25); border-radius: 12px; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--primary-green)'; this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.borderColor='rgba(46,139,87,0.25)'; this.style.background='rgba(255,255,255,0.03)'">
+                    <div style="display: flex; align-items: center; gap: 16px; min-width: 280px; flex: 1;">
+                        <span style="font-size: 20px;">🏛️</span>
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <h4 style="font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 600; color: #fff; margin: 0;">Ветеранський простір «Черкащани»</h4>
+                                <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; background: rgba(46,139,87,0.15); color: var(--primary-green); padding: 2px 8px; border-radius: 50px; border: 1px solid rgba(46,139,87,0.3);">Простір</span>
+                            </div>
+                            <p style="font-size: 12px; color: #aaa; margin: 3px 0 0 0;">📍 вул. Байди Вишневецького, 36, м. Черкаси</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+                        <a href="tel:+380671234567" style="font-size: 13px; color: var(--primary-green); text-decoration: none; font-weight: 600;">📞 +38 (067) 123-45-67</a>
+                        <div style="display: flex; gap: 6px;">
+                            <a href="https://t.me/novyshlyakh_bot" target="_blank" style="padding: 5px 10px; border-radius: 6px; background: rgba(0,136,204,0.15); color: #0088cc; font-size: 11px; text-decoration: none; font-weight: 600; border: 1px solid rgba(0,136,204,0.3);">💬 Telegram-бот</a>
+                            <a href="https://instagram.com" target="_blank" style="padding: 5px 10px; border-radius: 6px; background: rgba(225,48,108,0.15); color: #e1306c; font-size: 11px; text-decoration: none; font-weight: 600; border: 1px solid rgba(225,48,108,0.3);">📷 Instagram</a>
+                            <a href="#locations" onclick="if(window.focusMapMarker) window.focusMapMarker(49.4444, 32.0597);" style="padding: 5px 10px; border-radius: 6px; background: rgba(255,255,255,0.06); color: #fff; font-size: 11px; text-decoration: none; font-weight: 600;">🗺️ На карті</a>
+                        </div>
                     </div>
                 </div>
+
+                <!-- Рядок 2: Спільнота Ветеранів Черкащини -->
+                <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(46,139,87,0.25); border-radius: 12px; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--primary-green)'; this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.borderColor='rgba(46,139,87,0.25)'; this.style.background='rgba(255,255,255,0.03)'">
+                    <div style="display: flex; align-items: center; gap: 16px; min-width: 280px; flex: 1;">
+                        <span style="font-size: 20px;">🤝</span>
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <h4 style="font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 600; color: #fff; margin: 0;">Спільнота Ветеранів Черкащини</h4>
+                                <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; background: rgba(59,130,246,0.15); color: #60a5fa; padding: 2px 8px; border-radius: 50px; border: 1px solid rgba(59,130,246,0.3);">Спільнота</span>
+                            </div>
+                            <p style="font-size: 12px; color: #aaa; margin: 3px 0 0 0;">📍 Обласна мережа взаємодопомоги та побратимства</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+                        <a href="tel:+380689876543" style="font-size: 13px; color: var(--primary-green); text-decoration: none; font-weight: 600;">📞 +38 (068) 987-65-43</a>
+                        <div style="display: flex; gap: 6px;">
+                            <a href="https://t.me" target="_blank" style="padding: 5px 10px; border-radius: 6px; background: rgba(0,136,204,0.15); color: #0088cc; font-size: 11px; text-decoration: none; font-weight: 600; border: 1px solid rgba(0,136,204,0.3);">💬 Чат (1 200+)</a>
+                            <a href="https://facebook.com" target="_blank" style="padding: 5px 10px; border-radius: 6px; background: rgba(24,119,242,0.15); color: #3b82f6; font-size: 11px; text-decoration: none; font-weight: 600; border: 1px solid rgba(24,119,242,0.3);">🌐 Facebook</a>
+                            <a href="#locations" onclick="if(window.focusMapMarker) window.focusMapMarker(49.44, 32.06);" style="padding: 5px 10px; border-radius: 6px; background: rgba(255,255,255,0.06); color: #fff; font-size: 11px; text-decoration: none; font-weight: 600;">🗺️ На карті</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Рядок 3: ДФТГ №1 м. Черкаси -->
+                <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(46,139,87,0.25); border-radius: 12px; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--primary-green)'; this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.borderColor='rgba(46,139,87,0.25)'; this.style.background='rgba(255,255,255,0.03)'">
+                    <div style="display: flex; align-items: center; gap: 16px; min-width: 280px; flex: 1;">
+                        <span style="font-size: 20px;">🛡️</span>
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <h4 style="font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 600; color: #fff; margin: 0;">ДФТГ №1 Черкаської міської ТГ</h4>
+                                <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; background: rgba(16,185,129,0.15); color: #10b981; padding: 2px 8px; border-radius: 50px; border: 1px solid rgba(16,185,129,0.3);">Формування</span>
+                            </div>
+                            <p style="font-size: 12px; color: #aaa; margin: 3px 0 0 0;">📍 вул. Хрещатик, 196, м. Черкаси</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+                        <a href="tel:+380472330044" style="font-size: 13px; color: var(--primary-green); text-decoration: none; font-weight: 600;">📞 +38 (0472) 33-00-44</a>
+                        <div style="display: flex; gap: 6px;">
+                            <a href="https://t.me" target="_blank" style="padding: 5px 10px; border-radius: 6px; background: rgba(0,136,204,0.15); color: #0088cc; font-size: 11px; text-decoration: none; font-weight: 600; border: 1px solid rgba(0,136,204,0.3);">💬 Telegram</a>
+                            <a href="#locations" onclick="if(window.focusMapMarker) window.focusMapMarker(49.443, 32.062);" style="padding: 5px 10px; border-radius: 6px; background: rgba(255,255,255,0.06); color: #fff; font-size: 11px; text-decoration: none; font-weight: 600;">🗺️ На карті</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Рядок 4: Центр Новий Горизонт Умань -->
+                <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(46,139,87,0.25); border-radius: 12px; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--primary-green)'; this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.borderColor='rgba(46,139,87,0.25)'; this.style.background='rgba(255,255,255,0.03)'">
+                    <div style="display: flex; align-items: center; gap: 16px; min-width: 280px; flex: 1;">
+                        <span style="font-size: 20px;">🏥</span>
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <h4 style="font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 600; color: #fff; margin: 0;">Центр адаптації ветеранів «Новий Горизонт»</h4>
+                                <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; background: rgba(245,158,11,0.15); color: #fbbf24; padding: 2px 8px; border-radius: 50px; border: 1px solid rgba(245,158,11,0.3);">Центр адаптації</span>
+                            </div>
+                            <p style="font-size: 12px; color: #aaa; margin: 3px 0 0 0;">📍 вул. Європейська, 12, м. Умань</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+                        <a href="tel:+380501112233" style="font-size: 13px; color: var(--primary-green); text-decoration: none; font-weight: 600;">📞 +38 (050) 111-22-33</a>
+                        <div style="display: flex; gap: 6px;">
+                            <a href="https://talan.ua" target="_blank" style="padding: 5px 10px; border-radius: 6px; background: rgba(255,255,255,0.08); color: #fff; font-size: 11px; text-decoration: none; font-weight: 600; border: 1px solid rgba(255,255,255,0.15);">🌐 Сайт</a>
+                            <a href="https://t.me" target="_blank" style="padding: 5px 10px; border-radius: 6px; background: rgba(0,136,204,0.15); color: #0088cc; font-size: 11px; text-decoration: none; font-weight: 600; border: 1px solid rgba(0,136,204,0.3);">💬 Telegram</a>
+                        </div>
+                    </div>
+                </div>
+                <!-- Рядок 5: Ветеранський корпус — Черкаський осередок / Чат «Іскра» -->
+                <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(220,38,38,0.3); border-radius: 12px; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; transition: all 0.2s;" onmouseover="this.style.borderColor='#ef4444'; this.style.background='rgba(220,38,38,0.05)'" onmouseout="this.style.borderColor='rgba(220,38,38,0.3)'; this.style.background='rgba(255,255,255,0.03)'">
+                    <div style="display: flex; align-items: center; gap: 16px; min-width: 280px; flex: 1;">
+                        <span style="font-size: 20px;">⚔️</span>
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                                <h4 style="font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 600; color: #fff; margin: 0;">Ветеранський корпус — Черкаський осередок</h4>
+                                <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; background: rgba(220,38,38,0.15); color: #f87171; padding: 2px 8px; border-radius: 50px; border: 1px solid rgba(220,38,38,0.3);">3 ОШБр / 3 Корпус</span>
+                            </div>
+                            <p style="font-size: 12px; color: #aaa; margin: 3px 0 0 0;">Спільнота ветеранів 3-ї Окремої Штурмової Бригади. Чат «Іскра» — закрита мережа взаємодопомоги «свій для свого»</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+                        <a href="https://t.me/VETERANCHATCHE" target="_blank" style="padding: 5px 10px; border-radius: 6px; background: rgba(0,136,204,0.15); color: #0088cc; font-size: 11px; text-decoration: none; font-weight: 600; border: 1px solid rgba(0,136,204,0.3);">💬 Чат «Іскра»</a>
+                    </div>
+                </div>
+
             </div>
         </div>
-    </section>
-
-    <!-- НОВИННИЙ СЛАЙДЕР (Full-Width Compact Banner) -->
-    <div id="news-slider-bar" style="
-        background: #0d110d;
-        border-top: 1px solid rgba(46,139,87,0.15);
-        border-bottom: 1px solid rgba(46,139,87,0.25);
-        position: relative;
-        overflow: hidden;
-        height: 120px;
-        width: 100%;
-        display: flex;
-        align-items: stretch;
-    ">
-        <!-- Ліва стрілка навігації -->
-        <button id="ns-prev" onclick="nsMove(-1)" style="
-            position: absolute; top: 50%; transform: translateY(-50%);
-            z-index: 10; width: 34px; height: 34px; border-radius: 50%;
-            background: rgba(0, 0, 0, 0.65); border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #fff; font-size: 16px; cursor: pointer; display: flex;
-            align-items: center; justify-content: center; backdrop-filter: blur(4px);
-            transition: all 0.2s;
-        " onmouseover="this.style.background='rgba(46,139,87,0.8)'" onmouseout="this.style.background='rgba(0,0,0,0.65)'">❮</button>
-
-        <!-- Права стрілка навігації -->
-        <button id="ns-next" onclick="nsMove(1)" style="
-            position: absolute; right: 20px; top: 50%; transform: translateY(-50%);
-            z-index: 10; width: 34px; height: 34px; border-radius: 50%;
-            background: rgba(0, 0, 0, 0.65); border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #fff; font-size: 16px; cursor: pointer; display: flex;
-            align-items: center; justify-content: center; backdrop-filter: blur(4px);
-            transition: all 0.2s;
-        " onmouseover="this.style.background='rgba(46,139,87,0.8)'" onmouseout="this.style.background='rgba(0,0,0,0.65)'">❯</button>
-
-        <!-- Слайди -->
-        <div style="width: 100%; height: 100%; overflow: hidden; position: relative;">
-            <div id="ns-track" style="
-                display: flex;
-                height: 100%;
-                width: 100%;
-                transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            ">
-
-                <!-- СЛАЙД 1 -->
-                <a href="news.html#news-1" class="ns-slide" style="
-                    flex: 0 0 100%;
-                    width: 100%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    padding: 0 70px;
-                    height: 100%;
-                    text-decoration: none;
-                    color: inherit;
-                    background: linear-gradient(90deg, #0b1c0b 0%, #152b15 50%, #0d1a0d 100%);
-                    box-sizing: border-box;
-                ">
-                    <div style="display: flex; align-items: center; gap: 20px; flex: 1; max-width: 80%;">
-                        <div style="
-                            font-size: 36px; background: rgba(46,139,87,0.2);
-                            width: 65px; height: 65px; border-radius: 16px;
-                            display: flex; align-items: center; justify-content: center;
-                            border: 1px solid rgba(46,139,87,0.3); flex-shrink: 0;
-                        ">🛡️</div>
-                        <div style="display: flex; flex-direction: column; gap: 4px;">
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 2px 10px; border-radius: 50px; background: rgba(46,139,87,0.2); color: var(--primary-green); border: 1px solid rgba(46,139,87,0.3);">Портал</span>
-                                <span style="font-size: 11px; color: #777;">29 липня 2026</span>
-                            </div>
-                            <div style="font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 600; color: var(--soft-white);">Портал «Новий Шлях» розпочав роботу для ветеранів Черкащини</div>
-                            <div style="font-size: 12px; color: #aaa; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical;">Реєстрація, AI-помічник та підключення до спеціалістів — в одному місці без черг.</div>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- СЛАЙД 2 -->
-                <a href="news.html#news-2" class="ns-slide" style="
-                    flex: 0 0 100%;
-                    width: 100%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    padding: 0 70px;
-                    height: 100%;
-                    text-decoration: none;
-                    color: inherit;
-                    background: linear-gradient(90deg, #0b0b1c 0%, #15152b 50%, #0d0d1a 100%);
-                    box-sizing: border-box;
-                ">
-                    <div style="display: flex; align-items: center; gap: 20px; flex: 1; max-width: 80%;">
-                        <div style="
-                            font-size: 36px; background: rgba(59,130,246,0.15);
-                            width: 65px; height: 65px; border-radius: 16px;
-                            display: flex; align-items: center; justify-content: center;
-                            border: 1px solid rgba(59,130,246,0.3); flex-shrink: 0;
-                        ">⚖️</div>
-                        <div style="display: flex; flex-direction: column; gap: 4px;">
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 2px 10px; border-radius: 50px; background: rgba(59,130,246,0.15); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3);">Законодавство</span>
-                                <span style="font-size: 11px; color: #777;">27 липня 2026</span>
-                            </div>
-                            <div style="font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 600; color: var(--soft-white);">Нові правила оформлення статусу УБД — що змінилось</div>
-                            <div style="font-size: 12px; color: #aaa; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical;">Строк розгляду скорочено до 15 днів. Подача тепер доступна через «Дія» без особистого візиту.</div>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- СЛАЙД 3 -->
-                <a href="news.html#news-3" class="ns-slide" style="
-                    flex: 0 0 100%;
-                    width: 100%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    padding: 0 70px;
-                    height: 100%;
-                    text-decoration: none;
-                    color: inherit;
-                    background: linear-gradient(90deg, #1c0b1c 0%, #2b152b 50%, #1a0d1a 100%);
-                    box-sizing: border-box;
-                ">
-                    <div style="display: flex; align-items: center; gap: 20px; flex: 1; max-width: 80%;">
-                        <div style="
-                            font-size: 36px; background: rgba(139,92,246,0.15);
-                            width: 65px; height: 65px; border-radius: 16px;
-                            display: flex; align-items: center; justify-content: center;
-                            border: 1px solid rgba(139,92,246,0.3); flex-shrink: 0;
-                        ">🏆</div>
-                        <div style="display: flex; flex-direction: column; gap: 4px;">
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 2px 10px; border-radius: 50px; background: rgba(139,92,246,0.15); color: #a78bfa; border: 1px solid rgba(139,92,246,0.3);">Грант</span>
-                                <span style="font-size: 11px; color: #777;">25 липня 2026</span>
-                            </div>
-                            <div style="font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 600; color: var(--soft-white);">«єРобота: Власна Справа 2026» — гранти до 250 000 грн</div>
-                            <div style="font-size: 12px; color: #aaa; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical;">Відкрито прийом заявок для ветеранів. Дедлайн: 31 серпня 2026 через Дія.</div>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- СЛАЙД 4 -->
-                <a href="news.html#news-4" class="ns-slide" style="
-                    flex: 0 0 100%;
-                    width: 100%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    padding: 0 70px;
-                    height: 100%;
-                    text-decoration: none;
-                    color: inherit;
-                    background: linear-gradient(90deg, #1c0b14 0%, #2b1520 50%, #1a0d12 100%);
-                    box-sizing: border-box;
-                ">
-                    <div style="display: flex; align-items: center; gap: 20px; flex: 1; max-width: 80%;">
-                        <div style="
-                            font-size: 36px; background: rgba(236,72,153,0.15);
-                            width: 65px; height: 65px; border-radius: 16px;
-                            display: flex; align-items: center; justify-content: center;
-                            border: 1px solid rgba(236,72,153,0.3); flex-shrink: 0;
-                        ">🧠</div>
-                        <div style="display: flex; flex-direction: column; gap: 4px;">
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 2px 10px; border-radius: 50px; background: rgba(236,72,153,0.15); color: #f472b6; border: 1px solid rgba(236,72,153,0.3);">Психологія</span>
-                                <span style="font-size: 11px; color: #777;">22 липня 2026</span>
-                            </div>
-                            <div style="font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 600; color: var(--soft-white);">Нові безкоштовні психологічні сесії для ветеранів та їхніх родин</div>
-                            <div style="font-size: 12px; color: #aaa; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical;">Три нові психологи зі спеціалізацією ПТСР долучились до команди. Запис через Telegram-бот.</div>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- СЛАЙД 5 -->
-                <a href="news.html#news-5" class="ns-slide" style="
-                    flex: 0 0 100%;
-                    width: 100%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    padding: 0 70px;
-                    height: 100%;
-                    text-decoration: none;
-                    color: inherit;
-                    background: linear-gradient(90deg, #1c150b 0%, #2b2015 50%, #1a140d 100%);
-                    box-sizing: border-box;
-                ">
-                    <div style="display: flex; align-items: center; gap: 20px; flex: 1; max-width: 80%;">
-                        <div style="
-                            font-size: 36px; background: rgba(245,158,11,0.15);
-                            width: 65px; height: 65px; border-radius: 16px;
-                            display: flex; align-items: center; justify-content: center;
-                            border: 1px solid rgba(245,158,11,0.3); flex-shrink: 0;
-                        ">📅</div>
-                        <div style="display: flex; flex-direction: column; gap: 4px;">
-                                <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 2px 10px; border-radius: 50px; background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.3);">Захід</span>
-                                <span style="font-size: 11px; color: #777;">20 липня 2026</span>
-                            </div>
-                            <div style="font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 600; color: var(--soft-white);">Безкоштовні юридичні консультації у ЦНАП Черкас — пн, ср, пт з 10:00</div>
-                            <div style="font-size: 12px; color: #aaa; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical;">Щотижнево без попереднього запису для ветеранів. Адреса: вул. Байди Вишневецького, 36.</div>
-                        </div>
-                    </div>
-                </a>
-
-            </div><!-- /ns-track -->
-        </div>
-
-        <!-- Нижня горизонтальна панель крапок (Pagination Dots) -->
-        <div id="ns-dots" style="
-            position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
-            display: flex; gap: 8px; align-items: center; z-index: 10;
-            background: rgba(0,0,0,0.4); padding: 4px 12px; border-radius: 50px;
-            backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.08);
-        "></div>
-    </div>
-
-    <script>
-        (function() {
-            var total = 5, current = 0, timer;
-            var track = document.getElementById('ns-track');
-            var dotsEl = document.getElementById('ns-dots');
-
-            for (var i = 0; i < total; i++) {
-                var d = document.createElement('div');
-                d.style.cssText = 'width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.3);transition:all 0.3s;cursor:pointer;';
-                d.dataset.idx = i;
-                d.addEventListener('click', (function(idx){ return function(){ nsGo(idx); }; })(i));
-                dotsEl.appendChild(d);
-            }
-
-            function updateDots() {
-                dotsEl.querySelectorAll('div').forEach(function(d, i) {
-                    if (i === current) {
-                        d.style.background = 'var(--primary-green)';
-                        d.style.width = '24px';
-                        d.style.borderRadius = '50px';
-                    } else {
-                        d.style.background = 'rgba(255,255,255,0.3)';
-                        d.style.width = '8px';
-                        d.style.borderRadius = '50%';
-                    }
-                });
-            }
-
-            window.nsGo = function(idx) {
-                current = (idx + total) % total;
-                track.style.transform = 'translateX(-' + (current * 100) + '%)';
-                updateDots();
-                resetTimer();
-            };
-            window.nsMove = function(dir) { nsGo(current + dir); };
-
-            function resetTimer() {
-                clearInterval(timer);
-                timer = setInterval(function() { nsGo(current + 1); }, 5000);
-            }
-
-            updateDots();
-            resetTimer();
-
-            document.getElementById('news-slider-bar').addEventListener('mouseenter', function() { clearInterval(timer); });
-            document.getElementById('news-slider-bar').addEventListener('mouseleave', function() { resetTimer(); });
-        })();
-    </script>
-
-    <!-- БЛОК: Три кроки + Переваги реєстрації (об'єднано) -->
-    <section class="how-it-works" style="padding: 50px 0; background: #151715;">
-        <div class="container-fluid" style="width: 100%; max-width: 100%; padding: 0 40px; box-sizing: border-box;">
-            <style>
-            @keyframes pulse-dot {
-                0%,100%{opacity:1;transform:scale(1);}
-                50%{opacity:0.4;transform:scale(1.4);}
-            }
-            </style>
-            <h3 class="section-title">Три кроки до комплексної підтримки</h3>
-            <p class="section-subtitle" style="margin-bottom: 30px;">Прозорий та захищений алгоритм реінтеграції</p>
-            <!-- Покрокова горизонтальна лінія (Full-Screen Edge-to-Edge 3 Columns) -->
-            <div class="steps-stepper-container" style="
-                display: grid;
-                grid-template-columns: repeat(3, 1fr);
-                gap: 20px;
-                width: 100%;
-                margin-bottom: 30px;
-            ">
-                <!-- КРОК 1 -->
-                <div style="
-                    background: rgba(255, 255, 255, 0.03);
-                    border: 1px solid rgba(46, 139, 87, 0.25);
-                    border-radius: 14px;
-                    padding: 18px 20px;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 8px;
-                    transition: all 0.3s;
-                " onmouseover="this.style.borderColor='var(--primary-green)'; this.style.transform='translateY(-3px)'" onmouseout="this.style.borderColor='rgba(46, 139, 87, 0.25)'; this.style.transform='none'">
-                    <div style="display: flex; align-items: center; justify-content: space-between;">
-                        <span style="
-                            font-family: 'Outfit', sans-serif;
-                            font-size: 12px;
-                            font-weight: 700;
-                            color: var(--primary-green);
-                            background: rgba(46, 139, 87, 0.15);
-                            padding: 3px 10px;
-                            border-radius: 50px;
-                            border: 1px solid rgba(46, 139, 87, 0.3);
-                        ">Крок 01</span>
-                        <span style="font-size: 18px;">🔒</span>
-                    </div>
-                    <h4 style="font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 600; color: var(--soft-white); margin: 0;">Захищена Реєстрація</h4>
-                    <p style="font-size: 12px; color: #aaa; line-height: 1.5; margin: 0;">Створіть свій персональний кабінет за допомогою безпечної верифікації через державний сервіс Дія.Підпис. Ви автоматично отримаєте 10% знижки на послуги всіх верифікованих партнерів платформи (психологи, юристи, реабілітологи).</p>
-                </div>
-
-                <!-- КРОК 2 -->
-                <div style="
-                    background: rgba(255, 255, 255, 0.03);
-                    border: 1px solid rgba(46, 139, 87, 0.25);
-                    border-radius: 14px;
-                    padding: 18px 20px;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 8px;
-                    transition: all 0.3s;
-                " onmouseover="this.style.borderColor='var(--primary-green)'; this.style.transform='translateY(-3px)'" onmouseout="this.style.borderColor='rgba(46, 139, 87, 0.25)'; this.style.transform='none'">
-                    <div style="display: flex; align-items: center; justify-content: space-between;">
-                        <span style="
-                            font-family: 'Outfit', sans-serif;
-                            font-size: 12px;
-                            font-weight: 700;
-                            color: var(--primary-green);
-                            background: rgba(46, 139, 87, 0.15);
-                            padding: 3px 10px;
-                            border-radius: 50px;
-                            border: 1px solid rgba(46, 139, 87, 0.3);
-                        ">Крок 02</span>
-                        <span style="font-size: 18px;">🎯</span>
-                    </div>
-                    <h4 style="font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 600; color: var(--soft-white); margin: 0;">Оцінка персональних потреб</h4>
-                    <p style="font-size: 12px; color: #aaa; line-height: 1.5; margin: 0;">Сформуйте запит у захищеному просторі. Система автоматично підбере найкращого перевіреного профільного експерта під ваші потреби. Рекомендуватиме спеціалістів вашого району та сповіщатиме, як тільки з'явиться новий верифікований спеціаліст.</p>
-                </div>
-
-                <!-- КРОК 3 -->
-                <div style="
-                    background: rgba(255, 255, 255, 0.03);
-                    border: 1px solid rgba(46, 139, 87, 0.25);
-                    border-radius: 14px;
-                    padding: 18px 20px;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 8px;
-                    transition: all 0.3s;
-                " onmouseover="this.style.borderColor='var(--primary-green)'; this.style.transform='translateY(-3px)'" onmouseout="this.style.borderColor='rgba(46, 139, 87, 0.25)'; this.style.transform='none'">
-                    <div style="display: flex; align-items: center; justify-content: space-between;">
-                        <span style="
-                            font-family: 'Outfit', sans-serif;
-                            font-size: 12px;
-                            font-weight: 700;
-                            color: var(--primary-green);
-                            background: rgba(46, 139, 87, 0.15);
-                            padding: 3px 10px;
-                            border-radius: 50px;
-                            border: 1px solid rgba(46, 139, 87, 0.3);
-                        ">Крок 03</span>
-                        <span style="font-size: 18px;">🤝</span>
-                    </div>
-                    <h4 style="font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 600; color: var(--soft-white); margin: 0;">Фаховий Супровід</h4>
-                    <p style="font-size: 12px; color: #aaa; line-height: 1.5; margin: 0;">Отримуйте кваліфіковану юридичну, психологічну або кар'єрну допомогу з повним збереженням конфіденційності.</p>
-                </div>
-            </div>
-
-            <!-- Окремий блок: Внесок у розвиток системи -->
-            <div style="max-width: 700px; margin: 0 auto 20px auto; padding: 12px 20px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 12px; text-align: center;">
-                <h4 style="color: var(--soft-white); font-size: 14px; margin-bottom: 4px;">Внесок у розвиток системи</h4>
-                <p style="color: #aaa; font-size: 12px; line-height: 1.4; margin: 0;">Після реєстрації Ваші запити та відгуки допоможуть нам покращувати доступність послуг у громадах.</p>
-            </div>
-
-            <!-- Динамічна статистика соціального доказу (Компактний варіант) -->
-            <div class="stats-bar" style="display: flex; justify-content: space-evenly; background: rgba(46, 139, 87, 0.05); border: 1px solid rgba(46, 139, 87, 0.25); border-radius: 14px; padding: 12px 20px; margin-bottom: 25px; align-items: center;">
-                <div class="stat-item" style="display: flex; align-items: center; gap: 8px; padding: 0 20px;">
-                    <span id="stat-specialists" style="font-size: 20px; font-weight: 700; color: var(--primary-green); font-family: 'Outfit', sans-serif; white-space: nowrap;">—</span>
-                    <span style="color: #aaa; font-size: 11px; white-space: nowrap;">верифікованих фахівців</span>
-                </div>
-                <div style="width: 1px; height: 28px; background: rgba(255,255,255,0.12);"></div>
-                <div class="stat-item" style="display: flex; align-items: center; gap: 8px; padding: 0 20px;">
-                    <span id="stat-intake" style="font-size: 20px; font-weight: 700; color: var(--primary-green); font-family: 'Outfit', sans-serif; white-space: nowrap;">—</span>
-                    <span style="color: #aaa; font-size: 11px; white-space: nowrap;">опрацьованих звернень</span>
-                </div>
-                <div style="width: 1px; height: 28px; background: rgba(255,255,255,0.12);"></div>
-                <div class="stat-item" style="display: flex; align-items: center; gap: 8px; padding: 0 20px;">
-                    <span id="stat-veterans" style="font-size: 20px; font-weight: 700; color: var(--primary-green); font-family: 'Outfit', sans-serif; white-space: nowrap;">—</span>
-                    <span style="color: #aaa; font-size: 11px; white-space: nowrap;">зареєстрованих ветеранів</span>
-                </div>
-            </div>
-
-            <div style="text-align: center;">
-                <a href="my.html?reg=veteran" class="btn-primary" style="font-size: 14px; padding: 10px 28px; border-radius: 50px; font-weight: 600; box-shadow: 0 6px 18px rgba(46,139,87,0.25); transition: 0.3s; text-decoration: none; display: inline-block;">Розпочати реєстрацію</a>
-                <p style="font-size: 10px; color: #777; margin-top: 10px;">Ваші персональні дані захищені відповідно до Закону України №2297-VI. Аналітика повністю анонімізована.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- БЛОК: Локації та Мережева Мапа -->
-    <section id="locations" style="padding: 100px 0; background: var(--glass-bg);">
-        <div class="container">
-            <h3 class="section-title">Мережа підтримки Черкащини</h3>
-            <p class="section-subtitle">Ми об'єднали перевірені локації, де ви можете отримати допомогу офлайн</p>
-            
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr)); gap: 40px; align-items: start;">
-                <div class="location-card" style="background: #111; padding: 25px; border-radius: 25px; border: 1px solid var(--glass-border);">
-                    <div id="networkMap" style="width: 100%; height: 450px; background: #222; border-radius: 15px; overflow: hidden; border: 1px solid var(--primary-green);">
-                        <!-- Реальна карта Leaflet -->
-                    </div>
-                </div>
-
-                <div class="location-info">
-                    <div class="location-card" style="background: linear-gradient(135deg, #1a1c1a 0%, #2d4f4f 100%); padding: 40px; border-radius: 25px; border: 1px solid var(--primary-green); margin-bottom: 30px;">
-                        <div style="display: flex; gap: 20px; align-items: center; margin-bottom: 25px;">
-                            <div style="font-size: 40px;">🏢</div>
-                            <div>
-                                <h4 style="font-size: 24px; color: var(--primary-green);">Цифровий Координатор</h4>
-                                <p style="color: rgba(255,255,255,0.6);">Ваш офіс у смартфоні</p>
-                            </div>
-                        </div>
-                        <p style="color: white; line-height: 1.7; margin-bottom: 30px;">Ми відмовились від одного великого офісу на користь широкої мережі фахівців. Ви обираєте найближчого до вас спеціаліста — ми гарантуємо якість його послуг.</p>
-                        <a href="https://t.me/Veteran_NovyShlyakh_Bot" class="btn-main" style="width: 100%; text-align: center; margin: 0;">Відкрити Бот-Координатор</a>
-                    </div>
-                    
-                    <div class="location-card" style="background: #111; padding: 30px; border-radius: 25px; border: 1px solid var(--glass-border);">
-                        <h4 style="margin-bottom: 15px; color: var(--soft-white);">🌿 Проєкт «Ашрам»</h4>
-                        <p style="color: #ccc; font-size: 14px; margin-bottom: 20px;">Наш заміський центр відновлення зараз будується. Це буде унікальний простір для рекреації та трудотерапії.</p>
-                        <a href="https://talan.ua/ashram" style="color: var(--secondary-green); font-weight: bold; text-decoration: none;">Дізнатися більше →</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- БЛОК: Місія Ашрам -->
-    <section id="mission" class="specialist-cta" style="margin: 100px 20px; display: none;">
-        <!-- Перенесено в локації -->
     </section>
 
 

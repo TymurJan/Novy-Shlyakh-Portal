@@ -169,7 +169,7 @@ body.is-desktop-tg .logo h1 {
     display: flex;
     align-items: center;
     position: relative;
-    background: url('https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&q=80&w=2070') center/cover;
+    background: url('/img/home-background.avif') center/cover;
 }
 
 .hero-overlay {
@@ -1034,7 +1034,7 @@ html, body {
     /* Рядки спільнот адаптуємо під вертикальний формат */
     div[style*="display: flex; align-items: center; justify-content: space-between"] {
         flex-direction: column;
-        align-items: flex-start !alignment;
+        align-items: flex-start;
         gap: 10px;
     }
 }

@@ -107,7 +107,7 @@ diia_router = APIRouter(prefix="/api/diia", tags=["KYC"])
 async def login_via_diia(request: Request):
     state = generate_secure_state()
     request.session["diia_state"] = state
-    url = generate_auth_url("https://my.novyshlyakh.ua/api/diia/callback", state)
+    url = generate_auth_url("https://my.novy-shlyakh.org/api/diia/callback", state)
     return RedirectResponse(url)
 
 @diia_router.get("/callback")
@@ -116,7 +116,7 @@ async def diia_callback(code: str, state: str, request: Request):
         raise HTTPException(status_code=400, detail="State mismatch. Potential CSRF.")
         
     # 1. Обмін коду на токен
-    jwe = exchange_code_for_token(code, "https://my.novyshlyakh.ua/api/diia/callback")
+    jwe = exchange_code_for_token(code, "https://my.novy-shlyakh.org/api/diia/callback")
     
     # 2. Криптографічна перевірка та розшифровка
     user_data = decrypt_and_verify_payload(jwe)
