@@ -1,0 +1,21 @@
+[Unit]
+Description=Talan SDD Harness — Autonomous Development Orchestrator & Self-Update Watcher
+After=network.target network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ngotalanua
+Group=ngotalanua
+WorkingDirectory=/home/ngotalanua/talan
+EnvironmentFile=/home/ngotalanua/talan/.env
+ExecStart=/home/ngotalanua/talan/.venv/bin/python harness.py
+Restart=always
+RestartSec=3
+StandardOutput=append:/var/log/talan/harness.log
+StandardError=append:/var/log/talan/harness_err.log
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
+
