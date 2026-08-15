@@ -158,12 +158,37 @@ StandardError=append:/var/log/talan/antigravity_err.log
 WantedBy=multi-user.target
 EOF
 
+# -- Сервіс 4: Talan SDD Harness (Autonomous Orchestrator & Self-Update Watcher)
+cat > /etc/systemd/system/talan-harness.service << EOF
+[Unit]
+Description=Talan SDD Harness — Autonomous Development Orchestrator & Self-Update Watcher
+After=network.target network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=$USER_NAME
+Group=$USER_NAME
+WorkingDirectory=$APP_ROOT
+EnvironmentFile=$APP_ROOT/Talan_UA/Novy_Shlyakh/Novy_Shlyakh_Portal/backend/.env
+ExecStart=$APP_ROOT/.venv/bin/python harness.py
+Restart=always
+RestartSec=3
+StandardOutput=append:/var/log/talan/harness.log
+StandardError=append:/var/log/talan/harness_err.log
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
 chown -R "$USER_NAME:$USER_NAME" /var/log/talan
 systemctl daemon-reload
 systemctl enable novyshlyakh-backend.service
 systemctl enable novyshlyakh-bot.service
 systemctl enable antigravity-bot.service
-echo "  ✅ Всі 3 systemd сервіси зареєстровано."
+systemctl enable talan-harness.service
+echo "  ✅ Всі 4 systemd сервіси (включно з talan-harness) зареєстровано."
 
 # --- КРОК 7: Налаштування Firewalld ---
 echo ""
@@ -186,6 +211,7 @@ echo "▶️  [8/8] Запуск сервісів:"
 systemctl start novyshlyakh-backend.service
 systemctl start novyshlyakh-bot.service
 systemctl start antigravity-bot.service
+systemctl start talan-harness.service
 echo ""
 echo "======================================================"
 echo "  ✅ ДЕПЛОЙ НА ALMALINUX 9 ЗАВЕРШЕНО!"
