@@ -169,7 +169,7 @@ body.is-desktop-tg .logo h1 {
     display: flex;
     align-items: center;
     position: relative;
-    background: url('https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&q=80&w=2070') center/cover;
+    background: url('/img/home-background.avif') center/cover;
 }
 
 .hero-overlay {
@@ -440,53 +440,6 @@ body.is-desktop-tg .logo h1 {
     color: #666;
 }
 
-@media (max-width: 768px) and (hover: none) {
-    .hero-content h2 { 
-        font-size: 32px; 
-    }
-    /* FORCE COMPACT DESKTOP NAV ALWAYS */
-    .nav {
-        display: flex !important;
-        gap: 5px !important;
-        margin-left: auto;
-    }
-    .nav a {
-        display: inline-block !important;
-        margin-left: 5px !important;
-        font-size: 10px !important;
-        white-space: nowrap;
-    }
-    .logo h1 {
-        font-size: 16px !important;
-    }
-    .ngo-badge {
-        font-size: 8px !important;
-    }
-    .hero-actions {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-    }
-    .btn-main {
-        margin-right: 0;
-        width: 100%;
-        padding: 15px 20px;
-    }
-    .btn-secondary {
-        width: 100%;
-        padding: 15px 20px;
-    }
-    .logo h1 {
-        font-size: 20px;
-    }
-    /* Виправлення кнопки доступності на мобільних */
-    .accessibility-toggle {
-        right: 0 !important; /* Keep it on the edge but we will fix the cutting issue in accessibility.css */
-        font-size: 12px !important;
-        padding: 8px 10px !important;
-    }
-}
-
 /* AI Chat Widget */
 .chat-fab {
     position: fixed;
@@ -700,47 +653,6 @@ body.is-tg-app .tg-floating-btn {
     display: none; /* Ховаємо в самому боті, щоб не дублювати */
 }
 
-/* --- Mobile Responsiveness --- */
-@media (max-width: 768px) {
-    .header {
-        height: auto;
-        padding: 10px 0;
-    }
-    .header .container {
-        flex-direction: column;
-        justify-content: center;
-        gap: 10px;
-    }
-    .nav {
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 10px;
-    }
-    .nav a {
-        margin-left: 0;
-        margin: 5px 10px;
-        font-size: 13px;
-    }
-    .hero-content h2 {
-        font-size: 32px !important; /* Трохи менше для вузьких екранів */
-    }
-    .btn-main, .btn-secondary {
-        padding: 12px 25px;
-        margin-bottom: 10px;
-        width: 100%; /* Кнопки на всю ширину на мобілці */
-        margin-right: 0;
-    }
-    /* ПРИМУСОВО переносимо око вниз на мобілці */
-    .accessibility-toggle {
-        top: auto !important;
-        bottom: 20px !important;
-        right: 15px !important;
-        width: 50px !important;
-        height: 50px !important;
-        z-index: 9999 !important;
-    }
-}
-
 /* --- MODALS & REGISTRATION FORM --- */
 .modal-overlay {
     position: fixed;
@@ -880,12 +792,6 @@ body.is-tg-app .tg-floating-btn {
     margin-bottom: 15px;
 }
 
-@media (max-width: 768px) {
-    .modal-content {
-        padding: 30px 20px;
-    }
-}
-
 /* --- KEP SECTION & BADGES --- */
 .kep-section {
     background: rgba(16, 185, 129, 0.04);
@@ -930,50 +836,8 @@ html, body {
     overflow-x: hidden;
 }
 
-/* Планшети (до 1024px) */
-@media (max-width: 1024px) {
-    .header {
-        height: auto;
-        padding: 12px 0;
-    }
-    
-    .header .container {
-        flex-direction: column;
-        gap: 12px;
-        align-items: center;
-    }
-
-    .nav {
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 10px 14px;
-    }
-
-    .nav a {
-        font-size: 12px;
-    }
-
-    .hero h2 {
-        font-size: 36px;
-    }
-
-    .hero p {
-        font-size: 16px;
-    }
-
-    .specialist-tabs {
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-
-    .filters-panel {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    div[style*="grid-template-columns"] {
-        grid-template-columns: 1fr !important;
-    }
+.menu-container {
+    display: contents;
 }
 
 /* Смартфони (до 768px) */
@@ -1034,7 +898,293 @@ html, body {
     /* Рядки спільнот адаптуємо під вертикальний формат */
     div[style*="display: flex; align-items: center; justify-content: space-between"] {
         flex-direction: column;
-        align-items: flex-start !alignment;
+        align-items: flex-start;
         gap: 10px;
     }
+}
+
+/* --- Mobile Responsiveness --- */
+@media (max-width: 768px) and (hover: none) {
+    .hero-content h2 { 
+        font-size: 32px; 
+    }
+    /* FORCE COMPACT DESKTOP NAV ALWAYS */
+    .nav {
+        display: flex !important;
+        gap: 5px !important;
+        margin-left: auto;
+    }
+    .nav a {
+        display: inline-block !important;
+        margin-left: 5px !important;
+        font-size: 10px !important;
+        white-space: nowrap;
+    }
+    .logo h1 {
+        font-size: 16px !important;
+    }
+    .ngo-badge {
+        font-size: 8px !important;
+    }
+    .hero-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    .btn-main {
+        margin-right: 0;
+        width: 100%;
+        padding: 15px 20px;
+    }
+    .btn-secondary {
+        width: 100%;
+        padding: 15px 20px;
+    }
+    .logo h1 {
+        font-size: 20px;
+    }
+    /* Виправлення кнопки доступності на мобільних */
+    .accessibility-toggle {
+        right: 0 !important; /* Keep it on the edge but we will fix the cutting issue in accessibility.css */
+        font-size: 12px !important;
+        padding: 8px 10px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .header {
+        height: auto;
+        padding: 10px 0;
+    }
+    .header .container {
+        flex-direction: column;
+        justify-content: center;
+        gap: 10px;
+    }
+    .nav {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+    }
+    .nav a {
+        margin-left: 0;
+        margin: 5px 10px;
+        font-size: 13px;
+    }
+    .hero-content h2 {
+        font-size: 32px !important; /* Трохи менше для вузьких екранів */
+    }
+    .btn-main, .btn-secondary {
+        padding: 12px 25px;
+        margin-bottom: 10px;
+        width: 100%; /* Кнопки на всю ширину на мобілці */
+        margin-right: 0;
+    }
+    /* ПРИМУСОВО переносимо око вниз на мобілці */
+    .accessibility-toggle {
+        top: auto !important;
+        bottom: 20px !important;
+        right: 15px !important;
+        width: 50px !important;
+        height: 50px !important;
+        z-index: 9999 !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .modal-content {
+        padding: 30px 20px;
+    }
+}
+
+/* Планшети (до 1024px) */
+@media (max-width: 1024px) {
+    .header {
+        height: auto;
+        padding: 12px 0;
+    }
+    
+    .header .container {
+        flex-direction: column;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .nav {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px 14px;
+    }
+
+    .nav a {
+        font-size: 12px;
+    }
+
+    .hero h2 {
+        font-size: 36px;
+    }
+
+    .hero p {
+        font-size: 16px;
+    }
+
+    .specialist-tabs {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .filters-panel {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    div[style*="grid-template-columns"] {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* Планшети (до 1024px) */
+@media (max-width: 1024px) {
+    .header {
+        height: auto;
+        padding: 12px 0;
+    }
+    
+    .header .container {
+        flex-direction: column;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .nav {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px 14px;
+    }
+
+    .nav a {
+        font-size: 12px;
+    }
+
+    .hero h2 {
+        font-size: 36px;
+    }
+
+    .hero p {
+        font-size: 16px;
+    }
+
+    .specialist-tabs {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .filters-panel {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    div[style*="grid-template-columns"] {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+@media only screen and (max-width: 1024px) {
+    /* .menu-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    } */
+    .action.nav-toggle {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .header .nav-toggle {
+        /* top: -5px; */
+        /* left: unset; */
+        /* right: 0; */
+        width: 40px;
+        height: 30px;
+        /* margin-right: 20px; */
+        /* display: block; */
+        text-decoration: none;
+        cursor: pointer;
+        font-size: 0;
+        /* position: absolute; */
+        z-index: 14;
+    }
+
+    .action.nav-toggle .line {
+        width: 100%;
+        height: 2px;
+        background-color: lightslategrey;
+        transition: all 0.3s ease-in-out;
+    }
+    
+    .cms-home .active.action.nav-toggle .line {
+        background-color: #FD5F00;
+    }
+    .nav-toggle.active .line, .nav-open .nav-toggle .line {
+        background: #FD5F00;
+    }
+
+    .nav-toggle.active .top-line, .nav-open .nav-toggle .top-line {
+        left: 5px;
+        position: relative;
+        top: 3px;
+        transform: rotate(45deg);
+        transform-origin: left center;
+    }
+
+    .cms-home .active.action.nav-toggle .line {
+        background-color: #FD5F00;
+    }
+    
+    .nav-toggle.active .middle-line, .nav-open .nav-toggle .middle-line {
+        opacity: 0;
+        width: 0;
+    }
+
+    .nav-toggle.active .bottom-line, .nav-open .nav-toggle .bottom-line {
+        left: 0;
+        position: relative;
+        top: -10px;
+        transform: rotate(-45deg);
+    }
+    .menu-container {
+        display: none;
+
+        &.show {
+            position: absolute;
+            display: table-column-group;
+            top: 70px;
+            left: unset;
+            right: 0;
+            width: 170px;
+            /* height: 40px; */
+            padding: 5px 20px 10px;
+            background-color: lightslategrey;
+            align-items: stretch;
+            justify-items: start;
+            align-content: center;
+        }
+    }
+
+    .header .container {
+        flex-direction: row;
+        gap: 12px;
+    }
+}
+
+@media only screen and (max-width: 1024px) {
+    body.is-tg-app .header {
+        position: fixed;
+        /* background-color: lightslategrey; */
+    }
+
+    /* .action.nav-toggle {
+        display: block;
+    } */
 }
