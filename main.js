@@ -742,28 +742,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateLawyerTariffRecommendation() {
-        const courtCasesVal = document.querySelector('input[name="court-cases"]:checked')?.value;
-        const teamWorkVal = document.querySelector('input[name="team-work"]:checked')?.value;
-
-        // Зона 2в: працює в команді (бюро/установа)
-        // Зона 2б: веде судові справи (адвокат-практик)
-        // Зона 2а: базовий юрист-консультант
-        let recommendedId = 'zone2a_consultant';
-        let recommendedText = '2а: Юрист-консультант — $0 грант → $50/міс → $100/міс';
-
-        if (teamWorkVal === '1') {
-            recommendedId = 'zone2c_bureau';
-            recommendedText = '2в: Адвокатське бюро / Протезний центр — $0 грант → $100/міс → $150/міс';
-        } else if (courtCasesVal === '1') {
-            recommendedId = 'zone2b_practitioner';
-            recommendedText = '2б: Адвокат-практик (судовий супровід) — $0 грант → $50/міс → $100/міс';
-        }
-
-        const recTextEl = document.getElementById('recommended-tariff-text');
-        if (recTextEl) recTextEl.textContent = recommendedText;
-
         const tariffSelect = document.getElementById('regTariffPlan');
-        if (tariffSelect) tariffSelect.value = recommendedId;
+        if (tariffSelect) tariffSelect.value = 'grant_standard';
     }
 
     // Додамо прослуховування змін в анкеті юриста

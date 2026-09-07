@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ветеранський портал "Новий Шлях" (v46) — Координаційний центр реінтеграції ветеранів</title>
+    <title>Ветеранський портал «Новий Шлях» — Реінтеграція та підтримка ветеранів Черкащини</title>
     <!-- Open Graph / SEO (Для правильного відображення в Telegram/Facebook) -->
     <meta name="description" content="Координаційний центр реінтеграції ветеранів Черкащини. Юридична, психологічна та кар'єрна підтримка.">
     <meta property="og:title" content="Новий Шлях — Центр реінтеграції ветеранів">
@@ -688,71 +688,28 @@
                         <textarea id="regBio" rows="4" placeholder="Розкажіть про ваш досвід роботи з ветеранами" required></textarea>
                     </div>
 
-                    <!-- Спеціальний блок запитань для юристів (Self-selection) -->
-                    <div id="lawyer-questions-block" class="form-group" style="display: none; padding: 15px; background: rgba(0,0,0,0.02); border: 1px solid #ddd; border-radius: 12px; margin-bottom: 20px;">
-                        <h6 style="margin-bottom: 12px; font-weight: 700; color: #111;">📋 Анкетування для вибору тарифу юриста</h6>
+                    <!-- Спеціальний блок пільг для ветеранів -->
+                    <div id="lawyer-questions-block" class="form-group" style="padding: 15px; background: rgba(46,139,87,0.04); border: 1px solid rgba(46,139,87,0.15); border-radius: 12px; margin-bottom: 20px;">
+                        <h6 style="margin-bottom: 12px; font-weight: 700; color: #111;">🤝 Умови підтримки ветеранів</h6>
                         
                         <div class="form-group" style="margin-bottom: 12px;">
-                            <label style="font-size: 13px; font-weight: 600;">1. Чи ведете ви справи в суді?</label>
-                            <div style="display: flex; gap: 15px; margin-top: 4px;">
-                                <label style="font-size: 13px; cursor: pointer;"><input type="radio" name="court-cases" value="1" style="width: auto; margin-right: 5px;"> Так</label>
-                                <label style="font-size: 13px; cursor: pointer;"><input type="radio" name="court-cases" value="0" checked style="width: auto; margin-right: 5px;"> Ні</label>
-                            </div>
+                            <label style="font-size: 13px; font-weight: 600;">1. Розмір знижки для ветеранів (%):</label>
+                            <input type="number" id="spec-discount-percent" min="10" max="100" value="10" placeholder="10" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc; font-size: 13px;">
+                            <span style="font-size: 11px; color: #666;">Мінімальна знижка для ветеранів становить 10%.</span>
                         </div>
 
                         <div class="form-group" style="margin-bottom: 12px;">
-                            <label style="font-size: 13px; font-weight: 600;">2. Чи працюєте ви в команді з іншими юристами/адвокатами?</label>
-                            <div style="display: flex; gap: 15px; margin-top: 4px;">
-                                <label style="font-size: 13px; cursor: pointer;"><input type="radio" name="team-work" value="1" style="width: auto; margin-right: 5px;"> Так</label>
-                                <label style="font-size: 13px; cursor: pointer;"><input type="radio" name="team-work" value="0" checked style="width: auto; margin-right: 5px;"> Ні</label>
-                            </div>
-                        </div>
-
-                        <div class="form-group" style="margin-bottom: 12px;">
-                            <label style="font-size: 13px; font-weight: 600;">3. Яка середня вартість вашої послуги (або супроводу)?</label>
-                            <select id="avg-price-select" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc; font-size: 13px;">
-                                <option value="under_2000">до 2 000 грн</option>
-                                <option value="between_2000_10000">2 000 - 10 000 грн</option>
-                                <option value="over_10000">понад 10 000 грн</option>
-                            </select>
+                            <label style="font-size: 13px; font-weight: 600;">2. Кількість Про-Боно (безкоштовних) сесій / консультацій на місяць:</label>
+                            <input type="number" id="spec-probono-count" min="0" value="2" placeholder="2" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc; font-size: 13px;">
+                            <span style="font-size: 11px; color: #666;">Вкажіть, скільки безкоштовних консультацій ви готові надавати щомісяця.</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Крок 3: Рекомендований тариф -->
+                <!-- Крок 3: Налаштування співпраці (Приховано тарифні планки) -->
                 <div id="wizard-step-3" class="wizard-step" style="display: none;">
-                    <h5 style="margin-bottom: 15px; font-weight: 700; color: #2e8b57; border-bottom: 2px solid rgba(46,139,87,0.15); padding-bottom: 8px;">Крок 3: Умови та тариф співпраці</h5>
-                    
-                    <div id="lawyer-tariff-recommendation" style="display: none; margin-bottom: 15px; padding: 12px; background: #e6f7ff; border: 1px solid #91d5ff; border-radius: 8px; font-size: 13px; color: #0050b3; line-height: 1.4;">
-                        💡 <strong>Рекомендований тариф на основі відповідей:</strong><br>
-                        <span id="recommended-tariff-text" style="font-weight: 700;">Гнучкий (10% комісія)</span>
-                    </div>
-
-                    <div class="form-group" style="padding: 15px; background: rgba(46,139,87,0.03); border: 1px solid rgba(46,139,87,0.15); border-radius: 12px; margin-bottom: 20px;">
-                        <label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">Узгоджений тарифний план:</label>
-                        <select id="regTariffPlan" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(46,139,87,0.25); font-size: 14px; margin-bottom: 12px;" required>
-                            <optgroup label="Приватні фахівці (сесійна модель)">
-                                <option value="grant_standard" selected>🎁 Грантовий — $0 / 0% комісії (перші 12 місяців)</option>
-                                <option value="zone1_stable">📊 Стабільний — $30/міс перехідний, $50/міс постійний + 5% комісія</option>
-                                <option value="zone1_flexible">🔄 Гнучкий — $0 фіксовано + 10%/15% комісія (з місяця 13+)</option>
-                            </optgroup>
-                            <optgroup label="Юристи, адвокати, протезисти (фіксована підписка)">
-                                <option value="zone2a_consultant">2а: Юрист-консультант — $0 грант → $50/міс → $100/міс</option>
-                                <option value="zone2b_practitioner">2б: Адвокат-практик (судовий супровід) — $0 грант → $50/міс → $100/міс</option>
-                                <option value="zone2c_bureau">2в: Адвокатське бюро / Протезний центр — $0 грант → $100/міс → $150/міс</option>
-                            </optgroup>
-                            <optgroup label="Реабілітаційні центри, клініки, центри">
-                                <option value="zone3_bureau">Установа / Центр — $0 грант → $100/міс → $150/міс</option>
-                            </optgroup>
-                            <optgroup label="Громадські організації та благодійні фонди">
-                                <option value="zone4_ngo">Безкоштовний профіль ГО/БФ (після верифікації Радою)</option>
-                            </optgroup>
-                            <optgroup label="Державні структури, ОМС, ЦНАП, соцслужби">
-                                <option value="zone5_state">Інформаційний профіль ($0, за рішенням Ради)</option>
-                            </optgroup>
-                        </select>
-
-                        <div id="grant-date-container" style="display: none;">
+                    <input type="hidden" id="regTariffPlan" value="grant_standard">
+                    <div id="grant-date-container" style="display: none;">
                             <label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">
                                 📅 Кінцева дата договору (за наявності гранту)
                             </label>
