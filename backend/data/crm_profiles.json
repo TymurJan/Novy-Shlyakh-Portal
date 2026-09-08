@@ -1,0 +1,28 @@
+{
+  "tg_77112233": {
+    "user_id": "tg_77112233",
+    "first_seen_at": "2026-09-08T00:05:50.490036+00:00",
+    "sessions": [
+      "sess_anon_merge_test_999"
+    ],
+    "interest_categories": [
+      "psychology",
+      "legal_vlk",
+      "grants"
+    ],
+    "viewed_specialists": [],
+    "geo_history": [
+      "Канівська ТГ"
+    ],
+    "last_active_at": "2026-09-08T00:05:50.490065+00:00",
+    "auth_details": {
+      "id": "tg_77112233",
+      "name": "Олександр Ветеран",
+      "username": "@olex_vtr",
+      "roles": [
+        "ROLE_VETERAN"
+      ],
+      "is_veteran": true
+    }
+  }
+}

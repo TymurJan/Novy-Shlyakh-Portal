@@ -84,10 +84,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         // Змінюємо колір хедера під тему Telegram
-        tg.setHeaderColor('#1A1C1A');
-    }
-
-    const isUserLoggedIn = localStorage.getItem('current_veteran');
+    const isUserLoggedIn = (window.NovyShlyakh && window.NovyShlyakh.Auth) 
+        ? window.NovyShlyakh.Auth.isAuthenticated() 
+        : !!(localStorage.getItem('novy_shlyakh_user_profile') || localStorage.getItem('current_veteran'));
 
     let currentCategoryFilter = 'all';
 
@@ -211,11 +210,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     ${videoBtnHtml}
                     <div style="display: flex; gap: 10px; margin-top: 15px;">
-                        <a href="tel:${spec.phone}" onclick="trackClick('${spec.id}', 'call', '${spec.category}', '${spec.sub_specialties || ''}')" class="btn-card" style="text-align:center; display: flex; align-items: center; justify-content: center; text-decoration: none;">
-                            📞 Зателефонувати
-                        </a>
-                        <button class="btn-card" onclick="handleBookingClick('${spec.id}', '${spec.category}', '${spec.sub_specialties || ''}')" style="flex: 1;">
-                            Записатися через Бот
+                        ${isUserLoggedIn 
+                            ? `<a href="tel:${spec.phone}" onclick="trackClick('${spec.id}', 'call', '${spec.category}', '${spec.sub_specialties || ''}')" class="btn-card" style="text-align:center; display: flex; align-items: center; justify-content: center; text-decoration: none;">
+                                📞 ${spec.phone}
+                               </a>`
+                            : `<button type="button" class="btn-card js-requires-auth" data-spec-id="${spec.id}" data-spec-name="${spec.name}" data-phone="${spec.phone}" style="text-align:center; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                                📞 Показати телефон
+                               </button>`
+                        }
+                        <button class="btn-card ${isUserLoggedIn ? '' : 'js-requires-auth'}" data-spec-id="${spec.id}" data-spec-name="${spec.name}" onclick="${isUserLoggedIn ? `handleBookingClick('${spec.id}', '${spec.category}', '${spec.sub_specialties || ''}')` : ''}" style="flex: 1;">
+                            Записатися на прийом
                         </button>
                     </div>
                 </div>

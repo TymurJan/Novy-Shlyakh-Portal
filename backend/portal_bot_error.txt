@@ -1,11 +1,5 @@
+INFO:crypto_utils:✅ crypto_utils: шифрувальник Fernet ініціалізований успішно.
 INFO:aiogram.dispatcher:Start polling
-INFO:aiogram.dispatcher:Run polling for bot @Veteran_NovyShlyakh_Bot id=8491124030 - 'Ветеранський портал "Новий Шлях"'
-INFO:root:DEBUG: /start command received from 531215718
-INFO:aiogram.event:Update id=686491450 is handled. Duration 187 ms by bot id=8491124030
-INFO:root:DEBUG: /start command received from 531215718
-INFO:aiogram.event:Update id=686491451 is handled. Duration 74 ms by bot id=8491124030
-INFO:aiogram.event:Update id=686491452 is handled. Duration 129 ms by bot id=8491124030
-INFO:root:DEBUG: /start command received from 531215718
-INFO:aiogram.event:Update id=686491453 is handled. Duration 195 ms by bot id=8491124030
-INFO:root:DEBUG: /start command received from 531215718
-INFO:aiogram.event:Update id=686491454 is handled. Duration 238 ms by bot id=8491124030
+INFO:aiogram.dispatcher:Run polling for bot @Veteran_NovyShlyakh_bot id=8988055847 - 'Ветеранський інформаційний HUB "Новий Шлях"'
+INFO:aiogram.event:Update id=241094440 is handled. Duration 22 ms by bot id=8988055847
+INFO:aiogram.event:Update id=241094439 is handled. Duration 216 ms by bot id=8988055847
