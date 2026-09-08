@@ -684,7 +684,135 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // ─── 9. Вихід з кабінету ──────────────────────────────────────────────────
+    // ─── 9. Вкладка 5 та 6: Робочий простір Партнера (Offer/Accept та КЕП) ──────
+    const cabPartnerInboxGrid = document.getElementById('cabPartnerInboxGrid');
+    const cabPartnerInboxCount = document.getElementById('cabPartnerInboxCount');
+    const btnPartnerSignDiia = document.getElementById('btnPartnerSignDiia');
+    const btnPartnerSignKep = document.getElementById('btnPartnerSignKep');
+    const partnerSignStatus = document.getElementById('partnerSignStatus');
+
+    async function loadPartnerInbox() {
+        if (!cabPartnerInboxGrid) return;
+        try {
+            const res = await fetch('/api/v1/crm/partner/inbox');
+            const data = await res.json();
+            const cases = (data && data.status === 'success') ? data.data : [];
+
+            if (cabPartnerInboxCount) cabPartnerInboxCount.textContent = cases.length;
+
+            if (cases.length === 0) {
+                cabPartnerInboxGrid.innerHTML = `
+                    <div class="cab-empty-state">
+                        <span style="font-size: 32px;">📥</span>
+                        <h4>Немає нових нерозподілених звернень</h4>
+                        <p>Усі поточні запити ветеранів опрацьовані координаційним центром ГО «Талан ЮА».</p>
+                    </div>
+                `;
+            } else {
+                cabPartnerInboxGrid.innerHTML = cases.map(c => `
+                    <div class="cab-partner-case-card" id="partner-case-${c.id}">
+                        <div class="cab-ticket-header">
+                            <div>
+                                <span class="cab-ticket-category">${getCategoryName(c.category)}</span>
+                                <h4 class="cab-ticket-title">Запит № ${c.id}</h4>
+                            </div>
+                            <span class="cab-badge-urgency">${c.urgency}</span>
+                        </div>
+                        <p class="cab-ticket-desc">${c.description_preview}</p>
+                        <div class="cab-case-meta">
+                            <span>📍 Громада: <b>${c.community}</b></span>
+                            <span>📎 Документи: ${c.has_attached_docs ? 'Є в сейфі (доступ за згодою)' : 'Відсутні'}</span>
+                        </div>
+                        <div class="cab-partner-actions">
+                            <button class="btn-primary btn-sm btn-accept-case" data-id="${c.id}">
+                                ✅ Взяти справу в роботу
+                            </button>
+                            <button class="btn-secondary btn-sm btn-cascade-case" data-id="${c.id}">
+                                ↪️ Передати за каскадом
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+
+                document.querySelectorAll('.btn-accept-case').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        const caseId = btn.getAttribute('data-id');
+                        try {
+                            const acceptRes = await fetch(`/api/v1/crm/partner/tickets/${encodeURIComponent(caseId)}/accept`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    specialist_id: userId,
+                                    specialist_name: currentUser.name || "Верифікований партнер",
+                                    specialist_role: "Фахівець супроводу"
+                                })
+                            });
+                            const rJson = await acceptRes.json();
+                            if (rJson.status === 'success') {
+                                alert(`✅ Справу ${caseId} прийнято в роботу! Доступ до конфіденційного чату та контактів відкрито.`);
+                                await loadPartnerInbox();
+                            }
+                        } catch (err) {
+                            console.error('[Accept Case Error]', err);
+                        }
+                    });
+                });
+
+                document.querySelectorAll('.btn-cascade-case').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        const caseId = btn.getAttribute('data-id');
+                        try {
+                            await fetch(`/api/v1/crm/partner/tickets/${encodeURIComponent(caseId)}/cascade`, { method: 'POST' });
+                            alert(`↪️ Справу ${caseId} передано наступному спеціалісту в черзі каскаду.`);
+                            await loadPartnerInbox();
+                        } catch (err) {
+                            console.error('[Cascade Case Error]', err);
+                        }
+                    });
+                });
+            }
+        } catch (e) {
+            console.error('[Partner Inbox Error]', e);
+        }
+    }
+
+    if (isPartner) {
+        await loadPartnerInbox();
+    }
+
+    if (btnPartnerSignDiia) {
+        btnPartnerSignDiia.addEventListener('click', async () => {
+            btnPartnerSignDiia.disabled = true;
+            btnPartnerSignDiia.textContent = '⏳ Перевірка Дія.Підпис...';
+            try {
+                const res = await fetch('/api/v1/crm/partner/sign-agreement', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ partner_id: userId, sign_type: 'diia' })
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    if (partnerSignStatus) {
+                        partnerSignStatus.style.display = 'block';
+                        partnerSignStatus.textContent = '✅ Меморандум успішно підписано через Дія.Підпис!';
+                    }
+                }
+            } catch (err) {
+                console.error('[Sign Agreement Error]', err);
+            } finally {
+                btnPartnerSignDiia.disabled = false;
+                btnPartnerSignDiia.textContent = 'Підписати через Дія.Підпис';
+            }
+        });
+    }
+
+    if (btnPartnerSignKep) {
+        btnPartnerSignKep.addEventListener('click', () => {
+            alert('Оберіть підписаний КЕП-файл (.p7s / .asice) для завантаження на перевірку.');
+        });
+    }
+
+    // ─── 10. Вихід з кабінету ─────────────────────────────────────────────────
     const btnCabLogout = document.getElementById('btnCabLogout');
     if (btnCabLogout) {
         btnCabLogout.addEventListener('click', () => {

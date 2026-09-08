@@ -1081,3 +1081,40 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
     }
+
+    // ─── Публічний Дашборд Прозорості (МФВ «Відродження» / ГО «Талан ЮА») ─────
+    async function loadPublicDashboardStats() {
+        const statCommunities = document.getElementById('pdbStatCommunities');
+        const statSpecialists = document.getElementById('pdbStatSpecialists');
+        const statTickets = document.getElementById('pdbStatTickets');
+        const statSatisfaction = document.getElementById('pdbStatSatisfaction');
+
+        if (!statCommunities) return;
+
+        try {
+            const res = await fetch('/api/v1/analytics/public-summary');
+            const data = await res.json();
+            if (data && data.status === 'success' && data.data) {
+                const metrics = data.data.metrics || {};
+                const cov = data.data.coverage || {};
+
+                if (statCommunities && cov.all_ukraine_communities) {
+                    statCommunities.textContent = cov.all_ukraine_communities.toLocaleString('uk-UA');
+                }
+                if (statSpecialists && metrics.verified_specialists) {
+                    statSpecialists.textContent = metrics.verified_specialists + '+';
+                }
+                if (statTickets && metrics.processed_tickets) {
+                    statTickets.textContent = metrics.processed_tickets + '+';
+                }
+                if (statSatisfaction && metrics.satisfaction_rate) {
+                    statSatisfaction.textContent = metrics.satisfaction_rate;
+                }
+            }
+        } catch (e) {
+            console.warn('[Public Dashboard Stats Fallback]', e);
+        }
+    }
+
+    loadPublicDashboardStats();
+});
