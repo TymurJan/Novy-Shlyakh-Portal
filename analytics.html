@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Публічна аналітика та Прозорість — Ветеранський портал «Новий Шлях» | МФВ «Відродження»</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css?v=46">
+    <link rel="stylesheet" href="accessibility.css?v=46">
+    <link rel="stylesheet" href="soft_gate.css?v=46">
+
+    <style>
+        .analytics-hero {
+            padding: 120px 0 60px 0;
+            background: radial-gradient(circle at top right, rgba(16, 185, 129, 0.12), transparent 60%),
+                        linear-gradient(180deg, #1A1C1A 0%, #111411 100%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            text-align: center;
+        }
+
+        .analytics-donor-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #10B981;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .analytics-title {
+            font-size: clamp(30px, 5vw, 48px);
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 16px;
+            line-height: 1.2;
+        }
+
+        .analytics-sub {
+            max-width: 760px;
+            margin: 0 auto;
+            font-size: 16px;
+            color: #94A3B8;
+            line-height: 1.6;
+        }
+
+        .analytics-main {
+            padding: 60px 0 100px 0;
+            background: #111411;
+        }
+
+        .analytics-grid-4 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-bottom: 50px;
+        }
+
+        .an-stat-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 30px 24px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .an-stat-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(16, 185, 129, 0.4);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .an-stat-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+
+        .an-stat-num {
+            font-size: 44px;
+            font-weight: 700;
+            color: #10B981;
+            font-family: 'Outfit', sans-serif;
+            margin-bottom: 8px;
+        }
+
+        .an-stat-label {
+            font-size: 15px;
+            color: #E2E8F0;
+            font-weight: 600;
+        }
+
+        .an-stat-desc {
+            font-size: 13px;
+            color: #64748B;
+            margin-top: 6px;
+        }
+
+        .an-section-card {
+            background: rgba(255, 255, 255, 0.025);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 36px;
+            margin-bottom: 40px;
+        }
+
+        .an-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .an-section-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .an-bar-row {
+            margin-bottom: 20px;
+        }
+
+        .an-bar-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #CBD5E1;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .an-bar-track {
+            background: rgba(255, 255, 255, 0.06);
+            height: 12px;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .an-bar-fill {
+            height: 100%;
+            border-radius: 6px;
+            transition: width 1.2s ease-in-out;
+        }
+
+        .an-principles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .an-principle-item {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 14px;
+            padding: 20px;
+        }
+
+        .an-principle-item h4 {
+            color: #10B981;
+            font-size: 15px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .an-principle-item p {
+            font-size: 13px;
+            color: #94A3B8;
+            line-height: 1.5;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Хедер порталу -->
+    <header class="header">
+        <div class="container">
+            <a href="index.html" class="logo" style="text-decoration: none; color: inherit; cursor: pointer;">
+                <span class="ngo-badge">Проєкт ГО ТАЛАН ЮА</span>
+                <h1>НОВИЙ ШЛЯХ</h1>
+            </a>
+            <nav class="nav" style="display: flex; align-items: center;">
+                <div id="menu-container" class="menu-container">
+                    <a href="news.html">Новини</a>
+                    <a href="resources.html">Держресурси</a>
+                    <a href="catalog.html">Послуги та можливості</a>
+                    <a href="employers.html">Робота та Бізнес</a>
+                    <a href="communities.html">Спільноти та простори</a>
+                    <a href="analytics.html" class="active" style="color: #10B981; font-weight: 600;">Аналітика</a>
+                </div>
+                
+                <a id="nav-cabinet-btn" href="cabinet.html" class="btn-primary" style="margin-left: 15px; border-radius: 8px; font-weight: 600; display: flex; align-items: center; gap: 8px; padding: 10px 20px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <span id="nav-cabinet-label">Кабінет</span>
+                </a>
+
+                <button class="accessibility-header-btn" id="accessOpen" title="Версія для людей з порушенням зору">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero розділу аналітики -->
+    <section class="analytics-hero">
+        <div class="container">
+            <div class="analytics-donor-tag">
+                <span>🌱</span>
+                <span>МФВ «Відродження» & ГО «Талан ЮА»</span>
+            </div>
+            <h1 class="analytics-title">Публічна аналітика та Прозорість екосистеми</h1>
+            <p class="analytics-sub">
+                «Новий Шлях» відкриває статистику реального дефіциту соціальних та психологічних послуг, звернень ветеранів і покриття громад для органів місцевого самоврядування (ОМС), донорів та громадянського суспільства.
+            </p>
+        </div>
+    </section>
+
+    <!-- Основна аналітична зона -->
+    <main class="analytics-main">
+        <div class="container">
+            
+            <!-- 4 Ключові метрики живої телеметрії -->
+            <div class="analytics-grid-4">
+                <div class="an-stat-card">
+                    <div class="an-stat-icon">🗺️</div>
+                    <div class="an-stat-num" id="anStatCommunities">1 469</div>
+                    <div class="an-stat-label">Територіальних громад</div>
+                    <div class="an-stat-desc">Покриття КАТОТТГ + Онлайн-доступ</div>
+                </div>
+
+                <div class="an-stat-card">
+                    <div class="an-stat-icon">🛡️</div>
+                    <div class="an-stat-num" id="anStatSpecialists">84+</div>
+                    <div class="an-stat-label">Верифікованих фахівців</div>
+                    <div class="an-stat-desc">Юристи, психологи, куратори ВЛК</div>
+                </div>
+
+                <div class="an-stat-card">
+                    <div class="an-stat-icon">🤝</div>
+                    <div class="an-stat-num" id="anStatTickets">142+</div>
+                    <div class="an-stat-label">Опрацьованих звернень</div>
+                    <div class="an-stat-desc">100% безкоштовний Pro-Bono супровід</div>
+                </div>
+
+                <div class="an-stat-card">
+                    <div class="an-stat-icon">⭐</div>
+                    <div class="an-stat-num" id="anStatSatisfaction">98.4%</div>
+                    <div class="an-stat-label">Рівень довіри та якості</div>
+                    <div class="an-stat-desc">Контроль безпеки «Кнопкою SOS»</div>
+                </div>
+            </div>
+
+            <!-- Структура потреб та звернень ветеранів -->
+            <div class="an-section-card">
+                <div class="an-section-header">
+                    <h3 class="an-section-title">📊 Розподіл реального попиту ветеранів та їхніх родин</h3>
+                    <span style="font-size: 13px; color: #10B981; font-weight: 500;">Дані оновлюються в реальному часі</span>
+                </div>
+
+                <div class="an-bar-row">
+                    <div class="an-bar-label">
+                        <span>⚖️ Юридичний супровід (ВЛК, МСЕК, бойові виплати, отримання УБД)</span>
+                        <b id="anPctLegal">42%</b>
+                    </div>
+                    <div class="an-bar-track">
+                        <div class="an-bar-fill" style="width: 42%; background: linear-gradient(90deg, #10B981, #3B82F6);"></div>
+                    </div>
+                </div>
+
+                <div class="an-bar-row">
+                    <div class="an-bar-label">
+                        <span>🌿 Психологічна підтримка, подолання ПТСР та проєкт «Ашрам»</span>
+                        <b id="anPctPsych">28%</b>
+                    </div>
+                    <div class="an-bar-track">
+                        <div class="an-bar-fill" style="width: 28%; background: linear-gradient(90deg, #10B981, #059669);"></div>
+                    </div>
+                </div>
+
+                <div class="an-bar-row">
+                    <div class="an-bar-label">
+                        <span>🎓 Освіта, перекваліфікація та державні ваучери ДЦЗ (до 30 280 грн)</span>
+                        <b id="anPctEdu">18%</b>
+                    </div>
+                    <div class="an-bar-track">
+                        <div class="an-bar-fill" style="width: 18%; background: linear-gradient(90deg, #3B82F6, #6366F1);"></div>
+                    </div>
+                </div>
+
+                <div class="an-bar-row">
+                    <div class="an-bar-label">
+                        <span>💼 Працевлаштування, безбар'єрні роботодавці та бізнес-гранти («Власна Справа»)</span>
+                        <b id="anPctJob">12%</b>
+                    </div>
+                    <div class="an-bar-track">
+                        <div class="an-bar-fill" style="width: 12%; background: linear-gradient(90deg, #F59E0B, #E11D48);"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Принципи некомерційності та прозорості -->
+            <div class="an-section-card">
+                <div class="an-section-header">
+                    <h3 class="an-section-title">🛡️ Засадничі принципи прозорості та безпеки ГО «Талан ЮА»</h3>
+                </div>
+                <div class="an-principles-grid">
+                    <div class="an-principle-item">
+                        <h4>🌱 100% Безкоштовність</h4>
+                        <p>Жодних прихованих платежів, підписок чи комісій. Усі послуги для захисників та їхніх родин фінансуються за рахунок грантів та pro-bono внесків.</p>
+                    </div>
+                    <div class="an-principle-item">
+                        <h4>🔒 Захист військової таємниці</h4>
+                        <p>Сейф документів зашифровано за протоколом AES-256. Дані про військові частини чи локації передової автоматично захищені від публікації.</p>
+                    </div>
+                    <div class="an-principle-item">
+                        <h4>🛑 Кнопка SOS та Аудит</h4>
+                        <p>Ветеран може розірвати співпрацю з фахівцем в 1 клік. Будь-яка невідповідність етичним нормам веде до штрафу рейтингу та розгляду правлінням.</p>
+                    </div>
+                    <div class="an-principle-item">
+                        <h4>🏛️ Співпраця з ОМС та ЦНАП</h4>
+                        <p>Органи місцевого самоврядування отримують знеособлену аналітику дефіциту послуг для планування місцевих програм ветеранської підтримки.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Скрипти -->
+    <script src="soft_gate.js?v=46"></script>
+    <script src="auth_session.js?v=46"></script>
+    <script src="accessibility.js?v=46"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const res = await fetch('/api/v1/analytics/public-summary');
+                const data = await res.json();
+                if (data && data.status === 'success' && data.data) {
+                    const metrics = data.data.metrics || {};
+                    const cov = data.data.coverage || {};
+
+                    if (cov.all_ukraine_communities) {
+                        document.getElementById('anStatCommunities').textContent = cov.all_ukraine_communities.toLocaleString('uk-UA');
+                    }
+                    if (metrics.verified_specialists) {
+                        document.getElementById('anStatSpecialists').textContent = metrics.verified_specialists + '+';
+                    }
+                    if (metrics.processed_tickets) {
+                        document.getElementById('anStatTickets').textContent = metrics.processed_tickets + '+';
+                    }
+                    if (metrics.satisfaction_rate) {
+                        document.getElementById('anStatSatisfaction').textContent = metrics.satisfaction_rate;
+                    }
+                }
+            } catch (e) {
+                console.warn('[Analytics Live Sync Fallback]', e);
+            }
+        });
+    </script>
+</body>
+</html>
