@@ -1,231 +1,638 @@
-/* Базові налаштування екранів */
-body, html {
+/* ═══════════════════════════════════════════════════════════════════════════════
+ * ВЕТЕРАНСЬКИЙ ПОРТАЛ «НОВИЙ ШЛЯХ» — СТИЛІ ОСОБИСТОГО КАБІНЕТУ (Кроки 5, 6, 7, 8)
+ * Glassmorphism Dark UI | Адаптивність | WCAG 2.1 Доступність
+ * ═══════════════════════════════════════════════════════════════════════════════ */
+
+:root {
+    --cab-bg: #141714;
+    --cab-card-bg: rgba(26, 30, 26, 0.75);
+    --cab-border: rgba(255, 255, 255, 0.08);
+    --cab-primary: #10B981;
+    --cab-primary-hover: #59C44A;
+    --cab-accent-red: #ef4444;
+    --cab-text: #F9F9F9;
+    --cab-text-muted: #9ca3af;
+}
+
+body.cabinet-body {
+    background-color: var(--cab-bg);
+    color: var(--cab-text);
+    font-family: 'Inter', sans-serif;
     margin: 0;
     padding: 0;
-    height: 100%;
-    background-color: var(--deep-charcoal, #111);
-    font-family: 'Inter', sans-serif;
-}
-
-.cabinet-screen {
-    display: none;
-    height: 100vh;
-    width: 100%;
-}
-
-.cabinet-screen.active {
-    display: flex;
-}
-
-/* Логін та NDA */
-#screen-login, #screen-nda {
-    align-items: center;
-    justify-content: center;
-    background: radial-gradient(circle at center, #1a1c1a 0%, #0a0a0a 100%);
-}
-
-.login-box, .nda-box {
-    background: #151715;
-    border: 1px solid #333;
-    padding: 40px;
-    border-radius: 12px;
-    width: 100%;
-    max-width: 400px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    text-align: center;
-}
-
-.nda-box {
-    max-width: 600px;
-    text-align: left;
-}
-
-.cabinet-input {
-    width: 100%;
-    padding: 15px;
-    background: #0a0a0a;
-    border: 1px solid #333;
-    border-radius: 8px;
-    color: white;
-    margin-bottom: 20px;
-    outline: none;
-    box-sizing: border-box;
-}
-
-.cabinet-input:focus {
-    border-color: var(--primary-green, #10B981);
-}
-
-.nda-content {
-    background: #0a0a0a;
-    padding: 20px;
-    border-left: 4px solid #ff4444;
-    border-radius: 4px;
-    color: #ccc;
-    font-size: 14px;
-    line-height: 1.6;
-}
-
-/* Кнопки підпису */
-.btn-diia {
-    flex: 1;
-    background: #000;
-    color: white;
-    border: 1px solid #333;
-    padding: 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: 0.3s;
-}
-.btn-diia:hover { border-color: #000; background: #222; }
-
-.btn-kep {
-    flex: 1;
-    background: transparent;
-    color: var(--primary-green, #10B981);
-    border: 1px solid var(--primary-green, #10B981);
-    padding: 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: 0.3s;
-}
-.btn-kep:hover { background: rgba(16, 185, 129, 0.1); }
-
-/* Дашборд */
-.dashboard-layout {
-    display: flex;
-    width: 100%;
-    height: 100%;
-}
-
-.sidebar {
-    width: 250px;
-    background: #151715;
-    border-right: 1px solid #333;
-    padding: 30px 20px;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
 }
 
-.sidebar-nav {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 40px;
+/* ─── ХЕДЕР КАБІНЕТУ ─────────────────────────────────────────────────────────── */
+.cab-header {
+    background: rgba(20, 23, 20, 0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--cab-border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    padding: 12px 24px;
 }
 
-.sidebar-nav a {
-    color: #888;
-    text-decoration: none;
-    padding: 12px 15px;
-    border-radius: 8px;
-    transition: 0.3s;
-}
-
-.sidebar-nav a:hover, .sidebar-nav a.active {
-    background: rgba(16, 185, 129, 0.1);
-    color: var(--primary-green, #10B981);
-}
-
-.main-content {
-    flex: 1;
-    padding: 40px;
-    background: #0a0a0a;
-    overflow-y: auto;
-}
-
-.dash-header {
+.cab-header-inner {
+    max-width: 1400px;
+    margin: 0 auto;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 40px;
-    color: white;
+    gap: 16px;
+    flex-wrap: wrap;
 }
 
-.status-toggle {
+.cab-brand .cab-logo {
     display: flex;
     align-items: center;
-    gap: 15px;
-    background: #151715;
-    padding: 10px 20px;
-    border-radius: 50px;
-    border: 1px solid #333;
+    gap: 12px;
+    text-decoration: none;
+    color: var(--cab-text);
 }
 
-/* Toggle Switch */
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 50px;
-  height: 24px;
-}
-.switch input { opacity: 0; width: 0; height: 0; }
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background-color: #333;
-  transition: .4s;
-}
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 16px;
-  width: 16px;
-  left: 4px;
-  bottom: 4px;
-  background-color: white;
-  transition: .4s;
-}
-input:checked + .slider { background-color: var(--primary-green, #10B981); }
-input:checked + .slider:before { transform: translateX(26px); }
-.slider.round { border-radius: 24px; }
-.slider.round:before { border-radius: 50%; }
-
-/* Таблиця */
-.table-container {
-    background: #151715;
-    border: 1px solid #333;
-    border-radius: 12px;
-    overflow: hidden;
+.cab-logo-icon {
+    font-size: 28px;
 }
 
-.requests-table {
+.cab-logo-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin: 0;
+    color: #fff;
+}
+
+.cab-logo-sub {
+    font-size: 11px;
+    color: var(--cab-primary);
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.cab-user-meta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.cab-geo-badge {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    color: var(--cab-primary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.cab-profile-chip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 14px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--cab-border);
+    border-radius: 30px;
+}
+
+.cab-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--cab-primary);
+    color: #1A1C1A;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.cab-user-text b {
+    font-size: 13px;
+    display: block;
+}
+
+.cab-status-tag {
+    font-size: 11px;
+    color: var(--cab-primary);
+}
+
+.cab-btn-home {
+    color: var(--cab-text-muted);
+    text-decoration: none;
+    font-size: 13px;
+    transition: color 0.2s;
+}
+
+.cab-btn-home:hover {
+    color: var(--cab-primary);
+}
+
+/* ─── ОСНОВНИЙ ЛЕЙАУТ ────────────────────────────────────────────────────────── */
+.cab-container {
+    max-width: 1400px;
     width: 100%;
-    border-collapse: collapse;
-    color: #ccc;
-    font-size: 14px;
-    text-align: left;
+    margin: 24px auto;
+    padding: 0 24px;
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 24px;
+    box-sizing: border-box;
+    flex: 1;
 }
 
-.requests-table th, .requests-table td {
-    padding: 15px 20px;
-    border-bottom: 1px solid #333;
+/* ─── САЙДБАР ───────────────────────────────────────────────────────────────── */
+.cab-sidebar {
+    background: var(--cab-card-bg);
+    border: 1px solid var(--cab-border);
+    border-radius: 20px;
+    padding: 16px;
+    height: fit-content;
+    position: sticky;
+    top: 90px;
 }
 
-.requests-table th {
-    background: #1a1c1a;
-    font-weight: 600;
-    color: white;
+.cab-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
-.requests-table tbody tr:hover {
-    background: rgba(255,255,255,0.02);
-}
-
-.btn-take {
+.cab-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 12px;
     background: transparent;
-    color: var(--primary-green, #10B981);
-    border: 1px solid var(--primary-green, #10B981);
-    padding: 6px 12px;
-    border-radius: 4px;
+    border: none;
+    color: var(--cab-text-muted);
+    font-size: 14px;
+    font-weight: 500;
     cursor: pointer;
-    font-size: 12px;
-    transition: 0.3s;
+    text-align: left;
+    width: 100%;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
 }
-.btn-take:hover {
-    background: var(--primary-green, #10B981);
-    color: #111;
+
+.cab-nav-item:hover {
+    background: rgba(255, 255, 255, 0.04);
+    color: #fff;
+}
+
+.cab-nav-item.active {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--cab-primary);
+    font-weight: 600;
+}
+
+.cab-nav-icon {
+    font-size: 18px;
+}
+
+.cab-badge-counter {
+    margin-left: auto;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 700;
+}
+
+.cab-badge-counter.partner {
+    background: #10B981;
+    color: #141714;
+}
+
+.cab-nav-divider {
+    height: 1px;
+    background: var(--cab-border);
+    margin: 10px 0;
+}
+
+.cab-logout-btn {
+    color: #ef4444;
+    margin-top: 20px;
+}
+
+.cab-logout-btn:hover {
+    background: rgba(239, 68, 68, 0.15) !important;
+    color: #ef4444 !important;
+}
+
+/* ─── ОСНОВНИЙ КОНТЕНТ ──────────────────────────────────────────────────────── */
+.cab-tab-content {
+    display: none;
+}
+
+.cab-tab-content.active {
+    display: block;
+    animation: cabFadeIn 0.22s ease;
+}
+
+@keyframes cabFadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.cab-card {
+    background: var(--cab-card-bg);
+    border: 1px solid var(--cab-border);
+    border-radius: 20px;
+    padding: 28px;
+    box-sizing: border-box;
+}
+
+.cab-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--cab-border);
+    padding-bottom: 20px;
+    margin-bottom: 24px;
+}
+
+.cab-card-header h2 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 22px;
+    margin: 0;
+    color: #fff;
+}
+
+.cab-card-sub {
+    font-size: 13px;
+    color: var(--cab-text-muted);
+    margin: 4px 0 0 0;
+}
+
+.cab-verified-badge {
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid var(--cab-primary);
+    color: var(--cab-primary);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 20px;
+}
+
+/* Форми */
+.cab-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.cab-form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.cab-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #d1d5db;
+    margin-bottom: 8px;
+}
+
+.cab-input {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--cab-border);
+    border-radius: 12px;
+    padding: 12px 16px;
+    color: #fff;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+}
+
+.cab-input:focus {
+    border-color: var(--cab-primary);
+    background: rgba(255, 255, 255, 0.07);
+}
+
+.cab-status-switcher {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.cab-switch-option {
+    cursor: pointer;
+}
+
+.cab-switch-option input {
+    display: none;
+}
+
+.cab-switch-box {
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--cab-border);
+    transition: all 0.2s;
+}
+
+.cab-switch-box b {
+    font-size: 15px;
+    color: #fff;
+}
+
+.cab-switch-box small {
+    font-size: 12px;
+    color: var(--cab-text-muted);
+    margin-top: 4px;
+}
+
+.cab-switch-option input:checked + .cab-switch-box {
+    background: rgba(16, 185, 129, 0.12);
+    border-color: var(--cab-primary);
+}
+
+.cab-autocomplete-dropdown {
+    position: absolute;
+    background: #1e221e;
+    border: 1px solid var(--cab-border);
+    border-radius: 12px;
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 50;
+    display: none;
+    margin-top: 4px;
+}
+
+.cab-autocomplete-item {
+    padding: 10px 14px;
+    cursor: pointer;
+    font-size: 13px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.cab-autocomplete-item:hover {
+    background: rgba(16, 185, 129, 0.2);
+}
+
+.cab-save-msg {
+    color: var(--cab-primary);
+    font-size: 14px;
+    margin-left: 14px;
+    font-weight: 600;
+}
+
+/* Тікети */
+.cab-section-title {
+    font-size: 16px;
+    color: #fff;
+    margin: 18px 0 12px 0;
+}
+
+.cab-tickets-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+}
+
+.cab-ticket-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--cab-border);
+    border-radius: 14px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.2s;
+}
+
+.cab-ticket-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.cab-ticket-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.cab-ticket-id {
+    font-size: 12px;
+    color: var(--cab-text-muted);
+    font-weight: 600;
+}
+
+.cab-ticket-status {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+.cab-ticket-status.active {
+    background: rgba(16, 185, 129, 0.2);
+    color: var(--cab-primary);
+}
+
+.cab-ticket-status.closed {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--cab-text-muted);
+}
+
+.cab-ticket-desc {
+    font-size: 13px;
+    line-height: 1.5;
+    color: #e2e8f0;
+    margin: 8px 0 14px 0;
+}
+
+.cab-ticket-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding-top: 12px;
+}
+
+.btn-sos {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    color: #ef4444;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-sos:hover {
+    background: #ef4444;
+    color: #fff;
+}
+
+/* Освіта та Ваучери */
+.cab-education-banner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(45, 79, 79, 0.25));
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 24px;
+}
+
+.cab-edu-banner-icon {
+    font-size: 40px;
+}
+
+.cab-education-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+}
+
+.cab-edu-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--cab-border);
+    border-radius: 14px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* Сейф документів */
+.cab-warning-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: rgba(245, 158, 11, 0.1);
+    border-left: 4px solid #f59e0b;
+    padding: 14px 18px;
+    border-radius: 10px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #fde68a;
+    margin-bottom: 20px;
+}
+
+.cab-vault-dropzone {
+    border: 2px dashed rgba(16, 185, 129, 0.35);
+    border-radius: 16px;
+    padding: 32px 20px;
+    text-align: center;
+    background: rgba(16, 185, 129, 0.03);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cab-vault-dropzone:hover {
+    border-color: var(--cab-primary);
+    background: rgba(16, 185, 129, 0.06);
+}
+
+.cab-dropzone-icon {
+    font-size: 36px;
+    margin-bottom: 8px;
+}
+
+.cab-vault-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.cab-vault-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--cab-border);
+    border-radius: 12px;
+}
+
+/* Модальні вікна кабінету */
+.cab-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(8px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 16px;
+}
+
+.cab-modal-overlay.is-open {
+    display: flex;
+}
+
+.cab-modal-box {
+    background: #1c201c;
+    border: 1px solid var(--cab-border);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 500px;
+    padding: 24px;
+    position: relative;
+    color: #fff;
+}
+
+.cab-modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: none;
+    color: var(--cab-text-muted);
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.btn-danger {
+    background: #ef4444;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 20px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+/* Адаптивність */
+@media (max-width: 900px) {
+    .cab-container {
+        grid-template-columns: 1fr;
+    }
+    .cab-sidebar {
+        position: static;
+    }
+    .cab-form-grid {
+        grid-template-columns: 1fr;
+    }
+    .cab-status-switcher {
+        grid-template-columns: 1fr;
+    }
 }

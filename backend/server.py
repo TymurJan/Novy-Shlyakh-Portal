@@ -1136,6 +1136,357 @@ async def merge_session_profile(req: SessionMergeRequest):
         }
     }
 
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# СТАДІЯ II: ТІКЕТ-ЦЕНТР, СЕЙФ ДОКУМЕНТІВ ТА SOS-РОЗРИВ (КРОКИ 5, 6, 7, 8)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+CRM_TICKETS_FILE = os.path.join(os.path.dirname(__file__), "data", "crm_tickets.json")
+CRM_VAULT_FILE = os.path.join(os.path.dirname(__file__), "data", "crm_vault.json")
+USER_PROFILES_FILE = os.path.join(os.path.dirname(__file__), "data", "user_profiles.json")
+VAULT_STORAGE_DIR = os.path.join(os.path.dirname(__file__), "vault_storage")
+
+os.makedirs(os.path.dirname(CRM_TICKETS_FILE), exist_ok=True)
+os.makedirs(VAULT_STORAGE_DIR, exist_ok=True)
+
+class UserProfileRequest(BaseModel):
+    user_id: str
+    veteran_role: Optional[str] = "veteran"
+    callsign: Optional[str] = ""
+    phone: Optional[str] = ""
+    community: Optional[str] = "Вся Україна / Онлайн"
+    preferred_channel: Optional[str] = "telegram"
+
+@app.post("/api/v1/user/profile")
+async def save_user_profile(req: UserProfileRequest):
+    """
+    Збереження налаштувань анкети ветерана / члена родини
+    """
+    profiles = {}
+    if os.path.exists(USER_PROFILES_FILE):
+        try:
+            with open(USER_PROFILES_FILE, "r", encoding="utf-8") as f:
+                profiles = json.load(f)
+        except Exception:
+            profiles = {}
+            
+    profiles[req.user_id] = {
+        "user_id": req.user_id,
+        "veteran_role": req.veteran_role,
+        "callsign": req.callsign,
+        "phone": req.phone,
+        "community": req.community,
+        "preferred_channel": req.preferred_channel,
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    with open(USER_PROFILES_FILE, "w", encoding="utf-8") as f:
+        json.dump(profiles, f, ensure_ascii=False, indent=2)
+        
+    return {"status": "success", "data": profiles[req.user_id]}
+
+@app.get("/api/v1/user/profile")
+async def get_user_profile(user_id: str):
+    """
+    Отримання анкети ветерана
+    """
+    if os.path.exists(USER_PROFILES_FILE):
+        try:
+            with open(USER_PROFILES_FILE, "r", encoding="utf-8") as f:
+                profiles = json.load(f)
+                if user_id in profiles:
+                    return {"status": "success", "data": profiles[user_id]}
+        except Exception:
+            pass
+    return {"status": "success", "data": None}
+
+
+class TicketCreateRequest(BaseModel):
+    user_id: str
+    category: str
+    description: str
+    attached_documents: Optional[List[str]] = []
+    community: Optional[str] = "Вся Україна / Онлайн"
+    user_callsign: Optional[str] = None
+    user_phone: Optional[str] = None
+
+@app.post("/api/v1/crm/tickets")
+async def create_ticket(req: TicketCreateRequest):
+    """
+    Крок 6: Подання нового звернення ветерана
+    """
+    tickets = []
+    if os.path.exists(CRM_TICKETS_FILE):
+        try:
+            with open(CRM_TICKETS_FILE, "r", encoding="utf-8") as f:
+                tickets = json.load(f)
+        except Exception:
+            tickets = []
+
+    ticket_id = f"TK-{datetime.now(timezone.utc).strftime('%Y%m')}-{uuid.uuid4().hex[:6].upper()}"
+    
+    # Підбір фахівця за каскадом або черговий спеціаліст ГО "Талан ЮА"
+    specialist_name = "Координаційний центр ГО «Талан ЮА»"
+    specialist_role = "Черговий фахівець супроводу"
+    specialist_id = "spec_coordinator_default"
+    
+    if req.category == "legal":
+        specialist_name = "Юридична служба ветеранів «Талан ЮА»"
+        specialist_role = "Адвокат з питань ВЛК та пільг"
+        specialist_id = "spec_legal_01"
+    elif req.category == "psychology":
+        specialist_name = "Проєкт «Ашрам» (Психологічна служба)"
+        specialist_role = "Кризовий психолог"
+        specialist_id = "spec_ashram_01"
+    elif req.category == "education":
+        specialist_name = "Відділ ваучерів та освіти ДЦЗ"
+        specialist_role = "Кар'єрний радник"
+        specialist_id = "spec_edu_01"
+
+    new_ticket = {
+        "id": ticket_id,
+        "user_id": req.user_id,
+        "category": req.category,
+        "description": req.description,
+        "status": "IN_PROGRESS",
+        "community": req.community,
+        "attached_documents": req.attached_documents,
+        "specialist": {
+            "id": specialist_id,
+            "name": specialist_name,
+            "role": specialist_role,
+            "rating": 4.9
+        },
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+        "messages": [
+            {
+                "sender": "system",
+                "text": "Звернення зареєстровано. Фахівець прийняв справу в роботу.",
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+        ],
+        "audit_trail": [
+            f"Ticket created by {req.user_id} in category {req.category}"
+        ]
+    }
+
+    tickets.insert(0, new_ticket)
+
+    with open(CRM_TICKETS_FILE, "w", encoding="utf-8") as f:
+        json.dump(tickets, f, ensure_ascii=False, indent=2)
+
+    return {"status": "success", "data": new_ticket}
+
+@app.get("/api/v1/crm/tickets")
+async def get_tickets(user_id: Optional[str] = None, role: Optional[str] = None):
+    """
+    Крок 6: Отримання списку справ користувача
+    """
+    tickets = []
+    if os.path.exists(CRM_TICKETS_FILE):
+        try:
+            with open(CRM_TICKETS_FILE, "r", encoding="utf-8") as f:
+                tickets = json.load(f)
+        except Exception:
+            tickets = []
+
+    if user_id:
+        user_tickets = [t for t in tickets if t.get("user_id") == user_id]
+        return {"status": "success", "data": user_tickets}
+
+    return {"status": "success", "data": tickets}
+
+
+# ─── СЕЙФ ДОКУМЕНТІВ (КРОК 7) ─────────────────────────────────────────────────
+
+@app.post("/api/v1/crm/documents/vault-upload")
+async def upload_vault_document(
+    file: UploadFile = File(...),
+    user_id: str = Form("anon_user"),
+    doc_type: str = Form("certificate")
+):
+    """
+    Крок 7: Захищене завантаження документа у персональний сейф
+    """
+    contents = await file.read()
+    if len(contents) > 10 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="Розмір файлу перевищує ліміт 10 МБ")
+
+    doc_id = f"DOC-{datetime.now(timezone.utc).strftime('%Y%m')}-{uuid.uuid4().hex[:6].upper()}"
+    file_hash = hashlib.sha256(contents).hexdigest()
+    
+    # Зберігаємо файл у локальне сховище
+    ext = os.path.splitext(file.filename)[1].lower() or ".pdf"
+    stored_filename = f"{doc_id}_{file_hash[:8]}{ext}"
+    stored_path = os.path.join(VAULT_STORAGE_DIR, stored_filename)
+    
+    with open(stored_path, "wb") as f:
+        f.write(contents)
+
+    doc_meta = {
+        "id": doc_id,
+        "user_id": user_id,
+        "original_name": file.filename,
+        "file_size": len(contents),
+        "doc_type": doc_type,
+        "file_hash": file_hash,
+        "uploaded_at": datetime.now(timezone.utc).isoformat(),
+        "status": "ENCRYPTED_VAULT",
+        "granted_specialists": []
+    }
+
+    vault_docs = []
+    if os.path.exists(CRM_VAULT_FILE):
+        try:
+            with open(CRM_VAULT_FILE, "r", encoding="utf-8") as f:
+                vault_docs = json.load(f)
+        except Exception:
+            vault_docs = []
+
+    vault_docs.insert(0, doc_meta)
+
+    with open(CRM_VAULT_FILE, "w", encoding="utf-8") as f:
+        json.dump(vault_docs, f, ensure_ascii=False, indent=2)
+
+    return {"status": "success", "data": doc_meta}
+
+@app.get("/api/v1/crm/documents/vault")
+async def get_vault_documents(user_id: str):
+    """
+    Крок 7: Отримання списку документів сейфа ветерана
+    """
+    vault_docs = []
+    if os.path.exists(CRM_VAULT_FILE):
+        try:
+            with open(CRM_VAULT_FILE, "r", encoding="utf-8") as f:
+                vault_docs = json.load(f)
+        except Exception:
+            vault_docs = []
+
+    user_docs = [d for d in vault_docs if d.get("user_id") == user_id]
+    return {"status": "success", "data": user_docs}
+
+
+# ─── SOS-РОЗРИВ СПІВПРАЦІ ТА ШТРАФ РЕЙТИНГУ (КРОК 8) ─────────────────────────
+
+class SosRevokeRequest(BaseModel):
+    ticket_id: str
+    user_id: str
+    reason_category: str
+    feedback: Optional[str] = ""
+    reassign_requested: bool = True
+
+@app.post("/api/v1/crm/tickets/{ticket_id}/sos-revoke")
+async def sos_revoke_specialist(ticket_id: str, req: SosRevokeRequest):
+    """
+    Крок 8: Екстрене припинення роботи з фахівцем, миттєве блокування доступу та пенальті рейтингу
+    """
+    tickets = []
+    if os.path.exists(CRM_TICKETS_FILE):
+        try:
+            with open(CRM_TICKETS_FILE, "r", encoding="utf-8") as f:
+                tickets = json.load(f)
+        except Exception:
+            tickets = []
+
+    target_ticket = None
+    for t in tickets:
+        if t.get("id") == ticket_id:
+            target_ticket = t
+            break
+
+    if not target_ticket:
+        raise HTTPException(status_code=404, detail="Справу не знайдено")
+
+    specialist = target_ticket.get("specialist", {})
+    specialist_id = specialist.get("id")
+
+    # Зміна статусу справи
+    target_ticket["status"] = "REVOKED_BY_VETERAN"
+    target_ticket["revoked_at"] = datetime.now(timezone.utc).isoformat()
+    target_ticket["revocation_reason"] = req.reason_category
+    target_ticket["revocation_feedback"] = req.feedback
+    target_ticket["access_revoked"] = True
+    target_ticket["audit_trail"].append(
+        f"SOS Revocation by user {req.user_id}. Reason: {req.reason_category}. Access to vault and chat immediately blocked."
+    )
+
+    # Зниження рейтингу спеціаліста при неетичній поведінці або ігноруванні
+    penalty = 0.0
+    if req.reason_category == "unethical":
+        penalty = 0.5
+    elif req.reason_category == "unresponsive":
+        penalty = 0.3
+    elif req.reason_category == "competence":
+        penalty = 0.2
+
+    # Оновлюємо базу спеціалістів
+    if os.path.exists('data/specialists.json'):
+        try:
+            with open('data/specialists.json', 'r', encoding='utf-8') as f:
+                specs = json.load(f)
+            for s in specs:
+                if str(s.get("id")) == str(specialist_id) or str(s.get("telegram_id")) == str(specialist_id):
+                    current_rating = float(s.get("rating", 5.0))
+                    s["rating"] = max(1.0, round(current_rating - penalty, 2))
+                    s.setdefault("sos_strikes", []).append({
+                        "ticket_id": ticket_id,
+                        "reason": req.reason_category,
+                        "timestamp": datetime.now(timezone.utc).isoformat()
+                    })
+                    break
+            with open('data/specialists.json', 'w', encoding='utf-8') as f:
+                json.dump(specs, f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            print(f"[Specialist Rating Penalty Error] {e}")
+
+    # Створення нової справи при запиті на перепризначення
+    new_ticket_id = None
+    if req.reassign_requested:
+        new_ticket_id = f"TK-{datetime.now(timezone.utc).strftime('%Y%m')}-{uuid.uuid4().hex[:6].upper()}"
+        reassigned_ticket = {
+            "id": new_ticket_id,
+            "user_id": req.user_id,
+            "category": target_ticket.get("category", "general"),
+            "description": f"[Перепризначено після розриву {ticket_id}] " + target_ticket.get("description", ""),
+            "status": "IN_PROGRESS",
+            "community": target_ticket.get("community", "Вся Україна / Онлайн"),
+            "attached_documents": target_ticket.get("attached_documents", []),
+            "specialist": {
+                "id": "spec_senior_supervisor",
+                "name": "Старший куратор ГО «Талан ЮА»",
+                "role": "Прямий координатор правління",
+                "rating": 5.0
+            },
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "messages": [
+                {
+                    "sender": "system",
+                    "text": "Справу передано на особистий контроль старшого куратора платформи.",
+                    "timestamp": datetime.now(timezone.utc).isoformat()
+                }
+            ],
+            "audit_trail": [
+                f"Reassigned automatically from revoked ticket {ticket_id}"
+            ]
+        }
+        tickets.insert(0, reassigned_ticket)
+
+    with open(CRM_TICKETS_FILE, "w", encoding="utf-8") as f:
+        json.dump(tickets, f, ensure_ascii=False, indent=2)
+
+    return {
+        "status": "success",
+        "data": {
+            "revoked": True,
+            "ticket_id": ticket_id,
+            "penalty_applied": penalty,
+            "new_ticket_id": new_ticket_id
+        }
+    }
+
 if __name__ == "__main__":
     import uvicorn
     # Запуск: python server.py

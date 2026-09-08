@@ -3,111 +3,375 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Talan UA | Кабінет Спеціаліста</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css"> <!-- Базові стилі бренду -->
-    <link rel="stylesheet" href="cabinet.css"> <!-- Специфічні стилі кабінету -->
-    <link rel="stylesheet" href="soft_gate.css?v=46">
-</head>
-<body>
+    <title>Особистий кабінет — Ветеранський портал «Новий Шлях» | ГО «Талан ЮА»</title>
     
-    <!-- Екран 1: Логін -->
-    <div id="screen-login" class="cabinet-screen active">
-        <div class="login-box">
-            <h2 style="color: var(--primary-green); margin-bottom: 20px;">Авторизація</h2>
-            <p style="color: #888; margin-bottom: 30px; font-size: 14px;">Введіть ваш персональний токен доступу.</p>
-            <input type="password" id="tokenInput" placeholder="Access Token" class="cabinet-input">
-            <button id="btnLogin" class="btn-primary" style="width: 100%; border-radius: 8px;">Увійти</button>
-            <p id="loginError" style="color: #ff4444; font-size: 12px; margin-top: 15px; display: none;">Невірний токен.</p>
-        </div>
-    </div>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css?v=46">
+    <link rel="stylesheet" href="accessibility.css?v=46">
+    <link rel="stylesheet" href="soft_gate.css?v=46">
+    <link rel="stylesheet" href="cabinet.css?v=46">
+</head>
+<body class="cabinet-body">
 
-    <!-- Екран 2: NDA (Юридичний Шлюз) -->
-    <div id="screen-nda" class="cabinet-screen">
-        <div class="nda-box">
-            <h2 style="color: white; margin-bottom: 20px;">Договір про нерозголошення (NDA)</h2>
-            <div class="nda-content">
-                <p><strong>УВАГА: Офіційне попередження</strong></p>
-                <p>Отримуючи доступ до системи, ви зобов'язуєтесь зберігати сувору конфіденційність щодо будь-яких персональних даних ветеранів, медичних діагнозів, соціальних статусів та деталей їхніх запитів (ЗУ "Про захист персональних даних").</p>
-                <p>Розголошення або несанкціонована передача цієї інформації третім особам тягне за собою кримінальну та адміністративну відповідальність.</p>
+    <!-- Хедер кабінету -->
+    <header class="cab-header">
+        <div class="cab-header-inner">
+            <div class="cab-brand">
+                <a href="index.html" class="cab-logo">
+                    <span class="cab-logo-icon">🌿</span>
+                    <div>
+                        <h1 class="cab-logo-title">НОВИЙ ШЛЯХ</h1>
+                        <span class="cab-logo-sub">Єдиний простір ветерана</span>
+                    </div>
+                </a>
             </div>
-            <div style="display: flex; gap: 15px; margin-top: 30px;">
-                <button id="btnSignDiia" class="btn-diia">Підписати через Дія.Підпис</button>
-                <button id="btnSignKep" class="btn-kep">Підписати КЕП (Вчасно)</button>
-            </div>
-            <p id="signatureStatus" style="color: var(--primary-green); margin-top: 15px; font-size: 14px; display: none;">Верифікація підпису...</p>
-        </div>
-    </div>
 
-    <!-- Екран 3: Дашборд -->
-    <div id="screen-dashboard" class="cabinet-screen">
-        <div class="dashboard-layout">
-            <!-- Sidebar -->
-            <aside class="sidebar">
-                <div class="sidebar-header">
-                    <h3 style="color: var(--primary-green);">Talan UA</h3>
-                    <p style="color: #888; font-size: 12px;">Back-office</p>
+            <!-- Бейдж користувача та швидкі дії -->
+            <div class="cab-user-meta">
+                <div class="cab-geo-badge" id="cabGeoBadge" title="Ваш поточний населений пункт">
+                    <span class="cab-geo-icon">📍</span>
+                    <span id="cabCurrentGeo">Черкаси / Онлайн</span>
                 </div>
-                <nav class="sidebar-nav">
-                    <a href="#" class="active" id="nav-requests">Запити</a>
-                    <a href="#" id="nav-settings">Налаштування</a>
-                    <a href="index.html" style="color: #ff4444; margin-top: 50px;">Вихід</a>
-                </nav>
-            </aside>
 
-            <!-- Main Content -->
-            <main class="main-content">
-                <div id="requestsSection">
-                    <header class="dash-header">
-                        <h2>Нові запити від ветеранів</h2>
-                        <div class="status-toggle">
-                            <span id="statusText" style="color: #888; font-size: 14px;">Статус: Не приймаю заявки</span>
-                            <label class="switch">
-                                <input type="checkbox" id="statusCheckbox">
-                                <span class="slider round"></span>
-                            </label>
-                        </div>
-                    </header>
-
-                    <div class="table-container">
-                        <table class="requests-table">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Напрямок</th>
-                                    <th>Короткий опис</th>
-                                    <th>Дата</th>
-                                    <th>Дія</th>
-                                </tr>
-                            </thead>
-                            <tbody id="requestsTableBody">
-                                <!-- Заповнюється через JS -->
-                            </tbody>
-                        </table>
+                <div class="cab-profile-chip" id="cabProfileChip">
+                    <div class="cab-avatar" id="cabAvatar">👤</div>
+                    <div class="cab-user-text">
+                        <b id="cabUserName">Ветеран</b>
+                        <span class="cab-status-tag" id="cabStatusTag">Завантаження...</span>
                     </div>
                 </div>
 
-                <!-- Налаштування та видалення профілю -->
-                <div id="settingsSection" style="display: none; padding: 25px; background: rgba(255,255,255,0.02); border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); margin-top: 20px;">
-                    <header class="dash-header" style="margin-bottom: 20px;">
-                        <h2>Налаштування кабінету</h2>
-                    </header>
-                    <h3 style="color: #ff4d4d; margin-bottom: 10px; font-size: 18px;">⚠️ Видалення профілю (Право на забуття)</h3>
-                    <p style="color: #aaa; font-size: 14px; margin-bottom: 20px; line-height: 1.5;">Ви можете назавжди видалити свій профіль спеціаліста, всі завантажені фото, документи про освіту (дипломи, ліцензії) та КЕП-підписи з бази даних проєкту «Новий Шлях».</p>
-                    <div style="display: flex; gap: 15px; flex-direction: column; max-width: 400px;">
-                        <label style="font-size: 13px; color: #ccc;">Для підтвердження введіть ваш Telegram ID або системний ID:</label>
-                        <input type="text" id="deleteConfirmToken" placeholder="Введіть ID для підтвердження" style="padding: 10px; border-radius: 8px; background: #222; border: 1px solid #444; color: white; outline: none; font-size: 14px;">
-                        <button id="btnDeleteSpecialistSelf" style="background: #ff4d4d; border: none; padding: 12px; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; transition: 0.2s;">
-                            Видалити мій профіль та всі дані
+                <a href="index.html" class="cab-btn-home" title="На головну сторінку порталу">
+                    <span>Повернутися на портал</span> ➔
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Основний контейнер кабінету -->
+    <div class="cab-container">
+        
+        <!-- Сайдбар навігації -->
+        <aside class="cab-sidebar">
+            <nav class="cab-nav" id="cabNav">
+                <button class="cab-nav-item active" data-tab="tab-profile">
+                    <span class="cab-nav-icon">👤</span>
+                    <span>Моя анкета</span>
+                </button>
+                <button class="cab-nav-item" data-tab="tab-tickets">
+                    <span class="cab-nav-icon">💼</span>
+                    <span>Мої справи</span>
+                    <span class="cab-badge-counter" id="cabActiveTicketsCount">0</span>
+                </button>
+                <button class="cab-nav-item" data-tab="tab-education">
+                    <span class="cab-nav-icon">🎓</span>
+                    <span>Освіта та Професія</span>
+                </button>
+                <button class="cab-nav-item" data-tab="tab-vault">
+                    <span class="cab-nav-icon">🔒</span>
+                    <span>Сейф документів</span>
+                </button>
+
+                <!-- Розділ для партнерів / фахівців (динамічний) -->
+                <div class="cab-nav-divider" id="partnerNavDivider" style="display: none;"></div>
+                <button class="cab-nav-item cab-nav-partner" data-tab="tab-partner-inbox" id="btnNavPartnerInbox" style="display: none;">
+                    <span class="cab-nav-icon">📥</span>
+                    <span>Вхідні звернення</span>
+                    <span class="cab-badge-counter partner" id="cabPartnerInboxCount">0</span>
+                </button>
+                <button class="cab-nav-item cab-nav-partner" data-tab="tab-partner-agreement" id="btnNavPartnerAgreement" style="display: none;">
+                    <span class="cab-nav-icon">📝</span>
+                    <span>Угода / КЕП</span>
+                </button>
+
+                <div class="cab-nav-footer">
+                    <button class="cab-nav-item cab-logout-btn" id="btnCabLogout">
+                        <span class="cab-nav-icon">🚪</span>
+                        <span>Вийти з кабінету</span>
+                    </button>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Основна робоча зона -->
+        <main class="cab-main" id="cabMain">
+
+            <!-- Вкладка 1: Анкета та Статус -->
+            <section class="cab-tab-content active" id="tab-profile">
+                <div class="cab-card">
+                    <div class="cab-card-header">
+                        <h2>👤 Моя анкетна картка</h2>
+                        <span class="cab-verified-badge" id="cabVerifiedBadge">🛡️ Перевірка пройдена</span>
+                    </div>
+
+                    <form id="cabProfileForm" class="cab-form-grid">
+                        <div class="cab-form-group full-width">
+                            <label class="cab-label">Статус отримувача допомоги:</label>
+                            <div class="cab-status-switcher">
+                                <label class="cab-switch-option">
+                                    <input type="radio" name="veteranRole" value="veteran" checked id="radioIsVeteran">
+                                    <span class="cab-switch-box">
+                                        <b>🎖️ Я ветеран / ветеранка (УБД)</b>
+                                        <small>Пріоритет: ВЛК, МСЕК, виплати, адаптація</small>
+                                    </span>
+                                </label>
+                                <label class="cab-switch-option">
+                                    <input type="radio" name="veteranRole" value="family" id="radioIsFamily">
+                                    <span class="cab-switch-box">
+                                        <b>👨‍👩‍👧 Я член родини ветерана</b>
+                                        <small>Пріоритет: психологічна підтримка, довідки, супровід</small>
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="cab-form-group">
+                            <label class="cab-label" for="cabInputCallsign">Як до мене звертатися (Ім'я або позивний):</label>
+                            <input type="text" id="cabInputCallsign" class="cab-input" placeholder="Наприклад: Друг Сивий або Тарас">
+                        </div>
+
+                        <div class="cab-form-group">
+                            <label class="cab-label" for="cabInputPhone">Контактний номер телефону:</label>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="tel" id="cabInputPhone" class="cab-input" placeholder="+380 (__) ___-__-__">
+                                <button type="button" class="btn-secondary" id="btnCabSharePhone" style="white-space: nowrap; font-size: 12px; padding: 0 12px;">
+                                    📱 Автозаповнення
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="cab-form-group">
+                            <label class="cab-label" for="cabInputCommunity">Моя громада / населений пункт (Всеукраїнський пошук):</label>
+                            <input type="text" id="cabInputCommunity" class="cab-input" placeholder="Введіть село, місто або оберіть Онлайн" autocomplete="off">
+                            <div id="cabGeoAutocomplete" class="cab-autocomplete-dropdown"></div>
+                        </div>
+
+                        <div class="cab-form-group">
+                            <label class="cab-label" for="cabPreferredChannel">Бажаний спосіб сповіщень:</label>
+                            <select id="cabPreferredChannel" class="cab-input">
+                                <option value="telegram">✈️ Telegram (Бот «Новий Шлях»)</option>
+                                <option value="phone">📞 Телефонний дзвінок</option>
+                                <option value="sms">💬 SMS-повідомлення</option>
+                                <option value="portal">🌐 Тільки сповіщення на сайті</option>
+                            </select>
+                        </div>
+
+                        <div class="cab-form-actions full-width">
+                            <button type="submit" class="btn-primary" id="btnSaveProfile">
+                                💾 Зберегти зміни в анкеті
+                            </button>
+                            <span id="cabSaveProfileSuccess" class="cab-save-msg" style="display: none;">✅ Збережено успішно!</span>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Вкладка 2: Історія справ (Тікет-центр) -->
+            <section class="cab-tab-content" id="tab-tickets">
+                <div class="cab-card">
+                    <div class="cab-card-header" style="flex-wrap: wrap; gap: 12px;">
+                        <div>
+                            <h2>💼 Історія моїх справ</h2>
+                            <p class="cab-card-sub">Всі ваші звернення до юристів, психологів та координаторів</p>
+                        </div>
+                        <button class="btn-primary" id="btnOpenNewTicketModal">
+                            + Подати нове звернення
                         </button>
                     </div>
+
+                    <!-- Список активних справ -->
+                    <h3 class="cab-section-title">⚡ Активні справи в роботі</h3>
+                    <div class="cab-tickets-grid" id="cabActiveTicketsGrid">
+                        <!-- Динамічно заповнюється через cabinet.js -->
+                    </div>
+
+                    <!-- Архів справ -->
+                    <h3 class="cab-section-title" style="margin-top: 30px;">📁 Завершені консультації (Архів)</h3>
+                    <div class="cab-tickets-grid archive" id="cabArchivedTicketsGrid">
+                        <!-- Динамічно заповнюється через cabinet.js -->
+                    </div>
                 </div>
-            </main>
+            </section>
+
+            <!-- Вкладка 3: Освіта та Перекваліфікація -->
+            <section class="cab-tab-content" id="tab-education">
+                <div class="cab-card">
+                    <div class="cab-card-header">
+                        <div>
+                            <h2>🎓 Освіта, перекваліфікація та нові професії</h2>
+                            <p class="cab-card-sub">Безкоштовні ваучери від Держслужби зайнятості, IT-курси та програми вишів</p>
+                        </div>
+                    </div>
+
+                    <div class="cab-education-banner">
+                        <div class="cab-edu-banner-icon">📜</div>
+                        <div>
+                            <h4>Державний ваучер на навчання до 30 280 грн</h4>
+                            <p>Усі учасники бойових дій та особи з інвалідністю внаслідок війни мають право на 100% безкоштовне здобуття нової професії або підвищення кваліфікації за 70+ спеціальностями.</p>
+                        </div>
+                    </div>
+
+                    <!-- Каталог доступних освітніх програм -->
+                    <div class="cab-education-grid" id="cabEducationGrid">
+                        <!-- Заповнюється з education.json -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Вкладка 4: Захищений Сейф документів -->
+            <section class="cab-tab-content" id="tab-vault">
+                <div class="cab-card">
+                    <div class="cab-card-header">
+                        <div>
+                            <h2>🔒 Мій захищений сейф документів</h2>
+                            <p class="cab-card-sub">Шифрування AES-256. Доступ надається виключно за вашим разовим дозволом</p>
+                        </div>
+                    </div>
+
+                    <!-- Попередження щодо держтаємниці -->
+                    <div class="cab-warning-box">
+                        <span class="cab-warn-icon">⚠️</span>
+                        <div>
+                            <b>ПРАВИЛО БЕЗПЕКИ:</b> Переконайтеся, що на документах немає секретної військової інформації (точних координат передових позицій або повної назви закритих підрозділів на фронті). Дбаємо про безпеку побратимів!
+                        </div>
+                    </div>
+
+                    <!-- Зона завантаження -->
+                    <div class="cab-vault-dropzone" id="cabVaultDropzone">
+                        <div class="cab-dropzone-icon">📁</div>
+                        <h4>Перетягніть файл сюди або натисніть для вибору</h4>
+                        <p>Підтримуються PDF, JPG, PNG до 10 МБ (довідки ВЛК, УБД, медичні виписки)</p>
+                        <input type="file" id="cabVaultFileInput" style="display: none;" accept=".pdf,.jpg,.jpeg,.png">
+                        <button type="button" class="btn-secondary" onclick="document.getElementById('cabVaultFileInput').click()">
+                            Обрати файл з пристрою
+                        </button>
+                    </div>
+
+                    <!-- Список завантажених документів у сейфі -->
+                    <h3 class="cab-section-title" style="margin-top: 25px;">📄 Документи у вашому сейфі</h3>
+                    <div class="cab-vault-list" id="cabVaultList">
+                        <!-- Заповнюється динамічно -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Вкладка 5 (Партнер): Вхідні пропозиції -->
+            <section class="cab-tab-content" id="tab-partner-inbox" style="display: none;">
+                <div class="cab-card">
+                    <div class="cab-card-header">
+                        <div>
+                            <h2>📥 Вхідні звернення ветеранів (Модель Offer/Accept)</h2>
+                            <p class="cab-card-sub">Анонімні картки справ. Ви самі обираєте: взяти кейс чи передати за каскадом</p>
+                        </div>
+                    </div>
+                    <div class="cab-partner-inbox-grid" id="cabPartnerInboxGrid">
+                        <!-- Динамічні картки pro-bono пропозицій -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Вкладка 6 (Партнер): Угода КЕП -->
+            <section class="cab-tab-content" id="tab-partner-agreement" style="display: none;">
+                <div class="cab-card">
+                    <div class="cab-card-header">
+                        <div>
+                            <h2>📝 Меморандум про партнерство та КЕП</h2>
+                            <p class="cab-card-sub">Офіційне підтвердження співпраці з ГО «Талан ЮА» та МФВ «Відродження»</p>
+                        </div>
+                    </div>
+                    <div class="cab-agreement-box">
+                        <p>Для надання консультацій та публікації вакансій партнер підписує типову угоду через Дія.Підпис або КЕП.</p>
+                        <div style="display: flex; gap: 12px; margin-top: 15px;">
+                            <button class="btn-primary" id="btnPartnerSignDiia">Підписати через Дія.Підпис</button>
+                            <button class="btn-secondary" id="btnPartnerSignKep">Завантажити підписаний КЕП</button>
+                        </div>
+                        <div id="partnerSignStatus" style="margin-top: 12px; color: #10B981; display: none;">✅ Угоду підписано та верифіковано</div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Модальне вікно створення нового звернення -->
+    <div class="cab-modal-overlay" id="newTicketModal">
+        <div class="cab-modal-box">
+            <button class="cab-modal-close" id="btnCloseNewTicket">✕</button>
+            <div class="cab-modal-header">
+                <h3>💬 Подати запит на допомогу</h3>
+                <p>Опишіть вашу ситуацію. Система підбере фахівця за каскадом КАТОТТГ.</p>
+            </div>
+            <form id="formNewTicket" class="cab-modal-form">
+                <div class="cab-form-group">
+                    <label class="cab-label">Напрямок допомоги:</label>
+                    <select id="ticketCategory" class="cab-input" required>
+                        <option value="legal">⚖️ Юридична допомога (ВЛК, виплати, УБД)</option>
+                        <option value="psychology">🌿 Психологічна підтримка (ПТСР, адаптація)</option>
+                        <option value="education">🎓 Освіта та перекваліфікація (Ваучери, курси)</option>
+                        <option value="job">💼 Працевлаштування та бізнес-гранти</option>
+                        <option value="rehab">🏥 Реабілітація та здоров'я</option>
+                    </select>
+                </div>
+                <div class="cab-form-group">
+                    <label class="cab-label">Короткий опис питання:</label>
+                    <textarea id="ticketDescription" class="cab-input" rows="4" placeholder="Опишіть суть проблеми (без військової таємниці)" required></textarea>
+                </div>
+                <div class="cab-form-group">
+                    <label class="cab-label">Додати документ із Сейфу (за бажанням):</label>
+                    <div id="ticketVaultAttachList" class="cab-attach-list">
+                        <!-- Чекбокси документів сейфу -->
+                    </div>
+                </div>
+                <div class="cab-modal-actions">
+                    <button type="submit" class="btn-primary" style="width: 100%;">Надіслати звернення</button>
+                </div>
+            </form>
         </div>
     </div>
 
+    <!-- Модальне вікно Кнопки SOS (Екстрений розрив зв'язку) -->
+    <div class="cab-modal-overlay" id="sosModal">
+        <div class="cab-modal-box sos-box">
+            <button class="cab-modal-close" id="btnCloseSosModal">✕</button>
+            <div class="cab-modal-header">
+                <div style="font-size: 36px; margin-bottom: 8px;">🛑</div>
+                <h3 style="color: #ef4444;">Припинити роботу з фахівцем?</h3>
+                <p>Доступ цього спеціаліста до вашого чату, телефону та файлів сейфа <b>буде анульовано негайно</b>. Ваша безпека — понад усе.</p>
+            </div>
+            <form id="formSosSubmit" class="cab-modal-form">
+                <input type="hidden" id="sosTicketId">
+                <div class="cab-form-group">
+                    <label class="cab-label">Оберіть причину (для внутрішнього контролю якості ГО «Талан ЮА»):</label>
+                    <select id="sosReasonCategory" class="cab-input" required>
+                        <option value="unethical">❌ Неетична поведінка / тиск / грубість</option>
+                        <option value="unresponsive">⏳ Фахівець не виходить на зв'язок</option>
+                        <option value="competence">⚠️ Недостатня компетентність у моєму питанні</option>
+                        <option value="resolved_self">✅ Вирішив питання самостійно / відпала потреба</option>
+                        <option value="other">Інша причина</option>
+                    </select>
+                </div>
+                <div class="cab-form-group">
+                    <label class="cab-label">Коментар (за бажанням):</label>
+                    <textarea id="sosFeedback" class="cab-input" rows="2" placeholder="Що пішло не так?"></textarea>
+                </div>
+                <div style="margin: 12px 0;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; color: #cbd5e1;">
+                        <input type="checkbox" id="sosReassignCheck" checked> Призначити мені іншого фахівця з цього питання
+                    </label>
+                </div>
+                <div class="cab-modal-actions">
+                    <button type="submit" class="btn-danger" style="width: 100%;">Розірвати зв'язок та захистити дані</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Підключення скриптів -->
     <script src="soft_gate.js?v=46"></script>
     <script src="auth_session.js?v=46"></script>
-    <script src="cabinet.js"></script>
+    <script src="cabinet.js?v=46"></script>
 </body>
 </html>
