@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="accessibility.css?v=46">
     <link rel="stylesheet" href="soft_gate.css?v=46">
     <link rel="stylesheet" href="cabinet.css?v=46">
+    <link rel="stylesheet" href="demo_switcher.css?v=46">
 </head>
 <body class="cabinet-body">
 
@@ -369,9 +370,65 @@
         </div>
     </div>
 
+    <!-- Модальний Soft-Gate екран блокування для неавторизованого гостя -->
+    <div class="cab-modal-overlay" id="cabGuestLockModal" style="display: none; z-index: 2000000; background: rgba(5, 7, 5, 0.95); backdrop-filter: blur(12px);">
+        <div class="cab-modal-box" style="max-width: 520px; border-color: #10B981; box-shadow: 0 20px 60px rgba(0,0,0,0.9), 0 0 30px rgba(16,185,129,0.3); text-align: center; padding: 32px 24px;">
+            <div style="font-size: 44px; margin-bottom: 12px;">🛡️</div>
+            <h2 style="font-size: 22px; color: #fff; margin-bottom: 8px; font-family: 'Outfit', sans-serif;">Особистий кабінет ветерана та родини</h2>
+            <p style="font-size: 14px; color: #cbd5e1; line-height: 1.5; margin-bottom: 24px;">
+                Кабінет містить персональні дані, ваші активні звернення та захищений сейф документів. Будь ласка, оберіть зручний спосіб швидкого входу:
+            </p>
+
+            <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+                <!-- 1. Telegram -->
+                <button type="button" class="btn-primary" id="btnLockLoginTg" style="background: #229ED9; border-color: #229ED9; display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; font-size: 14px;">
+                    <span style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 18px;">📱</span>
+                        <b>Увійти через Telegram</b>
+                    </span>
+                    <span style="font-size: 12px; opacity: 0.8;">в 1 клік ➔</span>
+                </button>
+
+                <!-- 2. Дія -->
+                <button type="button" class="btn-primary" id="btnLockLoginDiia" style="background: #000; border: 1px solid rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; font-size: 14px;">
+                    <span style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 18px;">🆔</span>
+                        <b>Верифікація через Дію</b>
+                    </span>
+                    <span style="font-size: 12px; color: #10B981;">статус УБД ➔</span>
+                </button>
+
+                <!-- 3. Телефон -->
+                <button type="button" class="btn-secondary" id="btnLockLoginPhone" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; font-size: 14px; border-color: rgba(255,255,255,0.2);">
+                    <span style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 18px;">📞</span>
+                        <b>За номером телефону</b>
+                    </span>
+                    <span style="font-size: 12px; opacity: 0.7;">+380... ➔</span>
+                </button>
+            </div>
+
+            <!-- Блок форми телефону (прихований за замовчуванням) -->
+            <div id="lockPhoneBox" style="display: none; background: rgba(255,255,255,0.05); padding: 16px; border-radius: 12px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.1);">
+                <label style="font-size: 13px; color: #cbd5e1; display: block; margin-bottom: 8px;">Введіть ваш номер мобільного:</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="tel" id="inputLockPhone" class="cab-input" placeholder="+380 (50) 000-00-00" style="margin-bottom: 0;">
+                    <button type="button" id="btnSubmitLockPhone" class="btn-primary" style="white-space: nowrap;">Увійти</button>
+                </div>
+            </div>
+
+            <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 16px;">
+                <a href="index.html" style="color: #94a3b8; font-size: 13px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                    <span>↩️</span> Повернутися до каталогу послуг (без входу)
+                </a>
+            </div>
+        </div>
+    </div>
+
     <!-- Підключення скриптів -->
     <script src="soft_gate.js?v=46"></script>
     <script src="auth_session.js?v=46"></script>
     <script src="cabinet.js?v=46"></script>
+    <script src="demo_switcher.js?v=46"></script>
 </body>
 </html>

@@ -7,10 +7,111 @@
 
 document.addEventListener('DOMContentLoaded', async () => {
     // ─── 1. Ініціалізація Сесії та Користувача ────────────────────────────────
-    const session = window.NovyShlyakhSession ? window.NovyShlyakhSession.getSession() : null;
-    const tracker = window.NovyShlyakhTracker;
+    let storedUser = null;
+    try {
+        const raw = localStorage.getItem('novy_shlyakh_user_profile');
+        if (raw) storedUser = JSON.parse(raw);
+    } catch (e) {}
 
-    let currentUser = (session && session.user) ? session.user : {
+    const auth = (window.NovyShlyakh && window.NovyShlyakh.Auth) ? window.NovyShlyakh.Auth : null;
+    const session = (window.NovyShlyakh && window.NovyShlyakh.Session) ? window.NovyShlyakh.Session : null;
+    const tracker = (window.NovyShlyakh && window.NovyShlyakh.Tracker) ? window.NovyShlyakh.Tracker : null;
+
+    const isGuest = !storedUser || !storedUser.id || (storedUser.roles && storedUser.roles.includes('ROLE_GUEST')) || storedUser.id.startsWith('guest_');
+
+    // 🛡️ ЗАХИСТ КАБІНЕТУ: Якщо гість не авторизований — блокуємо доступ через Soft-Gate екран
+    const cabGuestLockModal = document.getElementById('cabGuestLockModal');
+    if (isGuest && cabGuestLockModal) {
+        cabGuestLockModal.style.display = 'flex';
+
+        // Кнопка 1: Вхід через Telegram
+        const btnLockTg = document.getElementById('btnLockLoginTg');
+        if (btnLockTg) {
+            btnLockTg.addEventListener('click', () => {
+                const demoId = 'tg_user_' + Math.floor(100000 + Math.random() * 900000);
+                const profile = {
+                    id: demoId,
+                    name: 'Тарас Коваленко',
+                    callsign: 'Друг Сокіл',
+                    phone: '+380 (50) 123-45-67',
+                    roles: ['ROLE_VETERAN'],
+                    veteran_role: 'veteran',
+                    is_veteran: true,
+                    is_family_member: false,
+                    auth_provider: 'telegram',
+                    diia_verified: false,
+                    geo_context: { community: 'Канівська ТГ', settlement: 'м. Канів', region: 'Черкаська область', is_online: true }
+                };
+                localStorage.setItem('novy_shlyakh_user_profile', JSON.stringify(profile));
+                localStorage.setItem('novy_shlyakh_geo_context', JSON.stringify(profile.geo_context));
+                window.location.reload();
+            });
+        }
+
+        // Кнопка 2: Вхід через Дію
+        const btnLockDiia = document.getElementById('btnLockLoginDiia');
+        if (btnLockDiia) {
+            btnLockDiia.addEventListener('click', () => {
+                const diiaId = 'diia_' + Math.floor(10000000 + Math.random() * 90000000);
+                const profile = {
+                    id: diiaId,
+                    name: 'Тарас Коваленко',
+                    callsign: 'Тарас',
+                    phone: '+380 (50) 123-45-67',
+                    roles: ['ROLE_VETERAN'],
+                    veteran_role: 'veteran',
+                    is_veteran: true,
+                    is_family_member: false,
+                    auth_provider: 'diia',
+                    diia_verified: true,
+                    geo_context: { community: 'Черкаська ТГ', settlement: 'м. Черкаси', region: 'Черкаська область', is_online: true }
+                };
+                localStorage.setItem('novy_shlyakh_user_profile', JSON.stringify(profile));
+                localStorage.setItem('novy_shlyakh_geo_context', JSON.stringify(profile.geo_context));
+                window.location.reload();
+            });
+        }
+
+        // Кнопка 3: Вхід за номером телефону
+        const btnLockPhone = document.getElementById('btnLockLoginPhone');
+        const lockPhoneBox = document.getElementById('lockPhoneBox');
+        const btnSubmitLockPhone = document.getElementById('btnSubmitLockPhone');
+        const inputLockPhone = document.getElementById('inputLockPhone');
+
+        if (btnLockPhone && lockPhoneBox) {
+            btnLockPhone.addEventListener('click', () => {
+                lockPhoneBox.style.display = lockPhoneBox.style.display === 'none' ? 'block' : 'none';
+                if (inputLockPhone && lockPhoneBox.style.display === 'block') inputLockPhone.focus();
+            });
+        }
+
+        if (btnSubmitLockPhone) {
+            btnSubmitLockPhone.addEventListener('click', () => {
+                const phoneVal = (inputLockPhone?.value || '+380 (50) 123-45-67').trim();
+                const phoneId = 'phone_' + phoneVal.replace(/\D/g, '');
+                const profile = {
+                    id: phoneId,
+                    name: 'Користувач',
+                    callsign: 'Побратим',
+                    phone: phoneVal,
+                    roles: ['ROLE_VETERAN'],
+                    veteran_role: 'veteran',
+                    is_veteran: true,
+                    is_family_member: false,
+                    auth_provider: 'phone',
+                    diia_verified: false,
+                    geo_context: { community: 'Вся Україна / Онлайн', settlement: 'Вся Україна', region: 'Україна', is_online: true }
+                };
+                localStorage.setItem('novy_shlyakh_user_profile', JSON.stringify(profile));
+                localStorage.setItem('novy_shlyakh_geo_context', JSON.stringify(profile.geo_context));
+                window.location.reload();
+            });
+        }
+    } else if (cabGuestLockModal) {
+        cabGuestLockModal.style.display = 'none';
+    }
+
+    let currentUser = storedUser || (auth ? auth.getCurrentUser() : null) || {
         id: "guest_" + (session ? session.sessionId : "anon"),
         name: "Гість порталу",
         callsign: "Побратим",
@@ -43,8 +144,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (cabUserName) {
             cabUserName.textContent = currentUser.callsign || currentUser.name || "Ветеран";
         }
+        const isSpecialist = currentUser.roles && (currentUser.roles.includes('ROLE_SPECIALIST') || currentUser.roles.includes('ROLE_PARTNER') || currentUser.roles.includes('ROLE_ADMIN'));
+
         if (cabStatusTag) {
-            if (currentUser.roles && (currentUser.roles.includes('ROLE_SPECIALIST') || currentUser.roles.includes('ROLE_PARTNER'))) {
+            if (isSpecialist) {
                 cabStatusTag.textContent = "💼 Верифікований партнер";
                 cabStatusTag.style.background = "rgba(59, 130, 246, 0.2)";
                 cabStatusTag.style.color = "#93c5fd";
@@ -53,16 +156,22 @@ document.addEventListener('DOMContentLoaded', async () => {
                 cabStatusTag.style.background = "rgba(168, 85, 247, 0.2)";
                 cabStatusTag.style.color = "#d8b4fe";
             } else {
-                cabStatusTag.textContent = "🎖️ Учасник бойових дій (УБД)";
+                cabStatusTag.textContent = "🎖️ Ветеран (УБД)";
                 cabStatusTag.style.background = "rgba(16, 185, 129, 0.2)";
                 cabStatusTag.style.color = "#6ee7b7";
             }
         }
         if (cabAvatar) {
-            cabAvatar.textContent = currentUser.veteran_role === 'family' ? '👨‍👩‍👧' : (currentUser.roles && currentUser.roles.includes('ROLE_SPECIALIST') ? '💼' : '🎖️');
+            if (currentUser.veteran_role === 'family') {
+                cabAvatar.textContent = '👨‍👩‍👧';
+            } else if (isSpecialist) {
+                cabAvatar.textContent = '💼';
+            } else {
+                cabAvatar.textContent = '🎖️';
+            }
         }
         if (cabVerifiedBadge) {
-            cabVerifiedBadge.style.display = (session && session.authMethod && session.authMethod !== 'none') ? 'inline-flex' : 'none';
+            cabVerifiedBadge.style.display = (!isGuest && (currentUser.diia_verified || currentUser.auth_provider)) ? 'inline-flex' : 'none';
         }
     }
 
@@ -237,6 +346,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // Миттєве перемикання ролі Ветеран / Родина в анкеті
+    if (radioIsVeteran && radioIsFamily) {
+        [radioIsVeteran, radioIsFamily].forEach(radio => {
+            radio.addEventListener('change', () => {
+                currentUser.veteran_role = radioIsFamily.checked ? 'family' : 'veteran';
+                currentUser.is_veteran = (currentUser.veteran_role === 'veteran');
+                currentUser.is_family_member = (currentUser.veteran_role === 'family');
+                localStorage.setItem('novy_shlyakh_user_profile', JSON.stringify(currentUser));
+                updateHeaderProfile();
+            });
+        });
+    }
+
     // Збереження анкети
     if (cabProfileForm) {
         cabProfileForm.addEventListener('submit', async (e) => {
@@ -246,6 +368,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             const phone = cabInputPhone.value.trim();
             const community = cabInputCommunity.value.trim();
             const preferredChannel = cabPreferredChannel.value;
+
+            currentUser.callsign = callsign;
+            currentUser.veteran_role = veteranRole;
+            currentUser.phone = phone;
+            currentUser.is_veteran = (veteranRole === 'veteran');
+            currentUser.is_family_member = (veteranRole === 'family');
+            if (currentUser.geo_context) {
+                currentUser.geo_context.settlement = community;
+                currentUser.geo_context.community = community;
+            }
+            localStorage.setItem('novy_shlyakh_user_profile', JSON.stringify(currentUser));
+            updateHeaderProfile();
 
             try {
                 const res = await fetch('/api/v1/user/profile', {
@@ -817,9 +951,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (btnCabLogout) {
         btnCabLogout.addEventListener('click', () => {
             if (confirm('Ви дійсно бажаєте вийти з особистого кабінету?')) {
-                if (window.NovyShlyakhSession) {
-                    window.NovyShlyakhSession.logout();
-                }
+                localStorage.removeItem('novy_shlyakh_user_profile');
+                sessionStorage.removeItem('novy_shlyakh_session_id');
                 window.location.href = 'index.html';
             }
         });

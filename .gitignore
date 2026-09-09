@@ -16,3 +16,8 @@ backend/.env
 portal_bot_log.txt
 portal_bot_error.txt
 uploads/
+
+# Local Developer Sandbox Tools (НІКОЛИ не комітити на сервер!)
+demo_switcher.js
+demo_switcher.css
+scratch/
