@@ -1235,9 +1235,9 @@ async def create_ticket(req: TicketCreateRequest):
         specialist_role = "Адвокат з питань ВЛК та пільг"
         specialist_id = "spec_legal_01"
     elif req.category == "psychology":
-        specialist_name = "Проєкт «Ашрам» (Психологічна служба)"
+        specialist_name = "Психологічна служба ветеранів (Кризовий центр)"
         specialist_role = "Кризовий психолог"
-        specialist_id = "spec_ashram_01"
+        specialist_id = "spec_psych_01"
     elif req.category == "education":
         specialist_name = "Відділ ваучерів та освіти ДЦЗ"
         specialist_role = "Кар'єрний радник"
@@ -1646,7 +1646,7 @@ async def get_public_analytics_summary():
             },
             "top_categories_demand": [
                 {"category": "Юридична допомога (ВЛК/Пільги)", "percentage": 42},
-                {"category": "Психологічна підтримка (Ашрам/ПТСР)", "percentage": 28},
+                {"category": "Психологічна підтримка та адаптація", "percentage": 28},
                 {"category": "Освіта та ваучери на перекваліфікацію", "percentage": 18},
                 {"category": "Працевлаштування та бізнес-гранти", "percentage": 12}
             ],
