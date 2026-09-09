@@ -78,6 +78,11 @@
 
                 <!-- Розділ для партнерів / фахівців (динамічний) -->
                 <div class="cab-nav-divider" id="partnerNavDivider" style="display: none;"></div>
+                <button class="cab-nav-item cab-nav-partner" data-tab="tab-dispatcher" id="btnNavDispatcher" style="display: none;">
+                    <span class="cab-nav-icon">🏛️</span>
+                    <span>Диспетчер ЦНАП</span>
+                    <span class="cab-badge-counter partner" id="cabDispatcherCasesCount">0</span>
+                </button>
                 <button class="cab-nav-item cab-nav-partner" data-tab="tab-partner-inbox" id="btnNavPartnerInbox" style="display: none;">
                     <span class="cab-nav-icon">📥</span>
                     <span>Вхідні звернення</span>
@@ -259,7 +264,32 @@
                 </div>
             </section>
 
-            <!-- Вкладка 5 (Партнер): Вхідні пропозиції -->
+            <!-- Вкладка 5 (Диспетчер ЦНАП): Офлайн-прийом -->
+            <section class="cab-tab-content" id="tab-dispatcher" style="display: none;">
+                <div class="cab-card">
+                    <div class="cab-card-header" style="flex-wrap: wrap; gap: 12px;">
+                        <div>
+                            <h2>🏛️ Робоче місце Диспетчера ЦНАП / Хабу</h2>
+                            <p class="cab-card-sub">Особистий прийом ветеранів без смартфонів, фіксація звернень та видача дорожніх карт А4</p>
+                        </div>
+                        <button class="btn-primary" id="btnOpenDispatcherIntake" style="background: #10B981; border-color: #10B981; font-weight: 700;">
+                            ➕ Зареєструвати офлайн-звернення
+                        </button>
+                    </div>
+
+                    <!-- Панель швидкого пошуку -->
+                    <div style="margin: 16px 0 24px 0; background: rgba(255,255,255,0.04); padding: 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); display: flex; gap: 12px; align-items: center;">
+                        <span style="font-size: 20px;">🔍</span>
+                        <input type="text" id="inputSearchDispatcherCases" class="cab-input" placeholder="Швидкий пошук за номером справи, телефоном або ПІБ ветерана..." style="margin-bottom: 0;">
+                    </div>
+
+                    <div id="dispatcherCasesList" class="cab-tickets-list">
+                        <!-- Динамічні картки офлайн-справ -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Вкладка 6 (Партнер): Вхідні пропозиції -->
             <section class="cab-tab-content" id="tab-partner-inbox" style="display: none;">
                 <div class="cab-card">
                     <div class="cab-card-header">
@@ -422,6 +452,122 @@
                     <span>↩️</span> Повернутися до каталогу послуг (без входу)
                 </a>
             </div>
+        </div>
+    </div>
+
+    <!-- Модальне вікно офлайн-прийому Диспетчера ЦНАП -->
+    <div class="cab-modal-overlay" id="dispatcherIntakeModal" style="display: none;">
+        <div class="cab-modal-box" style="max-width: 650px;">
+            <button class="cab-modal-close" id="btnCloseDispatcherIntake">✕</button>
+            <div class="cab-modal-header">
+                <h3>🏛️ Реєстрація офлайн-звернення ветерана</h3>
+                <p>Заповнюється оператором ЦНАП / Хабу зі слів людини. Після збереження буде сформовано дорожню карту для друку.</p>
+            </div>
+            <form id="formDispatcherIntake" class="cab-modal-form">
+                <div class="cab-form-group">
+                    <label class="cab-label">ПІБ або позивний ветерана / члена родини:</label>
+                    <input type="text" id="dispVeteranName" class="cab-input" placeholder="Наприклад: Коваленко Тарас Іванович (або Друг Сокіл)" required>
+                </div>
+                <div class="cab-form-group">
+                    <label class="cab-label">Контактний телефон (мобільний або кнопочний):</label>
+                    <input type="tel" id="dispVeteranPhone" class="cab-input" placeholder="+380 (__) ___-__-__" required>
+                </div>
+                <div class="cab-form-group">
+                    <label class="cab-label">Громада / Населений пункт (КАТОТТГ):</label>
+                    <input type="text" id="dispVeteranCommunity" class="cab-input" placeholder="Введіть село або місто (Черкаська область)" required autocomplete="off">
+                    <div id="dispGeoAutocomplete" class="cab-autocomplete-dropdown"></div>
+                </div>
+                <div class="cab-form-group">
+                    <label class="cab-label">Напрямок допомоги:</label>
+                    <select id="dispCategory" class="cab-input" required>
+                        <option value="legal">⚖️ Юридична допомога (ВЛК, МСЕК, виплати, УБД)</option>
+                        <option value="psychology">🌿 Психологічна підтримка та адаптація</option>
+                        <option value="education">🎓 Освіта, перекваліфікація та ваучери</option>
+                        <option value="rehab">🏥 Реабілітація, санаторії та здоров'я</option>
+                        <option value="social">🏢 Соціальні пільги громади та житло</option>
+                    </select>
+                </div>
+                <div class="cab-form-group">
+                    <label class="cab-label">Короткий опис проблеми зі слів ветерана:</label>
+                    <textarea id="dispDescription" class="cab-input" rows="3" placeholder="Опишіть ситуацію та з чим конкретно потрібна допомога" required></textarea>
+                </div>
+                <div class="cab-form-group">
+                    <label class="cab-label">Маршрутизація (Призначити фахівця або у загальний пул):</label>
+                    <select id="dispAssignSpecialist" class="cab-input">
+                        <option value="">🌐 Направити у відкритий пул фахівців громади (Швидкий підбір)</option>
+                        <option value="spec_jurist_01">⚖️ Юрист ГО «Талан ЮА» (Адвокатський супровід ВЛК)</option>
+                        <option value="spec_psych_02">🌿 Психологічна служба ветеранів Черкащини</option>
+                        <option value="spec_rehab_03">🏥 Центр медичної та фізичної реабілітації</option>
+                    </select>
+                </div>
+                <div class="cab-modal-actions" style="margin-top: 20px;">
+                    <button type="submit" class="btn-primary" style="width: 100%; background: #10B981; border-color: #10B981; font-weight: 700; padding: 14px;">
+                        ✅ Зареєструвати та сформувати Дорожню карту
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Прихований контейнер друкованої Дорожньої карти А4 (для @media print) -->
+    <div id="printableRoadmap" class="printable-roadmap" style="display: none;">
+        <div class="print-header">
+            <div style="font-size: 22px; font-weight: bold; margin-bottom: 4px;">🌿 ВЕТЕРАНСЬКИЙ ПОРТАЛ «НОВИЙ ШЛЯХ»</div>
+            <div style="font-size: 13px; color: #333;">Єдина соціальна екосистема реінтеграції ветеранів | ГО «Талан ЮА»</div>
+            <div style="border-bottom: 2px solid #000; margin: 10px 0;"></div>
+        </div>
+
+        <div style="text-align: center; margin-bottom: 16px;">
+            <h1 style="font-size: 18px; text-transform: uppercase; margin: 0 0 4px 0;">ДОРОЖНЯ КАРТА ЗВЕРНЕННЯ ВЕТЕРАНА</h1>
+            <div style="font-size: 14px; font-weight: bold;" id="printTicketId">Справа № TK-2026-0000</div>
+            <div style="font-size: 12px; color: #555;" id="printDate">Дата оформлення: 10.09.2026</div>
+        </div>
+
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 13px;">
+            <tr>
+                <td style="padding: 6px 8px; border: 1px solid #ccc; width: 35%; font-weight: bold;">Отримувач допомоги:</td>
+                <td style="padding: 6px 8px; border: 1px solid #ccc;" id="printClientName">Коваленко Тарас Іванович</td>
+            </tr>
+            <tr>
+                <td style="padding: 6px 8px; border: 1px solid #ccc; font-weight: bold;">Контактний телефон:</td>
+                <td style="padding: 6px 8px; border: 1px solid #ccc;" id="printClientPhone">+380 (50) 123-45-67</td>
+            </tr>
+            <tr>
+                <td style="padding: 6px 8px; border: 1px solid #ccc; font-weight: bold;">Громада:</td>
+                <td style="padding: 6px 8px; border: 1px solid #ccc;" id="printCommunity">Канівська ТГ</td>
+            </tr>
+            <tr>
+                <td style="padding: 6px 8px; border: 1px solid #ccc; font-weight: bold;">Напрямок допомоги:</td>
+                <td style="padding: 6px 8px; border: 1px solid #ccc;" id="printCategory">Юридична допомога (ВЛК)</td>
+            </tr>
+            <tr>
+                <td style="padding: 6px 8px; border: 1px solid #ccc; font-weight: bold;">Короткий опис проблеми:</td>
+                <td style="padding: 6px 8px; border: 1px solid #ccc;" id="printDescription">Оскарження постанови ВЛК щодо придатності до військової служби.</td>
+            </tr>
+        </table>
+
+        <div style="background: #f4f4f4; padding: 12px; border-radius: 6px; margin-bottom: 16px; border: 1px solid #ddd;">
+            <h3 style="margin: 0 0 6px 0; font-size: 14px;">🤝 ПРИЗНАЧЕНИЙ ФАХІВЕЦЬ / ОРГАНІЗАЦІЯ СУПРОВОДУ:</h3>
+            <div style="font-size: 13px; line-height: 1.5;" id="printSpecialistInfo">
+                <b>Організація:</b> Юридична служба ГО «Талан ЮА»<br>
+                <b>Черговий фахівець:</b> Адвокат (ВЛК та виплати)<br>
+                <b>Контактний телефон:</b> +380 (67) 123-45-67<br>
+                <b>Адреса простору:</b> м. Черкаси, вул. Хрещатик / Онлайн-консультація
+            </div>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <h3 style="margin: 0 0 6px 0; font-size: 14px;">📋 ВАШІ НАСТУПНІ КРОКИ:</h3>
+            <ol style="font-size: 12px; line-height: 1.5; margin: 0; padding-left: 18px;">
+                <li>Очікуйте вхідного телефонного дзвінка від призначеного спеціаліста протягом 24–48 годин.</li>
+                <li>Усі юридичні, психологічні консультації та супровід надаються повністю <b>БЕЗКОШТОВНО</b>.</li>
+                <li>При повторному зверненні до ЦНАПу просто назвіть номер цієї справи.</li>
+            </ol>
+        </div>
+
+        <div style="border-top: 1px dashed #666; padding-top: 10px; font-size: 11px; color: #444; display: flex; justify-content: space-between;">
+            <div>Звернення прийняв оператор ЦНАП: <b id="printDispatcherName">Координатор ЦНАП</b></div>
+            <div>Гаряча лінія порталу: <b>0 800 300 123</b></div>
         </div>
     </div>
 

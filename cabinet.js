@@ -219,15 +219,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         switchTab(`tab-${hash}`);
     }
 
-    // Відображення партнерських вкладок при відповідній ролі
+    // Відображення партнерських та диспетчерських вкладок при відповідній ролі
     const isPartner = currentUser.roles && (currentUser.roles.includes('ROLE_SPECIALIST') || currentUser.roles.includes('ROLE_PARTNER') || currentUser.roles.includes('ROLE_ADMIN'));
+    const isDispatcher = currentUser.roles && (currentUser.roles.includes('ROLE_STATE_BODY') || currentUser.roles.includes('ROLE_DISPATCHER') || currentUser.roles.includes('ROLE_ADMIN') || currentUser.veteran_role === 'dispatcher');
+
     const partnerDivider = document.getElementById('partnerNavDivider');
     const btnNavPartnerInbox = document.getElementById('btnNavPartnerInbox');
     const btnNavPartnerAgreement = document.getElementById('btnNavPartnerAgreement');
-    if (isPartner) {
+    const btnNavDispatcher = document.getElementById('btnNavDispatcher');
+
+    if (isPartner || isDispatcher) {
         if (partnerDivider) partnerDivider.style.display = 'block';
+    }
+    if (isPartner) {
         if (btnNavPartnerInbox) btnNavPartnerInbox.style.display = 'flex';
         if (btnNavPartnerAgreement) btnNavPartnerAgreement.style.display = 'flex';
+    }
+    if (isDispatcher) {
+        if (btnNavDispatcher) btnNavDispatcher.style.display = 'flex';
     }
 
     // ─── 4. Вкладка 1: Анкета та Гео-налаштування ──────────────────────────────
@@ -944,6 +953,285 @@ document.addEventListener('DOMContentLoaded', async () => {
         btnPartnerSignKep.addEventListener('click', () => {
             alert('Оберіть підписаний КЕП-файл (.p7s / .asice) для завантаження на перевірку.');
         });
+    }
+
+    // ─── 9.5. РОБОЧЕ МІСЦЕ ДИСПЕТЧЕРА ЦНАП / ХАБУ (ФАЗА 1) ──────────────────────
+    const btnOpenDispatcherIntake = document.getElementById('btnOpenDispatcherIntake');
+    const btnCloseDispatcherIntake = document.getElementById('btnCloseDispatcherIntake');
+    const dispatcherIntakeModal = document.getElementById('dispatcherIntakeModal');
+    const formDispatcherIntake = document.getElementById('formDispatcherIntake');
+    const dispatcherCasesList = document.getElementById('dispatcherCasesList');
+    const cabDispatcherCasesCount = document.getElementById('cabDispatcherCasesCount');
+    const inputSearchDispatcherCases = document.getElementById('inputSearchDispatcherCases');
+    const dispVeteranCommunity = document.getElementById('dispVeteranCommunity');
+    const dispGeoAutocomplete = document.getElementById('dispGeoAutocomplete');
+
+    let allDispatcherCases = [];
+
+    // Відкриття та закриття модального вікна
+    if (btnOpenDispatcherIntake && dispatcherIntakeModal) {
+        btnOpenDispatcherIntake.addEventListener('click', () => {
+            dispatcherIntakeModal.style.display = 'flex';
+            const nameInput = document.getElementById('dispVeteranName');
+            if (nameInput) nameInput.focus();
+        });
+    }
+
+    if (btnCloseDispatcherIntake && dispatcherIntakeModal) {
+        btnCloseDispatcherIntake.addEventListener('click', () => {
+            dispatcherIntakeModal.style.display = 'none';
+        });
+    }
+
+    // Автокомпліт КАТОТТГ для форми прийому
+    if (dispVeteranCommunity && dispGeoAutocomplete) {
+        let dispDebounce;
+        dispVeteranCommunity.addEventListener('input', () => {
+            clearTimeout(dispDebounce);
+            const q = dispVeteranCommunity.value.trim();
+            if (q.length < 2) {
+                dispGeoAutocomplete.style.display = 'none';
+                return;
+            }
+
+            dispDebounce = setTimeout(async () => {
+                try {
+                    const res = await fetch(`/api/v1/geo/settlements?q=${encodeURIComponent(q)}`);
+                    const json = await res.json();
+                    const results = (json && json.data) ? json.data : [];
+
+                    if (results.length === 0) {
+                        dispGeoAutocomplete.innerHTML = `
+                            <div class="cab-autocomplete-item" data-settlement="${q}">
+                                📍 <b>${q}</b> (Населений пункт України)
+                            </div>
+                        `;
+                    } else {
+                        dispGeoAutocomplete.innerHTML = results.map(item => `
+                            <div class="cab-autocomplete-item" data-settlement="${item.settlement}" data-community="${item.community}" data-region="${item.region}">
+                                📍 <b>${item.settlement}</b> — <small>${item.community}, ${item.region}</small>
+                            </div>
+                        `).join('');
+                    }
+                    dispGeoAutocomplete.style.display = 'block';
+
+                    dispGeoAutocomplete.querySelectorAll('.cab-autocomplete-item').forEach(el => {
+                        el.addEventListener('click', () => {
+                            dispVeteranCommunity.value = el.getAttribute('data-settlement') || q;
+                            dispGeoAutocomplete.style.display = 'none';
+                        });
+                    });
+                } catch (e) {
+                    console.error('[Disp Geo Search Error]', e);
+                }
+            }, 250);
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!dispVeteranCommunity.contains(e.target) && !dispGeoAutocomplete.contains(e.target)) {
+                dispGeoAutocomplete.style.display = 'none';
+            }
+        });
+    }
+
+    // Завантаження списку офлайн-підопічних
+    async function loadDispatcherCases() {
+        if (!dispatcherCasesList) return;
+        try {
+            const res = await fetch(`/api/v1/crm/dispatcher/my-cases?dispatcher_id=${encodeURIComponent(userId)}`);
+            const data = await res.json();
+            allDispatcherCases = (data && data.data && data.data.cases) ? data.data.cases : [];
+
+            if (cabDispatcherCasesCount) {
+                cabDispatcherCasesCount.textContent = allDispatcherCases.length;
+            }
+            renderDispatcherCases(allDispatcherCases);
+        } catch (err) {
+            console.error('[Load Dispatcher Cases Error]', err);
+        }
+    }
+
+    function renderDispatcherCases(cases) {
+        if (!dispatcherCasesList) return;
+
+        if (cases.length === 0) {
+            dispatcherCasesList.innerHTML = `
+                <div class="cab-empty-state">
+                    <span style="font-size: 32px;">🏛️</span>
+                    <h4>Немає зареєстрованих офлайн-звернень</h4>
+                    <p>Натисніть кнопку «➕ Зареєструвати офлайн-звернення» для створення першої картки підопічного.</p>
+                </div>
+            `;
+            return;
+        }
+
+        dispatcherCasesList.innerHTML = cases.map(c => `
+            <div class="cab-ticket-card" id="disp-case-${c.id}" style="border-left: 3px solid #10B981;">
+                <div class="cab-ticket-header">
+                    <div>
+                        <span class="cab-ticket-category">${getCategoryName(c.category)}</span>
+                        <h4 class="cab-ticket-title">${c.client_name || c.client_callsign || 'Ветеран'}</h4>
+                    </div>
+                    <span class="cab-offline-badge">🏛️ Офлайн-прийом</span>
+                </div>
+                <div style="font-size: 13px; color: #cbd5e1; margin: 8px 0;">
+                    <div>📞 Телефон: <b>${c.client_phone || 'Не вказано'}</b></div>
+                    <div>📍 Громада: <b>${c.geo_context?.settlement || c.geo_context?.community || 'Черкаська область'}</b></div>
+                    <div>🤝 Призначено: <b>${c.specialist?.name || 'Загальний пул громади'}</b></div>
+                </div>
+                <p class="cab-ticket-desc" style="font-size: 12px; color: #94A3B8;">${c.description}</p>
+                <div class="cab-partner-actions" style="margin-top: 12px;">
+                    <button class="btn-primary btn-sm btn-print-roadmap" data-id="${c.id}" style="background: #10B981; border-color: #10B981;">
+                        🖨️ Друк дорожньої карти А4
+                    </button>
+                </div>
+            </div>
+        `).join('');
+
+        // Прив'язка подій друку
+        dispatcherCasesList.querySelectorAll('.btn-print-roadmap').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const ticketId = btn.getAttribute('data-id');
+                printRoadmap(ticketId);
+            });
+        });
+    }
+
+    // Пошук у журналі офлайн-підопічних
+    if (inputSearchDispatcherCases) {
+        inputSearchDispatcherCases.addEventListener('input', () => {
+            const query = inputSearchDispatcherCases.value.toLowerCase().trim();
+            if (!query) {
+                renderDispatcherCases(allDispatcherCases);
+                return;
+            }
+            const filtered = allDispatcherCases.filter(c => 
+                (c.id && c.id.toLowerCase().includes(query)) ||
+                (c.client_name && c.client_name.toLowerCase().includes(query)) ||
+                (c.client_phone && c.client_phone.includes(query)) ||
+                (c.description && c.description.toLowerCase().includes(query))
+            );
+            renderDispatcherCases(filtered);
+        });
+    }
+
+    // Обробка збереження форми офлайн-прийому
+    if (formDispatcherIntake) {
+        formDispatcherIntake.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = formDispatcherIntake.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = '⏳ Збереження та формування картки...';
+            }
+
+            const specSelect = document.getElementById('dispAssignSpecialist');
+            const selectedSpecId = specSelect?.value || null;
+            const selectedSpecName = selectedSpecId ? specSelect.options[specSelect.selectedIndex].text : null;
+
+            const payload = {
+                dispatcher_id: userId,
+                dispatcher_name: currentUser.name || "Координатор ЦНАП",
+                veteran_name: document.getElementById('dispVeteranName')?.value.trim(),
+                veteran_callsign: "",
+                phone: document.getElementById('dispVeteranPhone')?.value.trim(),
+                category: document.getElementById('dispCategory')?.value,
+                description: document.getElementById('dispDescription')?.value.trim(),
+                geo_community: dispVeteranCommunity?.value.trim() || "Черкаська ТГ",
+                geo_settlement: dispVeteranCommunity?.value.trim() || "м. Черкаси",
+                geo_region: "Черкаська область",
+                assigned_specialist_id: selectedSpecId,
+                assigned_specialist_name: selectedSpecName,
+                urgency: "normal"
+            };
+
+            try {
+                const res = await fetch('/api/v1/crm/dispatcher/intake', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await res.json();
+                if (result.status === 'success' && result.data) {
+                    if (dispatcherIntakeModal) dispatcherIntakeModal.style.display = 'none';
+                    formDispatcherIntake.reset();
+                    await loadDispatcherCases();
+
+                    // Миттєвий виклик друку
+                    if (confirm(`✅ Звернення зареєстровано (Справа № ${result.data.ticket_id})!\n\nРоздрукувати дорожню карту для ветерана зараз?`)) {
+                        printRoadmap(result.data.ticket_id);
+                    }
+                }
+            } catch (err) {
+                console.error('[Dispatcher Intake Submit Error]', err);
+                alert('Не вдалося зареєструвати звернення на сервері.');
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '✅ Зареєструвати та сформувати Дорожню карту';
+                }
+            }
+        });
+    }
+
+    // Функція генерації та друку Дорожньої карти А4
+    async function printRoadmap(ticketId) {
+        try {
+            const res = await fetch(`/api/v1/crm/dispatcher/print-card/${encodeURIComponent(ticketId)}`);
+            const json = await res.json();
+            if (json.status !== 'success' || !json.data) {
+                alert('Не вдалося завантажити дані картки для друку.');
+                return;
+            }
+
+            const data = json.data;
+            const printEl = document.getElementById('printableRoadmap');
+            if (!printEl) return;
+
+            // Заповнення полів шаблону
+            const elId = document.getElementById('printTicketId');
+            const elDate = document.getElementById('printDate');
+            const elName = document.getElementById('printClientName');
+            const elPhone = document.getElementById('printClientPhone');
+            const elComm = document.getElementById('printCommunity');
+            const elCat = document.getElementById('printCategory');
+            const elDesc = document.getElementById('printDescription');
+            const elSpec = document.getElementById('printSpecialistInfo');
+            const elDisp = document.getElementById('printDispatcherName');
+
+            if (elId) elId.textContent = `Справа № ${data.ticket_id}`;
+            if (elDate) {
+                const d = data.created_at ? new Date(data.created_at) : new Date();
+                elDate.textContent = `Дата оформлення: ${d.toLocaleDateString('uk-UA')} ${d.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })}`;
+            }
+            if (elName) elName.textContent = data.client_name;
+            if (elPhone) elPhone.textContent = data.client_phone;
+            if (elComm) elComm.textContent = data.community;
+            if (elCat) elCat.textContent = getCategoryName(data.category);
+            if (elDesc) elDesc.textContent = data.description;
+            if (elDisp) elDisp.textContent = data.dispatcher?.name || 'Координатор ЦНАП';
+
+            if (elSpec) {
+                const s = data.specialist;
+                elSpec.innerHTML = `
+                    <b>Призначено:</b> ${s.name || 'Черговий фахівець простору'}<br>
+                    <b>Напрямок:</b> ${getCategoryName(data.category)}<br>
+                    <b>Контактний телефон:</b> ${s.phone || '+380 (67) 000-00-00'}<br>
+                    <b>Формат консультації:</b> Телефонний дзвінок / Очна зустріч у просторі
+                `;
+            }
+
+            // Виклик системного вікна друку браузера
+            window.print();
+
+        } catch (err) {
+            console.error('[Print Roadmap Error]', err);
+            alert('Помилка генерації друкованої картки.');
+        }
+    }
+
+    if (isDispatcher) {
+        await loadDispatcherCases();
     }
 
     // ─── 10. Вихід з кабінету ─────────────────────────────────────────────────

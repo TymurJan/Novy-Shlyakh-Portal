@@ -621,18 +621,67 @@ body.cabinet-body {
     cursor: pointer;
 }
 
-/* Адаптивність */
-@media (max-width: 900px) {
-    .cab-container {
-        grid-template-columns: 1fr;
+/* Стилі Диспетчера ЦНАП */
+.cab-nav-item.cab-nav-cnap {
+    border-left: 3px solid #10B981;
+}
+
+.cab-offline-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(16, 185, 129, 0.15);
+    color: #10B981;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Стилі чистого друку Дорожньої карти А4 (@media print)
+   ═══════════════════════════════════════════════════════════════ */
+@media print {
+    body, html {
+        background: #fff !important;
+        color: #000 !important;
+        font-family: Arial, sans-serif !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
-    .cab-sidebar {
-        position: static;
+
+    /* Приховуємо весь інтерфейс кабінету */
+    .cab-header,
+    .cab-sidebar,
+    .cab-main,
+    .cab-modal-overlay,
+    #demoSandboxBar,
+    .cab-btn-home {
+        display: none !important;
     }
-    .cab-form-grid {
-        grid-template-columns: 1fr;
+
+    /* Показуємо виключно друковану Дорожню карту на повний аркуш А4 */
+    #printableRoadmap,
+    .printable-roadmap {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 20px !important;
+        box-sizing: border-box !important;
+        color: #000 !important;
+        background: #fff !important;
     }
-    .cab-status-switcher {
-        grid-template-columns: 1fr;
+
+    .printable-roadmap table,
+    .printable-roadmap td,
+    .printable-roadmap th {
+        border-color: #333 !important;
+        color: #000 !important;
+    }
+
+    @page {
+        size: A4 portrait;
+        margin: 15mm;
     }
 }

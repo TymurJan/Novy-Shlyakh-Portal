@@ -1654,6 +1654,169 @@ async def get_public_analytics_summary():
         }
     }
 
+# ─── МОДУЛЬ: ДИСПЕТЧЕР ЦНАП ТА ОФЛАЙН-ПРИЙОМ (ФАЗА 1) ─────────────────────────
+
+class DispatcherIntakeRequest(BaseModel):
+    dispatcher_id: str
+    dispatcher_name: Optional[str] = "Координатор ЦНАП"
+    veteran_name: str
+    veteran_callsign: Optional[str] = ""
+    phone: str
+    category: str
+    description: str
+    geo_community: Optional[str] = "Черкаська ТГ"
+    geo_settlement: Optional[str] = "м. Черкаси"
+    geo_region: Optional[str] = "Черкаська область"
+    assigned_specialist_id: Optional[str] = None
+    assigned_specialist_name: Optional[str] = None
+    urgency: Optional[str] = "normal"  # normal, urgent
+
+@app.post("/api/v1/crm/dispatcher/intake")
+async def create_dispatcher_offline_intake(req: DispatcherIntakeRequest):
+    """
+    Фаза 1: Реєстрація офлайн-звернення ветерана оператором ЦНАП / Ветеранського простору
+    """
+    tickets = []
+    if os.path.exists(CRM_TICKETS_FILE):
+        try:
+            with open(CRM_TICKETS_FILE, "r", encoding="utf-8") as f:
+                tickets = json.load(f)
+        except Exception:
+            tickets = []
+
+    ticket_id = f"TK-{datetime.now(timezone.utc).strftime('%Y%m')}-{uuid.uuid4().hex[:6].upper()}"
+    offline_user_id = f"offline_{req.phone.replace('+', '').replace(' ', '').replace('(', '').replace(')', '').replace('-', '')}"
+
+    ticket_data = {
+        "id": ticket_id,
+        "user_id": offline_user_id,
+        "client_name": req.veteran_name,
+        "client_callsign": req.veteran_callsign or req.veteran_name,
+        "client_phone": req.phone,
+        "category": req.category,
+        "description": req.description,
+        "status": "IN_PROGRESS" if req.assigned_specialist_id else "PENDING_OFFER",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "is_offline_case": True,
+        "intake_channel": "cnap_desk",
+        "dispatcher": {
+            "id": req.dispatcher_id,
+            "name": req.dispatcher_name,
+            "intake_time": datetime.now(timezone.utc).isoformat()
+        },
+        "geo_context": {
+            "community": req.geo_community,
+            "settlement": req.geo_settlement,
+            "region": req.geo_region,
+            "is_online": True
+        },
+        "specialist": {
+            "id": req.assigned_specialist_id,
+            "name": req.assigned_specialist_name or "Черговий фахівець громади",
+            "role": req.category,
+            "assigned_at": datetime.now(timezone.utc).isoformat()
+        } if req.assigned_specialist_id else None,
+        "urgency": req.urgency,
+        "audit_trail": [
+            f"Офлайн-звернення зареєстровано оператором ЦНАП {req.dispatcher_name} ({req.dispatcher_id}).",
+            f"Призначено фахівця: {req.assigned_specialist_name or 'Загальний пул громади'}."
+        ]
+    }
+
+    tickets.insert(0, ticket_data)
+
+    with open(CRM_TICKETS_FILE, "w", encoding="utf-8") as f:
+        json.dump(tickets, f, ensure_ascii=False, indent=2)
+
+    return {
+        "status": "success",
+        "message": "Офлайн-звернення успішно зареєстровано в CRM",
+        "data": {
+            "ticket_id": ticket_id,
+            "client_name": req.veteran_name,
+            "phone": req.phone,
+            "specialist": ticket_data.get("specialist"),
+            "roadmap_url": f"/api/v1/crm/dispatcher/print-card/{ticket_id}"
+        }
+    }
+
+@app.get("/api/v1/crm/dispatcher/my-cases")
+async def get_dispatcher_cases(dispatcher_id: Optional[str] = None):
+    """
+    Фаза 1: Отримання списку офлайн-підопічних оператора ЦНАП
+    """
+    tickets = []
+    if os.path.exists(CRM_TICKETS_FILE):
+        try:
+            with open(CRM_TICKETS_FILE, "r", encoding="utf-8") as f:
+                tickets = json.load(f)
+        except Exception:
+            tickets = []
+
+    # Фільтруємо офлайн-кейси
+    if dispatcher_id:
+        cases = [t for t in tickets if t.get("is_offline_case") and (t.get("dispatcher", {}).get("id") == dispatcher_id or dispatcher_id in ["admin", "cnap_main"])]
+    else:
+        cases = [t for t in tickets if t.get("is_offline_case")]
+
+    return {
+        "status": "success",
+        "data": {
+            "total": len(cases),
+            "cases": cases
+        }
+    }
+
+@app.get("/api/v1/crm/dispatcher/print-card/{ticket_id}")
+async def get_print_card_data(ticket_id: str):
+    """
+    Фаза 1: Отримання даних для друку Дорожньої карти А4
+    """
+    tickets = []
+    if os.path.exists(CRM_TICKETS_FILE):
+        try:
+            with open(CRM_TICKETS_FILE, "r", encoding="utf-8") as f:
+                tickets = json.load(f)
+        except Exception:
+            tickets = []
+
+    target = next((t for t in tickets if t.get("id") == ticket_id), None)
+    if not target:
+        raise HTTPException(status_code=404, detail="Справу не знайдено")
+
+    spec = target.get("specialist") or {
+        "name": "Черговий юрист / психолог Хабу",
+        "role": "Фахівець супроводу",
+        "phone": "+380 (67) 000-00-00",
+        "address": "м. Черкаси / Канів / Сміла (Ветеранський простір)"
+    }
+
+    disp = target.get("dispatcher") or {
+        "name": "Оператор ЦНАП",
+        "id": "cnap_01"
+    }
+
+    return {
+        "status": "success",
+        "data": {
+            "ticket_id": target["id"],
+            "created_at": target.get("created_at"),
+            "client_name": target.get("client_name") or target.get("client_callsign") or "Ветеран",
+            "client_phone": target.get("client_phone"),
+            "category": target.get("category"),
+            "description": target.get("description"),
+            "community": target.get("geo_context", {}).get("settlement") or target.get("geo_context", {}).get("community") or "Черкаська ТГ",
+            "specialist": spec,
+            "dispatcher": disp,
+            "next_steps": [
+                "1. Фахівець зв'яжеться з вами за вказаним номером протягом 24 годин.",
+                "2. Усі консультації та юридичний супровід надаються повністю БЕЗКОШТОВНО.",
+                "3. При повторному візиті до ЦНАПу назвіть оператору номер справи: " + target["id"]
+            ]
+        }
+    }
+
+
 if __name__ == "__main__":
     import uvicorn
     # Запуск: python server.py
