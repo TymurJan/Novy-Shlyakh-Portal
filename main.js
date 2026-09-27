@@ -435,7 +435,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // Глобальні функції (поза DOMContentLoaded для виклику з HTML)
 function openCharityModal() {
     // В реальному проекті тут буде виклик модалки з IBAN/WayForPay
-    alert('Дякуємо за вашу підтримку! Система благодійних внесків на створення та облаштування заміського реабілітаційного простору «Ашрам» зараз інтегрується. \nВи можете зв’язатися з нами в Telegram для прямої підтримки: @Talan_UA_Admin');
+    window.open('https://t.me/Veteran_NovyShlyakh_Bot?start=donate', '_blank');
 }
 
 
