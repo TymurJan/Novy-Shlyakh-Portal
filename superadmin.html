@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Центр Стратегічної Телеметрії — Супер-адмінка ГО «Талан ЮА»</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css?v=46">
+    <link rel="stylesheet" href="cabinet.css?v=46">
+
+    <style>
+        :root {
+            --admin-bg: #0B0F17;
+            --admin-card: rgba(17, 24, 39, 0.85);
+            --admin-border: rgba(255, 255, 255, 0.08);
+            --admin-primary: #38BDF8;
+            --admin-success: #10B981;
+            --admin-warning: #F59E0B;
+            --admin-danger: #EF4444;
+        }
+
+        body {
+            background-color: var(--admin-bg);
+            color: #F3F4F6;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .sa-header {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--admin-border);
+            padding: 18px 32px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sa-logo-group {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .sa-badge-role {
+            background: linear-gradient(135deg, #0284C7, #0369A1);
+            color: #fff;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .sa-container {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 32px 24px 80px;
+        }
+
+        /* KPI Cards Grid */
+        .sa-kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .sa-kpi-card {
+            background: var(--admin-card);
+            border: 1px solid var(--admin-border);
+            border-radius: 16px;
+            padding: 24px;
+            backdrop-filter: blur(12px);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .sa-kpi-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(56, 189, 248, 0.4);
+        }
+
+        .sa-kpi-title {
+            font-size: 0.85rem;
+            color: #94A3B8;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sa-kpi-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            font-family: 'Outfit', sans-serif;
+            color: #FFFFFF;
+            line-height: 1.1;
+        }
+
+        .sa-kpi-sub {
+            font-size: 0.8rem;
+            color: #64748B;
+            margin-top: 8px;
+        }
+
+        /* Filter Toolbar */
+        .sa-toolbar {
+            background: var(--admin-card);
+            border: 1px solid var(--admin-border);
+            border-radius: 16px;
+            padding: 20px 24px;
+            margin-bottom: 28px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .sa-filter-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .sa-select {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #F8FAFC;
+            padding: 9px 16px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            outline: none;
+            cursor: pointer;
+            min-width: 180px;
+        }
+
+        .sa-select:focus {
+            border-color: var(--admin-primary);
+        }
+
+        /* Table Style */
+        .sa-table-card {
+            background: var(--admin-card);
+            border: 1px solid var(--admin-border);
+            border-radius: 16px;
+            overflow: hidden;
+            backdrop-filter: blur(12px);
+        }
+
+        .sa-table-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--admin-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .sa-table-wrap {
+            overflow-x: auto;
+        }
+
+        .sa-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        .sa-table th {
+            background: rgba(15, 23, 42, 0.6);
+            color: #94A3B8;
+            font-weight: 600;
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--admin-border);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+        }
+
+        .sa-table td {
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            color: #E2E8F0;
+        }
+
+        .sa-table tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        /* Badges */
+        .sa-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .sa-status-badge.stable {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34D399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .sa-status-badge.moderate {
+            background: rgba(245, 158, 11, 0.15);
+            color: #FBBF24;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .sa-status-badge.critical {
+            background: rgba(239, 68, 68, 0.15);
+            color: #F87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        /* Progress Bar */
+        .sa-progress {
+            width: 100px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        .sa-progress-fill {
+            height: 100%;
+            border-radius: 4px;
+        }
+
+        .sa-btn-action {
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            color: #38BDF8;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .sa-btn-action:hover {
+            background: rgba(56, 189, 248, 0.25);
+        }
+
+        /* AI Recommendation Box */
+        .sa-ai-box {
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.3), rgba(15, 23, 42, 0.8));
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 16px;
+            padding: 24px;
+            margin-top: 32px;
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .sa-ai-icon {
+            font-size: 32px;
+            background: rgba(59, 130, 246, 0.2);
+            padding: 12px;
+            border-radius: 14px;
+        }
+
+        /* Modal */
+        .sa-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .sa-modal-card {
+            background: #111827;
+            border: 1px solid var(--admin-border);
+            border-radius: 20px;
+            max-width: 650px;
+            width: 100%;
+            padding: 28px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Шапка супер-адмінки -->
+    <header class="sa-header">
+        <div class="sa-logo-group">
+            <a href="index.html" style="text-decoration: none; color: #fff; font-weight: 800; font-size: 1.2rem; display: flex; align-items: center; gap: 10px;">
+                <span style="color: #10B981;">🛡️</span> Новий Шлях
+            </a>
+            <span class="sa-badge-role">Стратегічна аналітика</span>
+            <span style="font-size: 0.85rem; color: #94A3B8;">ГО «Талан ЮА» — Аналітика порталу & Телеметрія</span>
+        </div>
+        <div style="display: flex; gap: 12px; align-items: center;">
+            <a href="cabinet.html" class="sa-btn-action" style="text-decoration: none;">👤 В кабінет</a>
+            <a href="/docs" target="_blank" class="sa-btn-action" style="text-decoration: none; background: rgba(56, 189, 248, 0.15); border-color: rgba(56, 189, 248, 0.4); color: #38BDF8;" title="Відкрити інтерактивну технічну документацію FastAPI">🛠️ FastAPI Docs</a>
+            <button class="sa-btn-action" onclick="window.print()" style="background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.4); color: #34D399;">🖨️ Друк звіту</button>
+            <button class="sa-btn-action" onclick="exportData('csv')" style="background: rgba(245, 158, 11, 0.15); border-color: rgba(245, 158, 11, 0.4); color: #FBBF24;">📥 CSV</button>
+            <button class="sa-btn-action" onclick="exportData('json')" style="background: rgba(168, 85, 247, 0.15); border-color: rgba(168, 85, 247, 0.4); color: #C084FC;">📄 JSON</button>
+        </div>
+    </header>
+
+    <div class="sa-container">
+        
+        <!-- Заголовок сторінки -->
+        <div style="margin-bottom: 28px;">
+            <h1 style="font-size: 2rem; font-weight: 800; margin: 0 0 8px 0; font-family: 'Outfit', sans-serif;">
+                🗺️ Центр стратегічної телеметрії та дефіциту ємності громад
+            </h1>
+            <p style="color: #94A3B8; margin: 0; font-size: 0.95rem;">
+                Математична модель виявлення перевантаження та дефіциту допомоги ветеранам: 
+                <code style="color: #38BDF8; background: rgba(56, 189, 248, 0.1); padding: 3px 8px; border-radius: 6px;">Deficit = Demand - (State + ProBono)</code>
+            </p>
+        </div>
+
+        <!-- 4 Ключові KPI-Картки -->
+        <div class="sa-kpi-grid">
+            <div class="sa-kpi-card">
+                <div class="sa-kpi-title"><span>🏛️</span> Проаналізовано громад</div>
+                <div class="sa-kpi-value" id="kpiCommunitiesCount">--</div>
+                <div class="sa-kpi-sub">Всі 24 області + Київ (1469 ТГ)</div>
+            </div>
+            <div class="sa-kpi-card">
+                <div class="sa-kpi-title"><span>👥</span> Загальний попит (Demand)</div>
+                <div class="sa-kpi-value" id="kpiTotalDemand" style="color: #38BDF8;">--</div>
+                <div class="sa-kpi-sub">Активні звернення, ЦНАП та CRM</div>
+            </div>
+            <div class="sa-kpi-card">
+                <div class="sa-kpi-title"><span>🛡️</span> Загальна ємність (Supply)</div>
+                <div class="sa-kpi-value" id="kpiTotalSupply" style="color: #34D399;">--</div>
+                <div class="sa-kpi-sub">Державні центри + Pro-Bono партнери</div>
+            </div>
+            <div class="sa-kpi-card">
+                <div class="sa-kpi-title"><span>🔴</span> Громад у критичному дефіциті</div>
+                <div class="sa-kpi-value" id="kpiCriticalCount" style="color: #F87171;">--</div>
+                <div class="sa-kpi-sub">Потребують термінового розширення штату</div>
+            </div>
+        </div>
+
+        <!-- Панель фільтрів та вибірки -->
+        <div class="sa-toolbar">
+            <div class="sa-filter-group">
+                <div>
+                    <label style="font-size: 0.75rem; color: #94A3B8; display: block; margin-bottom: 4px; font-weight: 600;">ОБЛАСТЬ / РЕГІОН</label>
+                    <select id="saRegionFilter" class="sa-select" onchange="loadTelemetryData()">
+                        <option value="all">🌍 Вся Україна (Всі області)</option>
+                        <option value="Черкаська область" selected>📍 Черкаська область (Пілот)</option>
+                        <option value="м. Київ">м. Київ</option>
+                        <option value="Київська область">Київська область</option>
+                        <option value="Львівська область">Львівська область</option>
+                        <option value="Дніпропетровська область">Дніпропетровська область</option>
+                        <option value="Харківська область">Харківська область</option>
+                        <option value="Одеська область">Одеська область</option>
+                        <option value="Вінницька область">Вінницька область</option>
+                        <option value="Полтавська область">Полтавська область</option>
+                        <option value="Житомирська область">Житомирська область</option>
+                        <option value="Запорізька область">Запорізька область</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label style="font-size: 0.75rem; color: #94A3B8; display: block; margin-bottom: 4px; font-weight: 600;">СТАТУС ЄМНОСТІ</label>
+                    <select id="saStatusFilter" class="sa-select" onchange="filterLocalData()">
+                        <option value="all">✨ Всі статуси</option>
+                        <option value="CRITICAL">🔴 Критичний дефіцит</option>
+                        <option value="MODERATE">🟡 Помірний дефіцит</option>
+                        <option value="STABLE">🟢 Стабільна ємність</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <input type="text" id="saSearchCommunity" placeholder="Швидкий пошук громади..." class="sa-select" style="min-width: 220px;" oninput="filterLocalData()">
+                <button class="sa-btn-action" onclick="loadTelemetryData()" style="padding: 10px 16px;">🔄 Оновити</button>
+            </div>
+        </div>
+
+        <!-- Таблиця телеметрії громад -->
+        <div class="sa-table-card">
+            <div class="sa-table-header">
+                <div>
+                    <h3 style="margin: 0; font-size: 1.1rem; font-weight: 700;">Реєстр громад та розрахунок дефіциту</h3>
+                    <p style="margin: 4px 0 0 0; color: #94A3B8; font-size: 0.85rem;">Дані оновлюються в реальному часі на основі CRM-тікетів та мережі фахівців</p>
+                </div>
+                <div id="saTableCounter" style="font-size: 0.85rem; color: #94A3B8;">Показано: -- громад</div>
+            </div>
+
+            <div class="sa-table-wrap">
+                <table class="sa-table">
+                    <thead>
+                        <tr>
+                            <th>Громада / Регіон</th>
+                            <th>Попит (Demand)</th>
+                            <th>Державні (State)</th>
+                            <th>Pro-Bono</th>
+                            <th>Дефіцит (Δ)</th>
+                            <th>Покриття</th>
+                            <th>Статус</th>
+                            <th style="text-align: right;">Дії</th>
+                        </tr>
+                    </thead>
+                    <tbody id="saTableBody">
+                        <tr>
+                            <td colspan="8" style="text-align: center; padding: 40px; color: #94A3B8;">
+                                ⏳ Завантаження телеметрії з сервера...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ШІ-Аналітика та стратегічні рекомендації -->
+        <div class="sa-ai-box">
+            <div class="sa-ai-icon">🤖</div>
+            <div style="flex: 1;">
+                <h3 style="margin: 0 0 8px 0; color: #38BDF8; font-size: 1.1rem; font-weight: 700;">
+                    ШІ-Асистент Стратегічного Розподілу Ресурсів (NGO Governance AI)
+                </h3>
+                <div id="saAiInsightsText" style="color: #CBD5E1; font-size: 0.95rem; line-height: 1.6;">
+                    Аналізую навантаження фахівців та дефіцит по громадах...
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Модальне вікно детального зрізу громади -->
+    <div class="sa-modal" id="saDetailModal">
+        <div class="sa-modal-card">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+                <div>
+                    <h3 id="saModalTitle" style="margin: 0; font-size: 1.25rem; color: #fff;">Детальний зріз ємності</h3>
+                    <p id="saModalSub" style="margin: 4px 0 0 0; color: #94A3B8; font-size: 0.85rem;">Розподіл за 6 спеціалізаціями</p>
+                </div>
+                <button onclick="closeModal()" style="background: transparent; border: none; color: #94A3B8; font-size: 20px; cursor: pointer;">✕</button>
+            </div>
+
+            <div id="saModalBreakdown" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;">
+                <!-- Динамічні рядки категорій -->
+            </div>
+
+            <div style="text-align: right;">
+                <button class="sa-btn-action" onclick="closeModal()" style="padding: 8px 20px;">Закрити</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let rawTelemetryData = null;
+        let currentFilteredList = [];
+
+        async function loadTelemetryData() {
+            const reg = document.getElementById('saRegionFilter').value;
+            const url = '/api/v1/crm/admin/capacity-deficit' + (reg !== 'all' ? '?region=' + encodeURIComponent(reg) : '');
+            
+            try {
+                const res = await fetch(url);
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                rawTelemetryData = await res.json();
+
+                renderKPIs(rawTelemetryData.summary);
+                filterLocalData();
+                generateAiInsights(rawTelemetryData);
+            } catch (err) {
+                console.error('Telemetry fetch error:', err);
+                document.getElementById('saTableBody').innerHTML = `<tr><td colspan="8" style="text-align:center;color:#EF4444;padding:30px;">Помилка завантаження даних: ${err.message}</td></tr>`;
+            }
+        }
+
+        function renderKPIs(summary) {
+            if (!summary) return;
+            document.getElementById('kpiCommunitiesCount').textContent = summary.total_communities_analyzed || 0;
+            document.getElementById('kpiTotalDemand').textContent = summary.total_demand || 0;
+            document.getElementById('kpiTotalSupply').textContent = (summary.total_state_capacity + summary.total_probono_capacity) || 0;
+            document.getElementById('kpiCriticalCount').textContent = summary.critical_deficit_communities || 0;
+        }
+
+        function filterLocalData() {
+            if (!rawTelemetryData || !rawTelemetryData.communities) return;
+            const statusVal = document.getElementById('saStatusFilter').value;
+            const searchVal = document.getElementById('saSearchCommunity').value.trim().toLowerCase();
+
+            currentFilteredList = rawTelemetryData.communities.filter(c => {
+                const matchStatus = statusVal === 'all' || c.status_level === statusVal;
+                const matchSearch = !searchVal || c.community.toLowerCase().includes(searchVal) || c.region.toLowerCase().includes(searchVal);
+                return matchStatus && matchSearch;
+            });
+
+            renderTable(currentFilteredList);
+        }
+
+        function renderTable(list) {
+            const tbody = document.getElementById('saTableBody');
+            document.getElementById('saTableCounter').textContent = `Показано: ${list.length} громад`;
+
+            if (!list.length) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#94A3B8;padding:40px;">За вказаними фільтрами громад не знайдено</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = list.map((c, idx) => {
+                let badgeClass = 'stable';
+                if (c.status_level === 'CRITICAL') badgeClass = 'critical';
+                else if (c.status_level === 'MODERATE') badgeClass = 'moderate';
+
+                let progressColor = '#10B981';
+                if (c.coverage_pct < 60) progressColor = '#EF4444';
+                else if (c.coverage_pct < 85) progressColor = '#F59E0B';
+
+                return `
+                    <tr>
+                        <td>
+                            <div style="font-weight:700;color:#fff;">${c.community}</div>
+                            <div style="font-size:0.75rem;color:#94A3B8;">${c.region} ${c.raion ? '• ' + c.raion + ' р-н' : ''}</div>
+                        </td>
+                        <td><b style="color:#38BDF8;">${c.demand}</b></td>
+                        <td>${c.state_capacity}</td>
+                        <td><b style="color:#34D399;">${c.probono_capacity}</b></td>
+                        <td><b style="color:${c.deficit > 0 ? '#EF4444' : '#94A3B8'};">${c.deficit}</b></td>
+                        <td>
+                            <div class="sa-progress">
+                                <div class="sa-progress-fill" style="width:${c.coverage_pct}%;background:${progressColor};"></div>
+                            </div>
+                            <span style="font-size:0.8rem;font-weight:600;">${c.coverage_pct}%</span>
+                        </td>
+                        <td>
+                            <span class="sa-status-badge ${badgeClass}">${c.status_label}</span>
+                        </td>
+                        <td style="text-align:right;">
+                            <button class="sa-btn-action" onclick="openDetails(${idx})">📊 Категорії</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function openDetails(idx) {
+            const item = currentFilteredList[idx];
+            if (!item) return;
+
+            document.getElementById('saModalTitle').textContent = `📊 ${item.community} (${item.region})`;
+            document.getElementById('saModalSub').textContent = `Загальний попит: ${item.demand} | Ємність: ${item.total_supply} | Дефіцит: ${item.deficit}`;
+
+            const catMap = {
+                legal: '⚖️ Юридична допомога',
+                psychology: '🧠 Психологічна допомога',
+                career: '💼 Кар\'єра та Вакансії',
+                social: '🤝 Соціальний захист',
+                education: '🎓 Освітні ваучери',
+                medical: '🏥 Медична реабілітація'
+            };
+
+            const container = document.getElementById('saModalBreakdown');
+            container.innerHTML = Object.entries(item.breakdown_by_category || {}).map(([k, val]) => {
+                const label = catMap[k] || k;
+                return `
+                    <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;">
+                        <div>
+                            <div style="font-weight:600;font-size:0.9rem;color:#F1F5F9;">${label}</div>
+                            <div style="font-size:0.75rem;color:#94A3B8;">Держава: ${val.state_capacity} | Pro-Bono: ${val.probono_capacity} | Попит: ${val.demand}</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="font-weight:700;color:${val.deficit > 0 ? '#EF4444' : '#10B981'};font-size:0.9rem;">
+                                ${val.deficit > 0 ? '🔴 Дефіцит: ' + val.deficit : '🟢 Покрито (' + val.coverage_pct + '%)'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('saDetailModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('saDetailModal').style.display = 'none';
+        }
+
+        function generateAiInsights(data) {
+            if (!data || !data.summary) return;
+            const sum = data.summary;
+            const topDef = data.communities.filter(c => c.deficit > 0).slice(0, 3);
+            
+            let html = `<p>На основі аналізу <b>${sum.total_communities_analyzed} громад</b> загальне покриття потреб ветеранів становить <b>${sum.overall_coverage_pct}%</b>.</p>`;
+            if (topDef.length > 0) {
+                html += `<p>⚠️ <b>Пріоритетний фокус для керівництва ГО «Талан ЮА»:</b> громади з найвищим дефіцитом — <b>${topDef.map(t => t.community).join(', ')}</b>. Рекомендовано терміново залучити додаткових pro-bono юристів та психологів у цих населених пунктах.</p>`;
+            } else {
+                html += `<p>✅ Поточна комбінація державних установ та pro-bono партнерів повністю покриває зареєстрований попит. Резерв ємності стабільний.</p>`;
+            }
+            document.getElementById('saAiInsightsText').innerHTML = html;
+        }
+
+        function exportData(format) {
+            if (!currentFilteredList || !currentFilteredList.length) {
+                alert('Немає даних для експорту');
+                return;
+            }
+
+            if (format === 'json') {
+                const blob = new Blob([JSON.stringify(currentFilteredList, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `telemetry_export_${new Date().toISOString().slice(0,10)}.json`;
+                a.click();
+            } else if (format === 'csv') {
+                let csv = 'Region,Community,Demand,State_Capacity,ProBono_Capacity,Deficit,Coverage_Pct,Status\n';
+                currentFilteredList.forEach(c => {
+                    csv += `"${c.region}","${c.community}",${c.demand},${c.state_capacity},${c.probono_capacity},${c.deficit},${c.coverage_pct}%,"${c.status_level}"\n`;
+                });
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `telemetry_export_${new Date().toISOString().slice(0,10)}.csv`;
+                a.click();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadTelemetryData);
+    </script>
+</body>
+</html>

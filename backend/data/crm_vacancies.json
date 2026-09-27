@@ -1,0 +1,252 @@
+[
+  {
+    "id": "vac-3d8563b6",
+    "employer_id": "audit_partner_bcb4d9",
+    "company_name": "Аудит Підприємство",
+    "title": "Інженер-програміст вбудованих систем",
+    "category": "it",
+    "description": "Розробка систем зв'язку для БПЛА",
+    "requirements": "",
+    "salary_min": 35000,
+    "salary_max": 55000,
+    "salary_currency": "грн",
+    "employment_type": "full",
+    "community": "Черкаська ТГ",
+    "settlement": "м. Черкаси",
+    "region": "Черкаська область",
+    "is_accessible_workplace": true,
+    "is_flexible_schedule": true,
+    "is_combat_experience_priority": true,
+    "is_bf_vesta_verified": true,
+    "status": "active",
+    "contact_person": "",
+    "contact_phone": "",
+    "contact_email": "",
+    "created_at": "2026-09-21T22:55:14.021079+00:00",
+    "updated_at": "2026-09-21T22:55:14.045660+00:00",
+    "applications_count": 1,
+    "vesta_verified_at": "2026-09-21T22:55:14.034162+00:00",
+    "vesta_curator_id": "curator_vesta_01",
+    "applications": [
+      {
+        "id": "app-63ad6c82",
+        "vacancy_id": "vac-3d8563b6",
+        "veteran_id": "audit_user_c79258",
+        "veteran_name": "Тарас Ветеран",
+        "phone": "+380671112233",
+        "cover_letter": "Маю бойовий досвід та навички зв'язку",
+        "attached_vault_docs": [
+          {
+            "id": "doc_ubd_1",
+            "title": "Посвідчення УБД"
+          }
+        ],
+        "applied_at": "2026-09-21T22:55:14.045646+00:00",
+        "status": "new"
+      }
+    ]
+  },
+  {
+    "id": "vac-7a100913",
+    "employer_id": "admin",
+    "company_name": "Ветеранський Коворкінг Черкас",
+    "title": "Адміністратор ветеранського хабу",
+    "category": "admin",
+    "description": "Координація відвідувачів та ведення обліку простору.",
+    "requirements": "",
+    "salary_min": 24000,
+    "salary_max": 30000,
+    "salary_currency": "грн",
+    "employment_type": "full",
+    "community": "Черкаська ТГ",
+    "settlement": "м. Черкаси",
+    "region": "Черкаська область",
+    "is_accessible_workplace": true,
+    "is_flexible_schedule": true,
+    "is_combat_experience_priority": true,
+    "is_bf_vesta_verified": true,
+    "status": "closed",
+    "contact_person": "",
+    "contact_phone": "",
+    "contact_email": "",
+    "created_at": "2026-09-21T22:14:00.846105+00:00",
+    "updated_at": "2026-09-21T22:14:00.875472+00:00",
+    "applications_count": 0,
+    "vesta_verified_at": "2026-09-21T22:14:00.862879+00:00",
+    "vesta_curator_id": "curator_olena_vesta"
+  },
+  {
+    "id": "vac-cherkasy-001",
+    "employer_id": "org_agro_talan_partner",
+    "company_name": "ТОВ «Черкаський Агро-Холдинг»",
+    "title": "Оператор агро-дронів та моніторингу полів",
+    "category": "agro_tech",
+    "description": "Керування безпілотними літальними апаратами для мультиспектрального аналізу посівів та картографування. Безкоштовне перенавчання для ветеранів з досвідом керування БПЛА в ЗСУ.",
+    "requirements": "Базові навички роботи з ПК, уважність. Досвід оператора FPV/Mavic буде значною перевагою.",
+    "salary_min": 28000,
+    "salary_max": 45000,
+    "salary_currency": "грн",
+    "employment_type": "full",
+    "community": "Черкаська ТГ",
+    "settlement": "м. Черкаси",
+    "region": "Черкаська область",
+    "is_accessible_workplace": true,
+    "is_flexible_schedule": true,
+    "is_combat_experience_priority": true,
+    "is_bf_vesta_verified": true,
+    "status": "active",
+    "contact_person": "Олена (HR-координатор)",
+    "contact_phone": "+380 (67) 345-67-89",
+    "contact_email": "hr@agro-cherkasy.ua",
+    "created_at": "2026-09-15T10:00:00Z",
+    "updated_at": "2026-09-21T23:47:40.684291+00:00",
+    "applications_count": 4,
+    "applications": [
+      {
+        "id": "app-83ba8cd6",
+        "vacancy_id": "vac-cherkasy-001",
+        "veteran_id": "vet_audit_01",
+        "veteran_name": "Ветеран Тарас",
+        "phone": "+380671112233",
+        "cover_letter": "",
+        "attached_vault_docs": [
+          {
+            "id": "doc_1",
+            "name": "Резюме_Тарас.pdf"
+          }
+        ],
+        "applied_at": "2026-09-21T23:47:40.684278+00:00",
+        "status": "new"
+      },
+      {
+        "id": "app-4934abcf",
+        "vacancy_id": "vac-cherkasy-001",
+        "veteran_id": "vet_audit_01",
+        "veteran_name": "Ветеран Тарас",
+        "phone": "+380671112233",
+        "cover_letter": "",
+        "attached_vault_docs": [
+          {
+            "id": "doc_1",
+            "name": "Резюме_Тарас.pdf"
+          }
+        ],
+        "applied_at": "2026-09-21T23:47:31.291867+00:00",
+        "status": "new"
+      },
+      {
+        "id": "app-5bbe16b9",
+        "vacancy_id": "vac-cherkasy-001",
+        "veteran_id": "vet_audit_01",
+        "veteran_name": "Ветеран Тарас",
+        "phone": "+380671112233",
+        "cover_letter": "",
+        "attached_vault_docs": [
+          {
+            "id": "doc_1",
+            "name": "Резюме_Тарас.pdf"
+          }
+        ],
+        "applied_at": "2026-09-21T23:47:05.952684+00:00",
+        "status": "new"
+      },
+      {
+        "id": "app-037df048",
+        "vacancy_id": "vac-cherkasy-001",
+        "veteran_id": "vet_audit_01",
+        "veteran_name": "Ветеран Тарас",
+        "phone": "+380671112233",
+        "cover_letter": "",
+        "attached_vault_docs": [
+          {
+            "id": "doc_1",
+            "name": "Резюме_Тарас.pdf"
+          }
+        ],
+        "applied_at": "2026-09-21T23:46:51.834972+00:00",
+        "status": "new"
+      }
+    ]
+  },
+  {
+    "id": "vac-cherkasy-002",
+    "employer_id": "org_it_probono_partner",
+    "company_name": "Digital Solutions UA",
+    "title": "Junior QA Engineer / Тестувальник програмного забезпечення",
+    "category": "it",
+    "description": "Тестування веб-сервісів та мобільних додатків. Повністю віддалена робота або затишний безбар'єрний офіс у Черкасах. Надаємо робочу техніку та персонального ментора з числа ветеранів-айтівців.",
+    "requirements": "Базове розуміння життєвого циклу ПЗ, бажання вчитися. Навчальний ваучер від ДСЗ вітається.",
+    "salary_min": 22000,
+    "salary_max": 32000,
+    "salary_currency": "грн",
+    "employment_type": "remote",
+    "community": "Черкаська ТГ",
+    "settlement": "м. Черкаси",
+    "region": "Черкаська область",
+    "is_accessible_workplace": true,
+    "is_flexible_schedule": true,
+    "is_combat_experience_priority": true,
+    "is_bf_vesta_verified": true,
+    "status": "active",
+    "contact_person": "Михайло (Lead QA)",
+    "contact_phone": "+380 (50) 412-33-44",
+    "contact_email": "jobs@digitalsolutions.ua",
+    "created_at": "2026-09-18T14:30:00Z",
+    "updated_at": "2026-09-18T14:30:00Z",
+    "applications_count": 5
+  },
+  {
+    "id": "vac-kaniv-003",
+    "employer_id": "org_kaniv_logistics",
+    "company_name": "Логістичний центр «Дніпро-Канів»",
+    "title": "Диспетчер-координатор вантажних перевезень",
+    "category": "logistics",
+    "description": "Прийом замовлень, планування маршрутів водіїв, ведення графіків відвантажень у системі 1С/CRM. Адаптоване робоче місце для осіб з порушеннями опорно-рухового апарату.",
+    "requirements": "Комунікабельність, стресостійкість, вміння швидко приймати рішення.",
+    "salary_min": 25000,
+    "salary_max": 35000,
+    "salary_currency": "грн",
+    "employment_type": "full",
+    "community": "Канівська ТГ",
+    "settlement": "м. Канів",
+    "region": "Черкаська область",
+    "is_accessible_workplace": true,
+    "is_flexible_schedule": true,
+    "is_combat_experience_priority": true,
+    "is_bf_vesta_verified": true,
+    "status": "active",
+    "contact_person": "Сергій Вікторович",
+    "contact_phone": "+380 (63) 890-11-22",
+    "contact_email": "logistics@kaniv-trans.com",
+    "created_at": "2026-09-20T09:15:00Z",
+    "updated_at": "2026-09-20T09:15:00Z",
+    "applications_count": 2
+  },
+  {
+    "id": "vac-smila-004",
+    "employer_id": "org_smila_security",
+    "company_name": "Служба безпеки та моніторингу «Варта-Сміла»",
+    "title": "Оператор пульту централізованої відео-охорони",
+    "category": "security",
+    "description": "Цілодобовий відеомоніторинг об'єктів інфраструктури з робочого місця оператора. Зручний графік чергувань: доба через три, можливість поєднувати з лікуванням.",
+    "requirements": "Уважність, дисциплінованість, відсутність протипоказань до роботи за монітором.",
+    "salary_min": 20000,
+    "salary_max": 28000,
+    "salary_currency": "грн",
+    "employment_type": "part",
+    "community": "Смілянська ТГ",
+    "settlement": "м. Сміла",
+    "region": "Черкаська область",
+    "is_accessible_workplace": true,
+    "is_flexible_schedule": true,
+    "is_combat_experience_priority": true,
+    "is_bf_vesta_verified": false,
+    "status": "active",
+    "contact_person": "Ігор Миколайович",
+    "contact_phone": "+380 (97) 555-44-33",
+    "contact_email": "varta-smila@ukr.net",
+    "created_at": "2026-09-21T11:00:00Z",
+    "updated_at": "2026-09-21T11:00:00Z",
+    "applications_count": 1
+  }
+]

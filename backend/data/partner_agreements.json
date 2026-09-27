@@ -1,0 +1,54 @@
+{
+  "test_partner_unit": {
+    "partner_id": "test_partner_unit",
+    "updated_at": "2026-09-21T22:08:02.509629+00:00",
+    "memorandum": {
+      "signed": true,
+      "signed_at": "2026-09-21T22:08:02.509595+00:00",
+      "sign_method": "bankid_smartid",
+      "signer_name": "Тестовий Представник",
+      "signer_rnokpp": "2839401928",
+      "bank_provider": "ПриватБанк",
+      "signature_hash": "SHA256:d0ea1690d0b44fb587af37620d8ee4d4"
+    }
+  },
+  "partner_unsigned_test": {
+    "partner_id": "partner_unsigned_test",
+    "updated_at": "2026-09-21T22:11:40.256208+00:00",
+    "contract_nda": {
+      "signed": true,
+      "signed_at": "2026-09-21T22:11:40.256169+00:00",
+      "sign_method": "bankid_smartid",
+      "signer_name": "Тестовий Керівник",
+      "signer_rnokpp": "2839401928",
+      "bank_provider": "monobank",
+      "signature_hash": "SHA256:3e3285f6c042452fa91ac21c15276ac3"
+    }
+  },
+  "audit_partner_bcb4d9": {
+    "partner_id": "audit_partner_bcb4d9",
+    "updated_at": "2026-09-21T22:55:13.998552+00:00",
+    "contract_nda": {
+      "signed": true,
+      "signed_at": "2026-09-21T22:55:13.998524+00:00",
+      "sign_method": "bankid_smartid",
+      "signer_name": "Директор Аудит",
+      "signer_rnokpp": "2918273645",
+      "bank_provider": "ПриватБанк (SmartID)",
+      "signature_hash": "SHA256:ecb8cc73c93047cba12ce9ed8e86a66e"
+    }
+  },
+  "partner_signed_audit": {
+    "partner_id": "partner_signed_audit",
+    "updated_at": "2026-09-21T23:47:40.653516+00:00",
+    "contract_nda": {
+      "signed": true,
+      "signed_at": "2026-09-21T23:47:40.653490+00:00",
+      "sign_method": "diia",
+      "signer_name": "Адвокат Тарас Коваленко",
+      "signer_rnokpp": "2839401928",
+      "bank_provider": null,
+      "signature_hash": "SHA256:3e55bbc2f8d04cf8a4f303f0bb64a73f"
+    }
+  }
+}

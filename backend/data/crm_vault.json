@@ -1,0 +1,24 @@
+[
+  {
+    "id": "DOC-202609-A67D42",
+    "user_id": "vet_taras_01",
+    "original_name": "dovidka_vlk_2026.pdf",
+    "file_size": 50,
+    "doc_type": "vlk_certificate",
+    "file_hash": "8acf0375473770cea15fd283b4ece4ada71c234918b52b42cadcc9a5afe1c60c",
+    "uploaded_at": "2026-09-09T23:00:46.533392+00:00",
+    "status": "ENCRYPTED_VAULT",
+    "granted_specialists": []
+  },
+  {
+    "id": "DOC-202609-9A0AA0",
+    "user_id": "test_vet_9988",
+    "original_name": "dovidka_vlk.pdf",
+    "file_size": 57,
+    "doc_type": "vlk_certificate",
+    "file_hash": "a54ba60e01bff89472405ad022054d9d50827ef504bfb3965ddd9e3a3cb8758a",
+    "uploaded_at": "2026-09-08T00:23:41.744450+00:00",
+    "status": "ENCRYPTED_VAULT",
+    "granted_specialists": []
+  }
+]

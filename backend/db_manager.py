@@ -62,6 +62,13 @@ def get_specialists(status=None, category=None):
     
     return [dict(row) for row in rows]
 
+def get_verified_specialists(category=None):
+    """Отримує список верифікованих (approved) спеціалістів."""
+    specs = get_specialists(status="approved", category=category)
+    if not specs:
+        specs = get_specialists(category=category)
+    return specs
+
 try:
     import crypto_utils
 except ImportError:

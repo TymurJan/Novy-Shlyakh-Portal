@@ -1,0 +1,212 @@
+[
+  {
+    "id": "course-a7c56a64",
+    "provider_id": "audit_partner_bcb4d9",
+    "provider_name": "Черкаський Навчальний Центр",
+    "title": "Кібербезпека та мережеві технології",
+    "category": "it",
+    "format": "hybrid",
+    "city": "м. Черкаси",
+    "duration_weeks": 10,
+    "cost_uah": 30000,
+    "voucher_eligible": true,
+    "voucher_amount_max": 30280,
+    "seats_total": 15,
+    "seats_available": 11,
+    "status": "active",
+    "description": "Підготовка фахівців кібербезпеки за ваучером ДСЗ",
+    "requirements": "УБД",
+    "contact_email": "",
+    "created_at": "2026-09-21T22:55:14.052541+00:00",
+    "applications": [
+      {
+        "id": "vapp-3817ddf0",
+        "course_id": "course-a7c56a64",
+        "course_title": "Кібербезпека та мережеві технології",
+        "veteran_id": "vet_audit_01",
+        "veteran_name": "Ветеран Тарас",
+        "phone": "+380671112233",
+        "status_category": "ubd",
+        "has_higher_education": true,
+        "comment": "",
+        "attached_vault_docs": [
+          "doc_diploma_01"
+        ],
+        "applied_at": "2026-09-21T23:47:40.694023+00:00",
+        "status": "registered_for_dcz_voucher"
+      },
+      {
+        "id": "vapp-2a83f8a3",
+        "course_id": "course-a7c56a64",
+        "course_title": "Кібербезпека та мережеві технології",
+        "veteran_id": "vet_audit_01",
+        "veteran_name": "Ветеран Тарас",
+        "phone": "+380671112233",
+        "status_category": "ubd",
+        "has_higher_education": true,
+        "comment": "",
+        "attached_vault_docs": [
+          "doc_diploma_01"
+        ],
+        "applied_at": "2026-09-21T23:47:31.311209+00:00",
+        "status": "registered_for_dcz_voucher"
+      },
+      {
+        "id": "vapp-0f460321",
+        "course_id": "course-a7c56a64",
+        "course_title": "Кібербезпека та мережеві технології",
+        "veteran_id": "vet_audit_01",
+        "veteran_name": "Ветеран Тарас",
+        "phone": "+380671112233",
+        "status_category": "ubd",
+        "has_higher_education": true,
+        "comment": "",
+        "attached_vault_docs": [
+          "doc_diploma_01"
+        ],
+        "applied_at": "2026-09-21T23:47:05.964384+00:00",
+        "status": "registered_for_dcz_voucher"
+      },
+      {
+        "id": "vapp-f1032153",
+        "course_id": "course-a7c56a64",
+        "course_title": "Кібербезпека та мережеві технології",
+        "veteran_id": "audit_user_c79258",
+        "veteran_name": "Тарас Ветеран",
+        "phone": "+380671112233",
+        "status_category": "ubd",
+        "has_higher_education": true,
+        "comment": "Бажаю отримати ваучер на 30 280 грн",
+        "attached_vault_docs": [
+          {
+            "id": "doc_diploma",
+            "title": "Диплом бакалавра"
+          }
+        ],
+        "applied_at": "2026-09-21T22:55:14.064065+00:00",
+        "status": "registered_for_dcz_voucher"
+      }
+    ]
+  },
+  {
+    "id": "course-it-fullstack-01",
+    "provider_id": "org_mate_academy",
+    "provider_name": "Mate Academy",
+    "title": "Fullstack Web Розробка для ветеранів",
+    "category": "it",
+    "format": "online",
+    "city": "Вся Україна / Черкаси (Online)",
+    "duration_weeks": 16,
+    "cost_uah": 30000,
+    "voucher_eligible": true,
+    "voucher_amount_max": 30280,
+    "seats_total": 25,
+    "seats_available": 7,
+    "status": "active",
+    "description": "Інтенсивна програма підготовки Fullstack розробників (JavaScript, React, Node.js). 100% покриття за ваучером ДСЗ або грантом. Допомога з працевлаштуванням.",
+    "requirements": "Статус УБД, базове володіння ПК",
+    "contact_email": "veterans@mate.academy",
+    "created_at": "2026-09-01T10:00:00Z",
+    "applications": [
+      {
+        "id": "vapp-e87b5518",
+        "course_id": "course-it-fullstack-01",
+        "course_title": "Fullstack Web Розробка для ветеранів",
+        "veteran_id": "vet_777",
+        "veteran_name": "Тарас Бойко",
+        "phone": "+380671234567",
+        "status_category": "ubd",
+        "has_higher_education": true,
+        "comment": "Маю статус УБД, бажаю опанувати веб-розробку за ваучером ДСЗ",
+        "attached_vault_docs": [
+          {
+            "id": "doc-1",
+            "title": "Посвідчення УБД"
+          }
+        ],
+        "applied_at": "2026-09-21T22:24:08.875552+00:00",
+        "status": "registered_for_dcz_voucher"
+      }
+    ]
+  },
+  {
+    "id": "course-uav-pilot-02",
+    "provider_id": "org_agro_talan_partner",
+    "provider_name": "Агро-Технолоджі Черкаси",
+    "title": "Оператор агродронів та моніторинг полів",
+    "category": "uav",
+    "format": "hybrid",
+    "city": "м. Черкаси",
+    "duration_weeks": 6,
+    "cost_uah": 18500,
+    "voucher_eligible": true,
+    "voucher_amount_max": 30280,
+    "seats_total": 15,
+    "seats_available": 4,
+    "status": "active",
+    "description": "Курс керування важкими аграрними БПЛА для внесення добрив та тепловізійного моніторингу посівів. Практичні польоти на базі підприємств Черкаського району.",
+    "requirements": "УБД або особи з інвалідністю внаслідок війни, водійське посвідчення бажане",
+    "contact_email": "edu@agro-cherkasy.ua",
+    "created_at": "2026-09-05T12:00:00Z"
+  },
+  {
+    "id": "course-auto-diag-03",
+    "provider_id": "org_cherkasy_autocenter",
+    "provider_name": "Черкаський Автоцентр",
+    "title": "Діагностика та сервіс сучасних автомобілів",
+    "category": "auto",
+    "format": "offline",
+    "city": "м. Черкаси",
+    "duration_weeks": 8,
+    "cost_uah": 22000,
+    "voucher_eligible": true,
+    "voucher_amount_max": 30280,
+    "seats_total": 12,
+    "seats_available": 3,
+    "status": "active",
+    "description": "Практичний курс комп'ютерної діагностики електронних систем авто, ремонту гібридних установок та ходової частини. Працевлаштування на СТО-партнерах.",
+    "requirements": "Бажання працювати з автотехнікою",
+    "contact_email": "service@cherkasy-auto.ua",
+    "created_at": "2026-09-10T14:00:00Z"
+  },
+  {
+    "id": "course-cnu-management-04",
+    "provider_id": "org_cnu_khmelnytsky",
+    "provider_name": "ЧНУ ім. Б. Хмельницького",
+    "title": "Управління проєктами та муніципальний менеджмент",
+    "category": "management",
+    "format": "hybrid",
+    "city": "м. Черкаси / Дистанційно",
+    "duration_weeks": 12,
+    "cost_uah": 28000,
+    "voucher_eligible": true,
+    "voucher_amount_max": 30280,
+    "seats_total": 30,
+    "seats_available": 11,
+    "status": "active",
+    "description": "Підвищення кваліфікації та перепідготовка ветеранів для роботи в органах місцевого самоврядування (ОМС), комунальних підприємствах та проєктних офісах громад.",
+    "requirements": "Вища або фахова передвища освіта, статус ветерана",
+    "contact_email": "veteran_hub@cnu.edu.ua",
+    "created_at": "2026-09-12T09:00:00Z"
+  },
+  {
+    "id": "course-psych-peer-05",
+    "provider_id": "org_ashram_rehab",
+    "provider_name": "Центр «Ашрам» & ГО «Талан ЮА»",
+    "title": "Підготовка помічників ветерана та консультантів «Рівний-Рівному»",
+    "category": "psychology",
+    "format": "offline",
+    "city": "м. Черкаси / м. Канів",
+    "duration_weeks": 4,
+    "cost_uah": 0,
+    "voucher_eligible": false,
+    "voucher_amount_max": 0,
+    "seats_total": 20,
+    "seats_available": 6,
+    "status": "active",
+    "description": "Сертифікований тренінг базової психологічної першої допомоги, деескалації та ветеранського менторства для роботи в громадах Черкащини. Фінансується донорськими грантами.",
+    "requirements": "Учасники бойових дій, бажання підтримувати побратимів",
+    "contact_email": "ashram@talan-ua.org",
+    "created_at": "2026-09-15T11:30:00Z"
+  }
+]

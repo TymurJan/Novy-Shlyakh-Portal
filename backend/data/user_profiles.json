@@ -1,0 +1,246 @@
+{
+  "test_vet_9988": {
+    "user_id": "test_vet_9988",
+    "veteran_role": "veteran",
+    "callsign": "Друг Сокіл",
+    "phone": "+380501112233",
+    "community": "Канівська ТГ (м. Канів)",
+    "preferred_channel": "telegram",
+    "updated_at": "2026-09-08T00:23:41.471814+00:00"
+  },
+  "vet_taras_01": {
+    "user_id": "vet_taras_01",
+    "veteran_role": "veteran",
+    "callsign": "Друг Сокіл",
+    "phone": "+380501234567",
+    "community": "Канівська ТГ (м. Канів)",
+    "preferred_channel": "telegram",
+    "updated_at": "2026-09-09T22:58:31.925792+00:00"
+  },
+  "vet_multi_001": {
+    "user_id": "vet_multi_001",
+    "veteran_role": "veteran",
+    "callsign": "Сармат",
+    "phone": "+380671112233",
+    "community": "Черкаська ТГ",
+    "preferred_channel": "telegram",
+    "updated_at": "2026-09-21T22:37:55.050549+00:00",
+    "roles": [
+      "veteran"
+    ],
+    "profiles_by_role": {
+      "veteran": {
+        "callsign": "Сармат",
+        "status_type": "ubd",
+        "military_unit": "72 ОМБр",
+        "preferred_channel": "telegram",
+        "updated_at": "2026-09-21T22:37:55.050528+00:00"
+      }
+    },
+    "roles_meta": {}
+  },
+  "user_test_transform_77": {
+    "user_id": "user_test_transform_77",
+    "primary_role": "veteran",
+    "active_role": "employer",
+    "roles": [
+      "veteran",
+      "employer",
+      "mentor"
+    ],
+    "roles_meta": {
+      "veteran": {
+        "verified": true,
+        "verified_at": "2026-09-21T22:53:16.057720+00:00",
+        "method": "initial_registration"
+      },
+      "employer": {
+        "verified": true,
+        "added_at": "2026-09-21T22:53:16.067676+00:00",
+        "verification_doc": "self_declared_diiakep",
+        "status": "active"
+      },
+      "mentor": {
+        "verified": true,
+        "added_at": "2026-09-21T22:53:16.076194+00:00",
+        "verification_doc": "self_declared_diiakep",
+        "status": "active"
+      }
+    },
+    "profiles_by_role": {
+      "veteran": {
+        "status_type": "ubd",
+        "military_unit": "118 ОБрТрО",
+        "needs": [
+          "rehab",
+          "job"
+        ],
+        "callsign": "Козак",
+        "phone": "+380671112233",
+        "community": "Черкаська ТГ",
+        "preferred_channel": "telegram",
+        "updated_at": "2026-09-21T22:53:16.057720+00:00"
+      },
+      "employer": {
+        "company_name": "ТОВ Ветеран Агро Черкаси",
+        "edrpou": "44556677",
+        "industry": "agro_tech",
+        "is_inclusive_workspace": true,
+        "phone": "+380671112233",
+        "community": "Черкаська ТГ",
+        "activated_at": "2026-09-21T22:53:16.067676+00:00"
+      },
+      "mentor": {
+        "support_topics": [
+          "civilian_adaptation",
+          "business_launch"
+        ],
+        "phone": "+380671112233",
+        "community": "Черкаська ТГ",
+        "activated_at": "2026-09-21T22:53:16.076194+00:00"
+      }
+    },
+    "created_at": "2026-09-21T22:53:16.057720+00:00",
+    "phone": "+380671112233",
+    "community": "Черкаська ТГ",
+    "callsign": "Козак",
+    "preferred_channel": "telegram",
+    "updated_at": "2026-09-21T22:53:16.087338+00:00"
+  },
+  "audit_user_c79258": {
+    "user_id": "audit_user_c79258",
+    "primary_role": "veteran",
+    "active_role": "employer",
+    "roles": [
+      "veteran",
+      "employer"
+    ],
+    "roles_meta": {
+      "veteran": {
+        "verified": true,
+        "verified_at": "2026-09-21T22:55:14.069082+00:00",
+        "method": "initial_registration"
+      },
+      "employer": {
+        "verified": true,
+        "added_at": "2026-09-21T22:55:14.080485+00:00",
+        "verification_doc": "self_declared_diiakep",
+        "status": "active"
+      }
+    },
+    "profiles_by_role": {
+      "veteran": {
+        "status_type": "ubd",
+        "military_unit": "72 ОМБр",
+        "needs": [
+          "rehab",
+          "legal"
+        ],
+        "callsign": "Сармат",
+        "phone": "+380679998877",
+        "community": "Черкаська ТГ",
+        "preferred_channel": "telegram",
+        "updated_at": "2026-09-21T22:55:14.069082+00:00"
+      },
+      "employer": {
+        "company_name": "ФОП Сармат Агро",
+        "edrpou": "3019283746",
+        "industry": "agro_tech",
+        "phone": "+380679998877",
+        "community": "Черкаська ТГ",
+        "activated_at": "2026-09-21T22:55:14.080485+00:00"
+      }
+    },
+    "created_at": "2026-09-21T22:55:14.069082+00:00",
+    "phone": "+380679998877",
+    "community": "Черкаська ТГ",
+    "callsign": "Сармат",
+    "preferred_channel": "telegram",
+    "updated_at": "2026-09-21T22:55:14.090609+00:00"
+  },
+  "phone_380679998877": {
+    "user_id": "phone_380679998877",
+    "primary_role": "veteran",
+    "active_role": "veteran",
+    "roles": [
+      "ROLE_VETERAN"
+    ],
+    "name": "Михайло Волонтер",
+    "callsign": "Михайло Волонтер",
+    "phone": "+380679998877",
+    "community": "Черкаська ТГ",
+    "created_at": "2026-09-21T23:41:58.438436+00:00",
+    "offline_registered": true
+  },
+  "phone_380671112233": {
+    "user_id": "phone_380671112233",
+    "primary_role": "veteran",
+    "active_role": "veteran",
+    "roles": [
+      "ROLE_VETERAN"
+    ],
+    "name": "Тарас Бойко",
+    "callsign": "Тарас Бойко",
+    "phone": "+380671112233",
+    "community": "Черкаська ТГ",
+    "created_at": "2026-09-21T23:43:45.852149+00:00",
+    "offline_registered": true
+  },
+  "usr_multi_audit_01": {
+    "user_id": "usr_multi_audit_01",
+    "primary_role": "veteran",
+    "active_role": "veteran",
+    "roles": [
+      "veteran",
+      "employer"
+    ],
+    "roles_meta": {
+      "veteran": {
+        "verified": true,
+        "verified_at": "2026-09-21T23:47:05.979737+00:00",
+        "method": "initial_registration"
+      },
+      "employer": {
+        "verified": true,
+        "added_at": "2026-09-21T23:47:40.713931+00:00",
+        "verification_doc": "self_declared_diiakep",
+        "status": "active"
+      }
+    },
+    "profiles_by_role": {
+      "veteran": {
+        "callsign": "Друг Орел",
+        "phone": "+380675554433",
+        "community": "Канівська ТГ",
+        "preferred_channel": "telegram",
+        "updated_at": "2026-09-21T23:47:40.701676+00:00"
+      },
+      "employer": {
+        "company_name": "ТОВ Ветеран-Агро",
+        "phone": "+380675554433",
+        "community": "Канівська ТГ",
+        "activated_at": "2026-09-21T23:47:40.713931+00:00"
+      }
+    },
+    "created_at": "2026-09-21T23:47:05.979737+00:00",
+    "phone": "+380675554433",
+    "community": "Канівська ТГ",
+    "callsign": "Друг Орел",
+    "preferred_channel": "telegram",
+    "updated_at": "2026-09-21T23:47:40.713931+00:00"
+  },
+  "phone_380674443322": {
+    "user_id": "phone_380674443322",
+    "primary_role": "veteran",
+    "active_role": "veteran",
+    "roles": [
+      "ROLE_VETERAN"
+    ],
+    "name": "Олександр Захисник",
+    "callsign": "Олександр Захисник",
+    "phone": "+380674443322",
+    "community": "Черкаська ТГ",
+    "created_at": "2026-09-21T23:47:31.436961+00:00",
+    "offline_registered": true
+  }
+}

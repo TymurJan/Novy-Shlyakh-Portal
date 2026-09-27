@@ -1,0 +1,14 @@
+{
+  "org_talan_01": [
+    {
+      "id": "mem_4712dc",
+      "name": "Олена Мельник (Юрист)",
+      "email": "olena.melnyk@talan-ua.org",
+      "phone": "+380501112233",
+      "role_title": "Адвокат / Юрисконсульт (ВЛК)",
+      "status": "active",
+      "joined_at": "2026-09-09T22:43:38.771407+00:00",
+      "invited_by": "org_talan_01"
+    }
+  ]
+}

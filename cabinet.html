@@ -45,6 +45,14 @@
                     </div>
                 </div>
 
+                <!-- Селектор активного режиму / ролі (Role Switcher) -->
+                <div class="cab-role-switcher-container" style="display: flex; align-items: center; gap: 6px; background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255,255,255,0.12); padding: 4px 10px; border-radius: 10px;">
+                    <span style="font-size: 0.8rem; color: #94A3B8;">Режим:</span>
+                    <select id="cabActiveRoleSelect" style="background: transparent; border: none; color: #38BDF8; font-weight: 700; font-size: 0.85rem; cursor: pointer; outline: none;">
+                        <option value="veteran">🎖️ Ветеран</option>
+                    </select>
+                </div>
+
                 <a href="index.html" class="cab-btn-home" title="На головну сторінку порталу">
                     <span>Повернутися на портал</span> ➔
                 </a>
@@ -75,12 +83,21 @@
                     <span class="cab-nav-icon">🔒</span>
                     <span>Сейф документів</span>
                 </button>
+                <button class="cab-nav-item" data-tab="tab-ai-assistant">
+                    <span class="cab-nav-icon">🤖</span>
+                    <span>ШІ-Консультант</span>
+                </button>
 
                 <!-- Розділ для партнерів / фахівців (динамічний) -->
                 <div class="cab-nav-divider" id="partnerNavDivider" style="display: none;"></div>
+                <button class="cab-nav-item cab-nav-partner" data-tab="tab-org-team" id="btnNavOrgTeam" style="display: none;">
+                    <span class="cab-nav-icon">👥</span>
+                    <span>Моя команда</span>
+                    <span class="cab-badge-counter partner" id="cabTeamCount">0</span>
+                </button>
                 <button class="cab-nav-item cab-nav-partner" data-tab="tab-dispatcher" id="btnNavDispatcher" style="display: none;">
                     <span class="cab-nav-icon">🏛️</span>
-                    <span>Диспетчер ЦНАП</span>
+                    <span>Оператор / Диспетчер</span>
                     <span class="cab-badge-counter partner" id="cabDispatcherCasesCount">0</span>
                 </button>
                 <button class="cab-nav-item cab-nav-partner" data-tab="tab-partner-inbox" id="btnNavPartnerInbox" style="display: none;">
@@ -88,9 +105,34 @@
                     <span>Вхідні звернення</span>
                     <span class="cab-badge-counter partner" id="cabPartnerInboxCount">0</span>
                 </button>
+                <button class="cab-nav-item cab-nav-partner" data-tab="tab-employer-jobs" id="btnNavEmployerJobs" style="display: none;">
+                    <span class="cab-nav-icon">💼</span>
+                    <span>Мої вакансії</span>
+                    <span class="cab-badge-counter partner" id="cabEmployerJobsCount">0</span>
+                </button>
+                <button class="cab-nav-item cab-nav-partner" data-tab="tab-provider-courses" id="btnNavProviderCourses" style="display: none;">
+                    <span class="cab-nav-icon">🎓</span>
+                    <span>Мої курси</span>
+                    <span class="cab-badge-counter partner" id="cabProviderCoursesCount">0</span>
+                </button>
                 <button class="cab-nav-item cab-nav-partner" data-tab="tab-partner-agreement" id="btnNavPartnerAgreement" style="display: none;">
                     <span class="cab-nav-icon">📝</span>
                     <span>Угода / КЕП</span>
+                </button>
+
+                <a href="superadmin.html" class="cab-nav-item cab-nav-partner" id="btnNavSuperadmin" style="text-decoration: none; display: none;" title="Стратегічна аналітика порталу & Телеметрія дефіциту">
+                    <span class="cab-nav-icon">📊</span>
+                    <span>Аналітика порталу</span>
+                </a>
+
+                <a href="/docs" target="_blank" class="cab-nav-item cab-nav-partner" id="btnNavFastApiDocs" style="text-decoration: none; display: none;" title="Інтерактивна технічна документація API (FastAPI Docs)">
+                    <span class="cab-nav-icon">🛠️</span>
+                    <span>FastAPI Docs</span>
+                </a>
+
+                <button class="cab-nav-item" data-tab="tab-upgrade-roles" id="btnNavUpgradeRoles">
+                    <span class="cab-nav-icon">🚀</span>
+                    <span>Розширити статус</span>
                 </button>
 
                 <div class="cab-nav-footer">
@@ -108,42 +150,169 @@
             <!-- Вкладка 1: Анкета та Статус -->
             <section class="cab-tab-content active" id="tab-profile">
                 <div class="cab-card">
-                    <div class="cab-card-header">
-                        <h2>👤 Моя анкетна картка</h2>
-                        <span class="cab-verified-badge" id="cabVerifiedBadge">🛡️ Перевірка пройдена</span>
+                    <div class="cab-card-header" style="flex-wrap: wrap; gap: 12px;">
+                        <div>
+                            <h2>👤 Моя анкетна картка</h2>
+                            <p class="cab-card-sub" id="profileRoleSubtitle">Контекстні дані відповідно до обраного режиму участі</p>
+                        </div>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <span class="cab-verified-badge" id="cabVerifiedBadge">🛡️ Перевірка пройдена</span>
+                            <span class="cab-status-pill" id="profileGenesisBadge" style="background: rgba(59, 130, 246, 0.15); color: #60A5FA; border: 1px solid rgba(59, 130, 246, 0.3); font-size: 0.75rem; padding: 4px 10px; border-radius: 20px;">Генезис: Ветеран</span>
+                        </div>
                     </div>
 
                     <form id="cabProfileForm" class="cab-form-grid">
-                        <div class="cab-form-group full-width">
-                            <label class="cab-label">Статус отримувача допомоги:</label>
-                            <div class="cab-status-switcher">
-                                <label class="cab-switch-option">
-                                    <input type="radio" name="veteranRole" value="veteran" checked id="radioIsVeteran">
-                                    <span class="cab-switch-box">
-                                        <b>🎖️ Я ветеран / ветеранка (УБД)</b>
-                                        <small>Пріоритет: ВЛК, МСЕК, виплати, адаптація</small>
-                                    </span>
-                                </label>
-                                <label class="cab-switch-option">
-                                    <input type="radio" name="veteranRole" value="family" id="radioIsFamily">
-                                    <span class="cab-switch-box">
-                                        <b>👨‍👩‍👧 Я член родини ветерана</b>
-                                        <small>Пріоритет: психологічна підтримка, довідки, супровід</small>
-                                    </span>
-                                </label>
+                        
+                        <!-- 1. КОНТЕКСТНА СЕКЦІЯ: ВЕТЕРАН (УБД) -->
+                        <div id="sectionFieldsVeteran" class="cab-role-context-section full-width">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                                <div class="cab-form-group">
+                                    <label class="cab-label" for="cabInputCallsign">Як до мене звертатися (Ім'я або позивний):</label>
+                                    <input type="text" id="cabInputCallsign" class="cab-input" placeholder="Наприклад: Друг Сивий або Тарас">
+                                </div>
+                                <div class="cab-form-group" id="groupMilitaryUnit">
+                                    <label class="cab-label" for="cabInputMilitaryUnit">Військова частина / Підрозділ (за бажанням):</label>
+                                    <input type="text" id="cabInputMilitaryUnit" class="cab-input" placeholder="Наприклад: 72 ОМБр / 118 ОБрТрО">
+                                </div>
                             </div>
                         </div>
 
-                        <div class="cab-form-group">
-                            <label class="cab-label" for="cabInputCallsign">Як до мене звертатися (Ім'я або позивний):</label>
-                            <input type="text" id="cabInputCallsign" class="cab-input" placeholder="Наприклад: Друг Сивий або Тарас">
+                        <!-- 1.1. КОНТЕКСТНА СЕКЦІЯ: ЧЛЕН РОДИНИ ВЕТЕРАНА -->
+                        <div id="sectionFieldsFamily" class="cab-role-context-section full-width" style="display: none;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                                <div class="cab-form-group">
+                                    <label class="cab-label" for="cabInputFamilyName">Ваше ПІБ або як до вас звертатися:</label>
+                                    <input type="text" id="cabInputFamilyName" class="cab-input" placeholder="Наприклад: Олена Коваленко">
+                                </div>
+                                <div class="cab-form-group" id="groupFamilyRelation">
+                                    <label class="cab-label" for="cabFamilyRelationSelect">Родинний зв'язок з ветераном:</label>
+                                    <select id="cabFamilyRelationSelect" class="cab-input">
+                                        <option value="spouse">Дружина / Чоловік</option>
+                                        <option value="parent">Мати / Батько</option>
+                                        <option value="child">Дитина</option>
+                                        <option value="other">Інший родич / опікун</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
 
+                        <!-- 2. КОНТЕКСТНА СЕКЦІЯ: РОБОТОДАВЕЦЬ -->
+                        <div id="sectionFieldsEmployer" class="cab-role-context-section full-width" style="display: none;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                                <div class="cab-form-group">
+                                    <label class="cab-label">Назва підприємства / ФОП:</label>
+                                    <input type="text" id="employerCompanyName" class="cab-input" placeholder="ТОВ Агро-Технолоджі">
+                                </div>
+                                <div class="cab-form-group">
+                                    <label class="cab-label">Код ЄДРПОУ або РНОКПП:</label>
+                                    <input type="text" id="employerEdrpou" class="cab-input" placeholder="12345678">
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px;">
+                                <div class="cab-form-group">
+                                    <label class="cab-label">Галузь діяльності:</label>
+                                    <select id="employerIndustry" class="cab-input">
+                                        <option value="it">💻 IT та цифрові технології</option>
+                                        <option value="agro_tech">🌾 Агросектор та БПЛА</option>
+                                        <option value="logistics">🚚 Логістика та транспорт</option>
+                                        <option value="production">🏭 Виробництво</option>
+                                        <option value="services">🛠️ Сфера послуг</option>
+                                    </select>
+                                </div>
+                                <div class="cab-form-group">
+                                    <label class="cab-label">Контактна особа HR:</label>
+                                    <input type="text" id="employerHrName" class="cab-input" placeholder="Ім'я рекрутера">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3. КОНТЕКСТНА СЕКЦІЯ: ФАХІВЕЦЬ PRO-BONO (АДВОКАТ / ПСИХОЛОГ) -->
+                        <div id="sectionFieldsSpecialist" class="cab-role-context-section full-width" style="display: none;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                                <div class="cab-form-group">
+                                    <label class="cab-label">Верифіковані напрямки експертизи:</label>
+                                    <div id="specialistVerifiedBadges" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px;">
+                                        <label style="display: inline-flex; align-items: center; gap: 6px; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.4); color: #34D399; padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 600;">
+                                            <input type="checkbox" id="chkSpecLawyer" checked disabled>
+                                            <span>⚖️ Адвокат (НААУ)</span>
+                                        </label>
+                                        <label style="display: inline-flex; align-items: center; gap: 6px; background: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.4); color: #60A5FA; padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 600;">
+                                            <input type="checkbox" id="chkSpecPsychologist">
+                                            <span>🧠 Кризовий психолог</span>
+                                        </label>
+                                        <label style="display: inline-flex; align-items: center; gap: 6px; background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.4); color: #FBBF24; padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 600;">
+                                            <input type="checkbox" id="chkSpecCaseManager">
+                                            <span>🤝 Кейс-менеджер</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="cab-form-group">
+                                    <label class="cab-label">Номер свідоцтва / диплома:</label>
+                                    <input type="text" id="specialistLicense" class="cab-input" placeholder="Свідоцтво НААУ №..." readonly style="opacity: 0.85;">
+                                </div>
+                            </div>
+                            <div class="cab-form-group" style="margin-top: 14px;">
+                                <label class="cab-label">Допустиме навантаження Pro-Bono справ на місяць:</label>
+                                <input type="number" id="specialistCapacity" class="cab-input" value="4" min="1" max="20">
+                            </div>
+                        </div>
+
+                        <!-- 4. КОНТЕКСТНА СЕКЦІЯ: ОСВІТНІЙ ЗАКЛАД -->
+                        <div id="sectionFieldsEducation" class="cab-role-context-section full-width" style="display: none;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                                <div class="cab-form-group">
+                                    <label class="cab-label">Назва навчального закладу / платформи:</label>
+                                    <input type="text" id="eduInstitutionName" class="cab-input" placeholder="ЧНУ / Автошкола / IT Академія">
+                                </div>
+                                <div class="cab-form-group">
+                                    <label class="cab-label">Ліцензія МОН / Акредитація:</label>
+                                    <input type="text" id="eduLicense" class="cab-input" placeholder="Серія та номер ліцензії">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 5. КОНТЕКСТНА СЕКЦІЯ: МЕНТОР «РІВНИЙ-РІВНОМУ» -->
+                        <div id="sectionFieldsMentor" class="cab-role-context-section full-width" style="display: none;">
+                            <div class="cab-form-group">
+                                <label class="cab-label">Сфери побратимської підтримки:</label>
+                                <input type="text" id="mentorTopics" class="cab-input" placeholder="Адаптація до цивільного життя, спорт, запуск ветеранського бізнесу">
+                            </div>
+                        </div>
+
+                        <!-- 7. КОНТЕКСТНА СЕКЦІЯ: ОПЕРАТОР ПРИЙОМУ / ФАХІВЕЦЬ СУПРОВОДУ -->
+                        <div id="sectionFieldsDispatcher" class="cab-role-context-section full-width" style="display: none;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                                <div class="cab-form-group">
+                                    <label class="cab-label">Назва установи / Ветеранського хабу:</label>
+                                    <input type="text" id="dispatcherOrgName" class="cab-input" placeholder="Ветеранський простір / Хаб громади">
+                                </div>
+                                <div class="cab-form-group">
+                                    <label class="cab-label">Посада оператора / Фахівця супроводу:</label>
+                                    <input type="text" id="dispatcherPosition" class="cab-input" placeholder="Головний спеціаліст / Диспетчер прийому">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 8. КОНТЕКСТНА СЕКЦІЯ: КЕРІВНИК ГО / ОРГАНІЗАЦІЇ -->
+                        <div id="sectionFieldsOrgLead" class="cab-role-context-section full-width" style="display: none;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                                <div class="cab-form-group">
+                                    <label class="cab-label">Повна назва Організації / ГО:</label>
+                                    <input type="text" id="orgLeadOrgName" class="cab-input" placeholder="ГО «Талан ЮА»">
+                                </div>
+                                <div class="cab-form-group">
+                                    <label class="cab-label">Код ЄДРПОУ організації:</label>
+                                    <input type="text" id="orgLeadEdrpou" class="cab-input" placeholder="45123456">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ЗАГАЛЬНІ КОНТАКТНІ ПОЛЯ -->
                         <div class="cab-form-group">
                             <label class="cab-label" for="cabInputPhone">Контактний номер телефону:</label>
                             <div style="display: flex; gap: 8px;">
                                 <input type="tel" id="cabInputPhone" class="cab-input" placeholder="+380 (__) ___-__-__">
-                                <button type="button" class="btn-secondary" id="btnCabSharePhone" style="white-space: nowrap; font-size: 12px; padding: 0 12px;">
+                                <button type="button" class="btn-secondary" id="btnCabSharePhone" style="white-space: nowrap; font-size: 13px; font-weight: 700; padding: 0 14px; background: #0F172A; color: #38BDF8; border: 1.5px solid #38BDF8; border-radius: 8px; cursor: pointer;">
                                     📱 Автозаповнення
                                 </button>
                             </div>
@@ -155,7 +324,7 @@
                             <div id="cabGeoAutocomplete" class="cab-autocomplete-dropdown"></div>
                         </div>
 
-                        <div class="cab-form-group">
+                        <div class="cab-form-group full-width">
                             <label class="cab-label" for="cabPreferredChannel">Бажаний спосіб сповіщень:</label>
                             <select id="cabPreferredChannel" class="cab-input">
                                 <option value="telegram">✈️ Telegram (Бот «Новий Шлях»)</option>
@@ -172,6 +341,82 @@
                             <span id="cabSaveProfileSuccess" class="cab-save-msg" style="display: none;">✅ Збережено успішно!</span>
                         </div>
                     </form>
+                </div>
+            </section>
+
+            <!-- Вкладка: Розширити статус в екосистемі (Self-Upgrade) -->
+            <section class="cab-tab-content" id="tab-upgrade-roles">
+                <div class="cab-card">
+                    <div class="cab-card-header">
+                        <div>
+                            <h2>🚀 Розширити статус в екосистемі</h2>
+                            <p class="cab-card-sub">Підключайте додаткові ролі під єдиним акаунтом без створення нових профілів</p>
+                        </div>
+                    </div>
+
+                    <div class="cab-roles-upgrade-grid" id="cabRolesUpgradeGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-top: 14px;">
+                        
+                        <!-- Картка: Роботодавець -->
+                        <div class="cab-upgrade-role-card" data-role="employer" style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <div style="font-size: 1.8rem; margin-bottom: 8px;">💼</div>
+                                <h4 style="color: #F8FAFC; margin-bottom: 4px;">Хочу наймати ветеранів</h4>
+                                <p style="color: #94A3B8; font-size: 0.85rem;">Публікація безбар'єрних вакансій, доступ до резюме, верифікація БФ «Веста».</p>
+                            </div>
+                            <button class="btn-action-upgrade-role" data-role="employer" style="width: 100%; margin-top: 14px; font-weight: 700; font-size: 0.9rem; padding: 10px 14px; background: #10B981; color: #0F172A; border: none; border-radius: 8px; cursor: pointer;">
+                                ➕ Активувати статус
+                            </button>
+                        </div>
+
+                        <!-- Картка: Освітній заклад -->
+                        <div class="cab-upgrade-role-card" data-role="education" style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <div style="font-size: 1.8rem; margin-bottom: 8px;">🎓</div>
+                                <h4 style="color: #F8FAFC; margin-bottom: 4px;">Освітній партнер</h4>
+                                <p style="color: #94A3B8; font-size: 0.85rem;">Розміщення курсів перекваліфікації та робота з ваучерами ДСЗ (до 30 280 грн).</p>
+                            </div>
+                            <button class="btn-action-upgrade-role" data-role="education" style="width: 100%; margin-top: 14px; font-weight: 700; font-size: 0.9rem; padding: 10px 14px; background: #10B981; color: #0F172A; border: none; border-radius: 8px; cursor: pointer;">
+                                ➕ Активувати статус
+                            </button>
+                        </div>
+
+                        <!-- Картка: Фахівець Pro-Bono -->
+                        <div class="cab-upgrade-role-card" data-role="specialist" style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <div style="font-size: 1.8rem; margin-bottom: 8px;">⚖️</div>
+                                <h4 style="color: #F8FAFC; margin-bottom: 4px;">Фахівець супроводу</h4>
+                                <p style="color: #94A3B8; font-size: 0.85rem;">Юридичні та психологічні консультації ветеранів за моделлю Offer/Accept.</p>
+                            </div>
+                            <button class="btn-action-upgrade-role" data-role="specialist" style="width: 100%; margin-top: 14px; font-weight: 700; font-size: 0.9rem; padding: 10px 14px; background: #10B981; color: #0F172A; border: none; border-radius: 8px; cursor: pointer;">
+                                ➕ Активувати статус
+                            </button>
+                        </div>
+
+                        <!-- Картка: Ментор -->
+                        <div class="cab-upgrade-role-card" data-role="mentor" style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <div style="font-size: 1.8rem; margin-bottom: 8px;">🤝</div>
+                                <h4 style="color: #F8FAFC; margin-bottom: 4px;">Ментор «Рівний-Рівному»</h4>
+                                <p style="color: #94A3B8; font-size: 0.85rem;">Підтримка побратимів та посестер при поверненні до цивільного життя.</p>
+                            </div>
+                            <button class="btn-action-upgrade-role" data-role="mentor" style="width: 100%; margin-top: 14px; font-weight: 700; font-size: 0.9rem; padding: 10px 14px; background: #10B981; color: #0F172A; border: none; border-radius: 8px; cursor: pointer;">
+                                ➕ Активувати статус
+                            </button>
+                        </div>
+
+                        <!-- Картка: Благодійник -->
+                        <div class="cab-upgrade-role-card" data-role="donor" style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <div style="font-size: 1.8rem; margin-bottom: 8px;">❤️</div>
+                                <h4 style="color: #F8FAFC; margin-bottom: 4px;">Благодійник / Меценат</h4>
+                                <p style="color: #94A3B8; font-size: 0.85rem;">Підтримка реабілітації ветеранів та прозорий моніторинг внесків.</p>
+                            </div>
+                            <button class="btn-action-upgrade-role" data-role="donor" style="width: 100%; margin-top: 14px; font-weight: 700; font-size: 0.9rem; padding: 10px 14px; background: #10B981; color: #0F172A; border: none; border-radius: 8px; cursor: pointer;">
+                                ➕ Активувати статус
+                            </button>
+                        </div>
+
+                    </div>
                 </div>
             </section>
 
@@ -220,9 +465,19 @@
                         </div>
                     </div>
 
+                    <!-- Фільтри освітніх програм -->
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;" id="cabEduFilters">
+                        <button class="btn-filter-edu active" data-filter="all" style="padding: 7px 14px; border-radius: 20px; font-size: 0.85rem; border: 1px solid rgba(255,255,255,0.15); background: rgba(59, 130, 246, 0.2); color: #93C5FD; cursor: pointer; font-weight: 600;">✨ Всі програми</button>
+                        <button class="btn-filter-edu" data-filter="it" style="padding: 7px 14px; border-radius: 20px; font-size: 0.85rem; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03); color: #CBD5E1; cursor: pointer;">💻 IT</button>
+                        <button class="btn-filter-edu" data-filter="uav" style="padding: 7px 14px; border-radius: 20px; font-size: 0.85rem; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03); color: #CBD5E1; cursor: pointer;">🌾 Агродрони / БПЛА</button>
+                        <button class="btn-filter-edu" data-filter="auto" style="padding: 7px 14px; border-radius: 20px; font-size: 0.85rem; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03); color: #CBD5E1; cursor: pointer;">🚗 Автосправа</button>
+                        <button class="btn-filter-edu" data-filter="management" style="padding: 7px 14px; border-radius: 20px; font-size: 0.85rem; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03); color: #CBD5E1; cursor: pointer;">📈 Менеджмент</button>
+                        <button class="btn-filter-edu" data-filter="psychology" style="padding: 7px 14px; border-radius: 20px; font-size: 0.85rem; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03); color: #CBD5E1; cursor: pointer;">🧠 Менторство / Психологія</button>
+                    </div>
+
                     <!-- Каталог доступних освітніх програм -->
                     <div class="cab-education-grid" id="cabEducationGrid">
-                        <!-- Заповнюється з education.json -->
+                        <!-- Заповнюється динамічно через API /api/v1/education/courses -->
                     </div>
                 </div>
             </section>
@@ -264,12 +519,55 @@
                 </div>
             </section>
 
-            <!-- Вкладка 5 (Диспетчер ЦНАП): Офлайн-прийом -->
+            <!-- Вкладка 4.5: ШІ-Штурман та персональний помічник -->
+            <section class="cab-tab-content" id="tab-ai-assistant" style="display: none;">
+                <div class="cab-card">
+                    <div class="cab-card-header">
+                        <div>
+                            <h2>🤖 Персональний ШІ-Штурман ветерана</h2>
+                            <p class="cab-card-sub">Захищений асистент вашого кабінету: статус справ у CRM, документи Сейфу та нормативна база громад</p>
+                        </div>
+                    </div>
+
+                    <!-- Prompt Chips -->
+                    <div style="margin: 16px 0 20px 0;">
+                        <div style="font-size: 0.85rem; color: #94A3B8; margin-bottom: 8px; font-weight: 600;">⚡ Швидкі підказки:</div>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;" id="cabAiPromptChips">
+                            <button type="button" class="btn-secondary cab-ai-chip" onclick="applyCabinetAiPrompt('Який статус моїх справ у CRM та хто мій фахівець?')" style="padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; background: rgba(59, 130, 246, 0.15); border-color: rgba(59, 130, 246, 0.4); color: #93C5FD; cursor: pointer;">📂 Що з моїми справами?</button>
+                            <button type="button" class="btn-secondary cab-ai-chip" onclick="applyCabinetAiPrompt('Які документи збережені в моєму захищеному Сейфі?')" style="padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.4); color: #6EE7B7; cursor: pointer;">🔒 Мої документи в Сейфі</button>
+                            <button type="button" class="btn-secondary cab-ai-chip" onclick="applyCabinetAiPrompt('Як отримати державний ваучер на навчання до 30 280 грн?')" style="padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; background: rgba(245, 158, 11, 0.15); border-color: rgba(245, 158, 11, 0.4); color: #FCD34D; cursor: pointer;">🎓 Ваучер на навчання</button>
+                            <button type="button" class="btn-secondary cab-ai-chip" onclick="applyCabinetAiPrompt('Які муніципальні пільги діють у моїй громаді?')" style="padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; background: rgba(168, 85, 247, 0.15); border-color: rgba(168, 85, 247, 0.4); color: #D8B4FE; cursor: pointer;">🏛️ Пільги моєї громади</button>
+                            <button type="button" class="btn-secondary cab-ai-chip" onclick="applyCabinetAiPrompt('Грант для ветеранів та другого з подружжя єРобота до 1 000 000 грн')" style="padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.4); color: #FCA5A5; cursor: pointer;">💼 Грант єРобота</button>
+                            <button type="button" class="btn-secondary cab-ai-chip" onclick="applyCabinetAiPrompt('Порядок проходження ВЛК та оскарження постанови')" style="padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; background: rgba(14, 165, 233, 0.15); border-color: rgba(14, 165, 233, 0.4); color: #7DD3FC; cursor: pointer;">⚖️ ВЛК / МСЕК</button>
+                        </div>
+                    </div>
+
+                    <!-- Вікно діалогу ШІ -->
+                    <div id="cabAiChatBox" style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 18px; min-height: 260px; max-height: 420px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px;">
+                        <div style="background: rgba(30, 41, 59, 0.8); border-left: 3px solid #38BDF8; padding: 12px 16px; border-radius: 8px; font-size: 0.95rem; line-height: 1.6; color: #E2E8F0;">
+                            👋 Вітаю! Я — ваш персональний ШІ-штурман у кабінеті «Новий Шлях». Я маю захищений доступ до ваших справ у CRM, документів Сейфу та всеукраїнського довідника муніципальних програм. Оберіть швидку підказку вгорі або напишіть запитання нижче.
+                        </div>
+                    </div>
+                    <div id="cabAiTyping" style="display: none; color: #38BDF8; font-size: 0.85rem; margin-top: 8px; font-style: italic;">
+                        🤖 ШІ-Штурман аналізує захищений контекст...
+                    </div>
+
+                    <!-- Поле вводу -->
+                    <div style="display: flex; gap: 10px; margin-top: 14px;">
+                        <input type="text" id="inputCabAiMessage" class="cab-input" placeholder="Введіть запитання щодо ваших справ, документів чи пільг..." style="margin-bottom: 0; flex: 1;" onkeydown="if(event.key==='Enter'){sendCabinetAiMessage();}">
+                        <button type="button" class="btn-primary" id="btnSendCabAi" onclick="sendCabinetAiMessage()" style="padding: 0 24px; font-weight: 700;">
+                            Надіслати ➤
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Вкладка 5 (Оператор / Фахівець супроводу): Офлайн-прийом -->
             <section class="cab-tab-content" id="tab-dispatcher" style="display: none;">
                 <div class="cab-card">
                     <div class="cab-card-header" style="flex-wrap: wrap; gap: 12px;">
                         <div>
-                            <h2>🏛️ Робоче місце Диспетчера ЦНАП / Хабу</h2>
+                            <h2>🏛️ Робоче місце Оператора / Фахівця супроводу</h2>
                             <p class="cab-card-sub">Особистий прийом ветеранів без смартфонів, фіксація звернень та видача дорожніх карт А4</p>
                         </div>
                         <button class="btn-primary" id="btnOpenDispatcherIntake" style="background: #10B981; border-color: #10B981; font-weight: 700;">
@@ -289,6 +587,47 @@
                 </div>
             </section>
 
+            <!-- Вкладка 5 (Організація / БФ): Управління штатом та Capacity Control -->
+            <section class="cab-tab-content" id="tab-org-team" style="display: none;">
+                <div class="cab-card">
+                    <div class="cab-card-header" style="flex-wrap: wrap; gap: 12px;">
+                        <div>
+                            <h2>👥 Мій штат та Capacity Control (Суб-акаунти)</h2>
+                            <p class="cab-card-sub">AI-контроль навантаження фахівців, додавання колег та екстрене перепризначення справ у 1 клік</p>
+                        </div>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <button class="btn-primary" id="btnOpenAddTeamMember" style="background: #10B981; border-color: #10B981; font-weight: 600;">
+                                ➕ Додати фахівця
+                            </button>
+                            <button class="btn-secondary" id="btnOpenReassignAll" style="border-color: #F59E0B; color: #F59E0B; font-weight: 600;">
+                                ⚡ Екстрене делегування справ
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Панель статусу навантаження (Capacity Legend) -->
+                    <div class="cab-capacity-legend">
+                        <div class="legend-item">
+                            <span class="capacity-dot green"></span>
+                            <span><b>0–1 справа:</b> 🟢 Вільний (Готовий до нових справ)</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="capacity-dot yellow"></span>
+                            <span><b>2–4 справи:</b> 🟡 Оптимальне навантаження</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="capacity-dot red"></span>
+                            <span><b>5+ справ:</b> 🔴 Перевантажено (Авто-призначення призупинено)</span>
+                        </div>
+                    </div>
+
+                    <!-- Список співробітників організації -->
+                    <div class="cab-team-grid" id="orgTeamList">
+                        <!-- Динамічні картки членів команди -->
+                    </div>
+                </div>
+            </section>
+
             <!-- Вкладка 6 (Партнер): Вхідні пропозиції -->
             <section class="cab-tab-content" id="tab-partner-inbox" style="display: none;">
                 <div class="cab-card">
@@ -304,22 +643,163 @@
                 </div>
             </section>
 
-            <!-- Вкладка 6 (Партнер): Угода КЕП -->
+            <!-- Вкладка 6.5 (Партнер-Роботодавець): Керування безбар'єрними вакансіями -->
+            <section class="cab-tab-content" id="tab-employer-jobs" style="display: none;">
+                <div class="cab-card">
+                    <div class="cab-card-header" style="flex-wrap: wrap; gap: 12px;">
+                        <div>
+                            <h2>💼 Конструктор ветеран-френдлі вакансій</h2>
+                            <p class="cab-card-sub">Публікація безбар'єрних робочих місць, верифікація БФ «Веста» та перегляд відгуків ветеранів</p>
+                        </div>
+                        <button class="btn-primary" id="btnOpenCreateVacancy" style="font-weight: 700; padding: 10px 18px;">
+                            ➕ Опублікувати вакансію
+                        </button>
+                    </div>
+
+                    <!-- Контейнер списку вакансій роботодавця -->
+                    <div id="cabEmployerVacanciesContainer" style="margin-top: 20px;">
+                        <!-- Сюди динамічно рендеряться вакансії або захисний екран NDA -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Вкладка 6.6 (Партнер-Освітній провайдер): Керування курсами та ваучерами -->
+            <section class="cab-tab-content" id="tab-provider-courses" style="display: none;">
+                <div class="cab-card">
+                    <div class="cab-card-header" style="flex-wrap: wrap; gap: 12px;">
+                        <div>
+                            <h2>🎓 Кабінет освітнього закладу та ваучерних програм</h2>
+                            <p class="cab-card-sub">Керування навчальними курсами, квотами місць за ваучерами ДСЗ (до 30 280 грн) та ветеранами, що записалися</p>
+                        </div>
+                        <button class="btn-primary" id="btnOpenCreateCourse" style="font-weight: 700; padding: 10px 18px;">
+                            ➕ Додати освітній курс
+                        </button>
+                    </div>
+
+                    <!-- Контейнер списку курсів освітнього закладу -->
+                    <div id="cabProviderCoursesContainer" style="margin-top: 20px;">
+                        <!-- Сюди динамічно рендеряться курси або захисний екран NDA -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Вкладка 7 (Партнер): Угода КЕП та Селектор ролей -->
             <section class="cab-tab-content" id="tab-partner-agreement" style="display: none;">
                 <div class="cab-card">
-                    <div class="cab-card-header">
+                    <div class="cab-card-header" style="flex-wrap: wrap; gap: 12px;">
                         <div>
-                            <h2>📝 Меморандум про партнерство та КЕП</h2>
-                            <p class="cab-card-sub">Офіційне підтвердження співпраці з ГО «Талан ЮА» та МФВ «Відродження»</p>
+                            <h2>📝 Юридична співпраця з ГО «Талан ЮА» та КЕП</h2>
+                            <p class="cab-card-sub">Оберіть напрямки участі вашої організації/ФОП для автоматичного формування пакета документів</p>
+                        </div>
+                        <span class="cab-verified-badge" id="partnerLegalOverallStatus">⏳ Очікує верифікації</span>
+                    </div>
+
+                    <!-- 1. Інтерактивний селектор напрямків діяльності партнера -->
+                    <div class="cab-partner-roles-section">
+                        <label class="cab-label" style="margin-bottom: 12px; display: block; font-size: 14px;">
+                            📌 Оберіть ролі, які виконує ваша організація / ФОП на платформі:
+                        </label>
+                        <div class="cab-partner-roles-grid">
+                            <!-- Роль 1: Інфо-партнер / Донатор -->
+                            <label class="cab-role-card" id="cardRoleInfo">
+                                <input type="checkbox" id="chkPartnerRoleInfo" class="cab-role-checkbox" checked>
+                                <div class="cab-role-icon">📢</div>
+                                <div class="cab-role-info">
+                                    <h4>Інформаційне партнерство та Благодійність</h4>
+                                    <p>Поширення матеріалів платформи, розміщення наліпок/QR-кодів у просторах, партнерські посилання, благодійні внески.</p>
+                                    <span class="cab-role-tag">Потрібен: Меморандум</span>
+                                </div>
+                            </label>
+
+                            <!-- Роль 2: Надання послуг ветеранам (Pro-Bono) -->
+                            <label class="cab-role-card" id="cardRoleServices">
+                                <input type="checkbox" id="chkPartnerRoleServices" class="cab-role-checkbox" checked>
+                                <div class="cab-role-icon">🩺</div>
+                                <div class="cab-role-info">
+                                    <h4>Надавач послуг ветеранам (Pro-Bono)</h4>
+                                    <p>Отримання звернень ветеранів (психологія, право, реабілітація, супровід ВЛК), ведення кейсів та керування штатом фахівців.</p>
+                                    <span class="cab-role-tag req-contract">Потрібен: Договір / NDA</span>
+                                </div>
+                            </label>
+
+                            <!-- Роль 3: Роботодавець -->
+                            <label class="cab-role-card" id="cardRoleEmployer">
+                                <input type="checkbox" id="chkPartnerRoleEmployer" class="cab-role-checkbox">
+                                <div class="cab-role-icon">💼</div>
+                                <div class="cab-role-info">
+                                    <h4>Роботодавець (Ветеран-френдлі бізнес)</h4>
+                                    <p>Публікація безбар'єрних вакансій, готовність адаптувати робочі місця для ветеранів з інвалідністю, верифікація БФ «Веста».</p>
+                                    <span class="cab-role-tag req-contract">Потрібен: Договір / NDA</span>
+                                </div>
+                            </label>
+
+                            <!-- Роль 4: Освітній провайдер -->
+                            <label class="cab-role-card" id="cardRoleEducation">
+                                <input type="checkbox" id="chkPartnerRoleEducation" class="cab-role-checkbox">
+                                <div class="cab-role-icon">🎓</div>
+                                <div class="cab-role-info">
+                                    <h4>Освітній центр / Перекваліфікація</h4>
+                                    <p>Публікація навчальних курсів, грантових програм перекваліфікації та робота з ваучерами Держслужби зайнятості.</p>
+                                    <span class="cab-role-tag req-contract">Потрібен: Договір / NDA</span>
+                                </div>
+                            </label>
                         </div>
                     </div>
-                    <div class="cab-agreement-box">
-                        <p>Для надання консультацій та публікації вакансій партнер підписує типову угоду через Дія.Підпис або КЕП.</p>
-                        <div style="display: flex; gap: 12px; margin-top: 15px;">
-                            <button class="btn-primary" id="btnPartnerSignDiia">Підписати через Дія.Підпис</button>
-                            <button class="btn-secondary" id="btnPartnerSignKep">Завантажити підписаний КЕП</button>
+
+                    <!-- 2. Динамічно розрахований пакет документів для підписання -->
+                    <div class="cab-doc-package-box">
+                        <div class="cab-doc-package-header">
+                            <div>
+                                <h3>📑 Розрахований пакет документів для вашої конфігурації</h3>
+                                <p style="font-size: 13px; color: #94A3B8; margin-top: 4px;">Згідно з регламентом безпеки ГО «Талан ЮА», кожен тип доступу має відповідний рівень юридичного захисту</p>
+                            </div>
                         </div>
-                        <div id="partnerSignStatus" style="margin-top: 12px; color: #10B981; display: none;">✅ Угоду підписано та верифіковано</div>
+
+                        <div class="cab-docs-list">
+                            <!-- Документ 1: Меморандум -->
+                            <div class="cab-doc-item" id="docItemMemorandum">
+                                <div class="cab-doc-icon">📜</div>
+                                <div class="cab-doc-details">
+                                    <div class="cab-doc-title-row">
+                                        <h4>Меморандум про взаєморозуміння та співпрацю з ГО «Талан ЮА»</h4>
+                                        <span class="cab-doc-badge pending" id="badgeMemorandumStatus">⏳ Очікує підпису КЕП</span>
+                                    </div>
+                                    <p class="cab-doc-desc">Декларує партнерство, взаємну інформаційну підтримку та дотримання етичних принципів взаємодії з ветеранами.</p>
+                                    <div class="cab-doc-actions">
+                                        <button class="btn-outline btn-sm" id="btnPartnerPreviewMemo">👁️ Текст Меморандуму</button>
+                                        <button class="btn-primary btn-sm" id="btnPartnerSignDiiaMemo">Підписати Дія.Підпис</button>
+                                        <button class="btn-primary btn-sm btn-bankid" id="btnPartnerSignBankIdMemo" style="background: linear-gradient(135deg, #059669, #10B981); border-color: #10B981;">🏦 BankID SmartID</button>
+                                        <button class="btn-secondary btn-sm" id="btnPartnerSignKepMemo">Файл КЕП (.p12/.pfx)</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Документ 2: Договір / NDA -->
+                            <div class="cab-doc-item" id="docItemContract">
+                                <div class="cab-doc-icon">🔒</div>
+                                <div class="cab-doc-details">
+                                    <div class="cab-doc-title-row">
+                                        <h4>Партнерський Договір про захист персональних даних (NDA) та Pro-Bono умови</h4>
+                                        <span class="cab-doc-badge pending" id="badgeContractStatus">⏳ Очікує підпису КЕП</span>
+                                    </div>
+                                    <p class="cab-doc-desc">Обов'язковий юридичний документ для отримання доступу до звернень ветеранів, документів сейфа та публікації вакансій. Гарантує нерозголошення військової таємниці та особистих даних захисників.</p>
+                                    <div class="cab-doc-actions">
+                                        <button class="btn-outline btn-sm" id="btnPartnerPreviewContract">👁️ Текст Договору</button>
+                                        <button class="btn-primary btn-sm" id="btnPartnerSignDiiaContract">Підписати Дія.Підпис</button>
+                                        <button class="btn-primary btn-sm btn-bankid" id="btnPartnerSignBankIdContract" style="background: linear-gradient(135deg, #059669, #10B981); border-color: #10B981;">🏦 BankID SmartID</button>
+                                        <button class="btn-secondary btn-sm" id="btnPartnerSignKepContract">Файл КЕП (.p12/.pfx)</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Попередження щодо блокування доступу без договору -->
+                        <div class="cab-doc-lock-notice" id="docLockNotice">
+                            <span style="font-size: 20px;">🛡️</span>
+                            <div>
+                                <b>Захисне правило платформи:</b> Без підписання Партнерського Договору доступ до бази звернень ветеранів (Offer/Accept інбокс) та публікації вакансій залишатиметься заблокованим. Партнер відображатиметься на сайті суто в інформаційному режимі.
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -461,7 +941,7 @@
             <button class="cab-modal-close" id="btnCloseDispatcherIntake">✕</button>
             <div class="cab-modal-header">
                 <h3>🏛️ Реєстрація офлайн-звернення ветерана</h3>
-                <p>Заповнюється оператором ЦНАП / Хабу зі слів людини. Після збереження буде сформовано дорожню карту для друку.</p>
+                <p>Заповнюється оператором Ветеранського простору / Хабу зі слів людини. Після збереження буде сформовано дорожню карту для друку.</p>
             </div>
             <form id="formDispatcherIntake" class="cab-modal-form">
                 <div class="cab-form-group">
@@ -561,13 +1041,576 @@
             <ol style="font-size: 12px; line-height: 1.5; margin: 0; padding-left: 18px;">
                 <li>Очікуйте вхідного телефонного дзвінка від призначеного спеціаліста протягом 24–48 годин.</li>
                 <li>Усі юридичні, психологічні консультації та супровід надаються повністю <b>БЕЗКОШТОВНО</b>.</li>
-                <li>При повторному зверненні до ЦНАПу просто назвіть номер цієї справи.</li>
+                <li>При повторному зверненні до Ветеранського хабу просто назвіть номер цієї справи.</li>
             </ol>
         </div>
 
         <div style="border-top: 1px dashed #666; padding-top: 10px; font-size: 11px; color: #444; display: flex; justify-content: space-between;">
-            <div>Звернення прийняв оператор ЦНАП: <b id="printDispatcherName">Координатор ЦНАП</b></div>
+            <div>Звернення прийняв оператор супроводу: <b id="printDispatcherName">Фахівець супроводу</b></div>
             <div>Гаряча лінія порталу: <b>0 800 300 123</b></div>
+        </div>
+    </div>
+
+    <!-- Модальне вікно: Додавання спеціаліста до штату -->
+    <div class="cab-modal-overlay" id="addTeamMemberModal" style="display: none;">
+        <div class="cab-modal-box" style="max-width: 520px;">
+            <button class="cab-modal-close" id="btnCloseAddTeamMember">✕</button>
+            <div class="cab-modal-header">
+                <h3>👥 Додати спеціаліста до штату</h3>
+                <p>Створення робочого суб-акаунту фахівця вашої організації або БФ.</p>
+            </div>
+            <form id="formAddTeamMember" class="cab-modal-form">
+                <div class="cab-form-group">
+                    <label class="cab-label">ПІБ спеціаліста:</label>
+                    <input type="text" id="memberInputName" class="cab-input" placeholder="Наприклад: Олена Мельник" required>
+                </div>
+                <div class="cab-form-group">
+                    <label class="cab-label">Робочий Email:</label>
+                    <input type="email" id="memberInputEmail" class="cab-input" placeholder="olena@charity.org" required>
+                </div>
+                <div class="cab-form-group">
+                    <label class="cab-label">Контактний телефон:</label>
+                    <input type="tel" id="memberInputPhone" class="cab-input" placeholder="+380 (__) ___-__-__">
+                </div>
+                <div class="cab-form-group">
+                    <label class="cab-label">Посада / Спеціалізація:</label>
+                    <select id="memberInputRole" class="cab-input" required>
+                        <option value="Адвокат / Юрисконсульт (ВЛК, МСЕК, виплати)">⚖️ Адвокат / Юрисконсульт (ВЛК, МСЕК, виплати)</option>
+                        <option value="Кризовий психолог (ПТСР, бойова травма)">🌿 Кризовий психолог (ПТСР, бойова травма)</option>
+                        <option value="Кейс-менеджер супроводу та реабілітації">🏥 Кейс-менеджер супроводу та реабілітації</option>
+                        <option value="Кар'єрний радник / Освіта">🎓 Кар'єрний радник / Освіта</option>
+                    </select>
+                </div>
+                <div class="cab-modal-actions" style="margin-top: 20px;">
+                    <button type="submit" class="btn-primary" style="width: 100%; background: #10B981; border-color: #10B981; font-weight: 700; padding: 13px;">
+                        ✅ Створити суб-акаунт спеціаліста
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Модальне вікно: Екстрене перепризначення всіх справ (1-клік Reassign) -->
+    <div class="cab-modal-overlay" id="reassignTeamCasesModal" style="display: none;">
+        <div class="cab-modal-box" style="max-width: 520px; border-color: #F59E0B;">
+            <button class="cab-modal-close" id="btnCloseReassignModal">✕</button>
+            <div class="cab-modal-header">
+                <div style="font-size: 32px; margin-bottom: 6px;">⚡</div>
+                <h3 style="color: #F59E0B;">Екстрене перепризначення справ</h3>
+                <p>Масове перенесення активних підопічних у разі хвороби, відпустки або форс-мажору колеги.</p>
+            </div>
+            <form id="formReassignTeamCases" class="cab-modal-form">
+                <div class="cab-form-group">
+                    <label class="cab-label">Від кого перенести справи (Хто тимчасово відсутній):</label>
+                    <select id="reassignFromMember" class="cab-input" required>
+                        <!-- Динамічно заповнюється -->
+                    </select>
+                </div>
+                <div class="cab-form-group">
+                    <label class="cab-label">Кому передати підопічних (Приймаючий колега):</label>
+                    <select id="reassignToMember" class="cab-input" required>
+                        <!-- Динамічно заповнюється -->
+                    </select>
+                </div>
+                <div class="cab-form-group">
+                    <label class="cab-label">Причина делегування:</label>
+                    <select id="reassignReason" class="cab-input">
+                        <option value="Хвороба / Тимчасова непрацездатність">🤒 Лікарняний / Хвороба</option>
+                        <option value="Планова відпустка">🏖️ Планова відпустка</option>
+                        <option value="Відрядження / Ротація">🚗 Робота в полі / Відрядження</option>
+                        <option value="Критичне перевантаження">🔴 Високе навантаження (Capacity Overflow)</option>
+                    </select>
+                </div>
+                <div class="cab-modal-actions" style="margin-top: 20px;">
+                    <button type="submit" class="btn-primary" style="width: 100%; background: #F59E0B; border-color: #F59E0B; font-weight: 700; padding: 13px; color: #111;">
+                        ⚡ Перенести всі справи в 1 клік
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Модальне вікно: Двосторонній захист спеціаліста (Скарга на токсичність) -->
+    <div class="cab-modal-overlay" id="reportConflictModal" style="display: none;">
+        <div class="cab-modal-box" style="max-width: 500px; border-color: #EF4444;">
+            <button class="cab-modal-close" id="btnCloseReportConflict">✕</button>
+            <div class="cab-modal-header">
+                <div style="font-size: 32px; margin-bottom: 6px;">🛡️</div>
+                <h3 style="color: #EF4444;">Захист фахівця (Фіксація інциденту)</h3>
+                <p>Платформа захищає як ветеранів, так і спеціалістів від агресії чи токсичної поведінки. Справу буде негайно передано координатору ГО «Талан ЮА».</p>
+            </div>
+            <form id="formReportConflict" class="cab-modal-form">
+                <input type="hidden" id="conflictTicketId">
+                <div class="cab-form-group">
+                    <label class="cab-label">Характер інциденту:</label>
+                    <select id="conflictReason" class="cab-input" required>
+                        <option value="Агресія / Нецензурна лайка / Погрози">❌ Агресія / Нецензурна лайка / Погрози</option>
+                        <option value="Неадекватний стан / Підозра на сп'яніння">⚠️ Неадекватний стан / Сп'яніння</option>
+                        <option value="Вимагання неправомірних дій / Фальсифікацій">🚫 Вимагання підробки документів</option>
+                        <option value="Інша конфліктна ситуація">Інша конфліктна ситуація</option>
+                    </select>
+                </div>
+                <div class="cab-form-group">
+                    <label class="cab-label">Деталі інциденту (для внутрішнього арбітражу):</label>
+                    <textarea id="conflictDetails" class="cab-input" rows="3" placeholder="Опишіть коротко що сталося..." required></textarea>
+                </div>
+                <div class="cab-modal-actions" style="margin-top: 20px;">
+                    <button type="submit" class="btn-danger" style="width: 100%; padding: 13px;">
+                        🛡️ Зупинити прямий контакт та передати координатору
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Модальне вікно: Перегляд тексту документа перед підписанням -->
+    <div class="cab-modal-overlay" id="modalPartnerDocPreview" style="display: none;">
+        <div class="cab-modal-box" style="max-width: 680px;">
+            <button class="cab-modal-close" id="btnClosePartnerDocPreview">✕</button>
+            <div class="cab-modal-header">
+                <div style="font-size: 28px; margin-bottom: 4px;" id="partnerDocPreviewIcon">📜</div>
+                <h3 id="partnerDocPreviewTitle">Меморандум про взаєморозуміння та співпрацю</h3>
+                <p id="partnerDocPreviewSubtitle">Офіційний текст документа, згенерований з урахуванням обраних ролей та реквізитів</p>
+            </div>
+            <div class="cab-doc-preview-content" id="partnerDocPreviewBody" style="background: rgba(0,0,0,0.25); border: 1px solid var(--cab-border); border-radius: 10px; padding: 18px; max-height: 380px; overflow-y: auto; font-size: 13px; line-height: 1.6; color: #CBD5E1; white-space: pre-wrap; font-family: monospace;">
+                Завантаження тексту...
+            </div>
+            <div class="cab-modal-actions" style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center;">
+                <span id="partnerDocPreviewSignStatus" style="font-size: 13px; font-weight: 600;"></span>
+                <button type="button" class="btn-primary" id="btnPartnerDocPreviewSignAction">
+                    ✍️ Перейти до підписання
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальне вікно: BankID SmartID підписання -->
+    <div class="cab-modal-overlay" id="modalBankIdSign" style="display: none;">
+        <div class="cab-modal-box" style="max-width: 480px; border-color: #10B981;">
+            <button class="cab-modal-close" id="btnCloseBankIdSign">✕</button>
+            <div class="cab-modal-header">
+                <div style="font-size: 32px; margin-bottom: 6px;">🏦</div>
+                <h3 style="color: #10B981;">BankID НБУ / SmartID</h3>
+                <p>Оберіть ваш банк для підписання документа кваліфікованим електронним підписом</p>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 10px; margin: 20px 0;">
+                <button class="btn-outline btn-bank-select" data-bank="ПриватБанк (SmartID)" style="padding: 12px; display: flex; align-items: center; justify-content: space-between; border-radius: 10px; border-color: rgba(16, 185, 129, 0.3);">
+                    <span>🟢 <b>ПриватБанк</b> (SmartID / Приват24)</span>
+                    <span style="font-size: 11px; color: #10B981;">Швидко</span>
+                </button>
+                <button class="btn-outline btn-bank-select" data-bank="monobank (Universal Bank)" style="padding: 12px; display: flex; align-items: center; justify-content: space-between; border-radius: 10px; border-color: rgba(16, 185, 129, 0.3);">
+                    <span>⚫ <b>monobank</b> (КЕП у додатку)</span>
+                    <span style="font-size: 11px; color: #10B981;">Швидко</span>
+                </button>
+                <button class="btn-outline btn-bank-select" data-bank="Ощадбанк (Ощад24)" style="padding: 12px; display: flex; align-items: center; justify-content: space-between; border-radius: 10px; border-color: rgba(16, 185, 129, 0.3);">
+                    <span>🟡 <b>Ощадбанк</b> (КЕП / BankID)</span>
+                    <span style="font-size: 11px; color: #10B981;">Держбанк</span>
+                </button>
+                <button class="btn-outline btn-bank-select" data-bank="Sense Bank" style="padding: 12px; display: flex; align-items: center; justify-content: space-between; border-radius: 10px; border-color: rgba(16, 185, 129, 0.3);">
+                    <span>🔵 <b>Sense Bank</b> (Sense SuperApp)</span>
+                    <span style="font-size: 11px; color: #10B981;">Онлайн</span>
+                </button>
+                <button class="btn-outline btn-bank-select" data-bank="ПУМБ Online" style="padding: 12px; display: flex; align-items: center; justify-content: space-between; border-radius: 10px; border-color: rgba(16, 185, 129, 0.3);">
+                    <span>🔴 <b>ПУМБ</b> (Digital КЕП)</span>
+                    <span style="font-size: 11px; color: #10B981;">Онлайн</span>
+                </button>
+            </div>
+            <div id="bankIdSignProgress" style="display: none; text-align: center; padding: 14px; background: rgba(16, 185, 129, 0.1); border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.3); font-size: 13px; color: #10B981;">
+                ⏳ Очікуємо підтвердження підпису в мобільному додатку банку...
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальне вікно: Конструктор нової безбар'єрної вакансії -->
+    <div class="cab-modal-overlay" id="modalCreateVacancy" style="display: none;">
+        <div class="cab-modal-box" style="max-width: 620px;">
+            <button class="cab-modal-close" id="btnCloseCreateVacancy">✕</button>
+            <div class="cab-modal-header">
+                <div style="font-size: 32px; margin-bottom: 4px;">💼</div>
+                <h3>Створення безбар'єрної вакансії</h3>
+                <p>Опублікуйте робоче місце з адаптованими умовами для ветеранів та ветеранок</p>
+            </div>
+            <form id="formCreateVacancy" class="cab-modal-form" style="max-height: 520px; overflow-y: auto; padding-right: 6px;">
+                <div class="cab-form-group">
+                    <label class="cab-label">Назва організації / компанії:</label>
+                    <input type="text" id="vacCompanyName" class="cab-input" placeholder="ТОВ / ФОП / Назва підприємства" required>
+                </div>
+                <div class="cab-form-group">
+                    <label class="cab-label">Назва посади:</label>
+                    <input type="text" id="vacTitle" class="cab-input" placeholder="Наприклад: Оператор БПЛА / Логіст / Фахівець підтримки" required>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="cab-form-group">
+                        <label class="cab-label">Сфера / Категорія:</label>
+                        <select id="vacCategory" class="cab-input" required>
+                            <option value="it">💻 IT та цифрові технології</option>
+                            <option value="agro_tech">🌾 Агросектор та БПЛА</option>
+                            <option value="logistics">🚚 Логістика та склад</option>
+                            <option value="security">🛡️ Охорона та безпека</option>
+                            <option value="admin">📋 Адміністрування / Координація</option>
+                            <option value="production">🏭 Виробництво та майстерні</option>
+                        </select>
+                    </div>
+                    <div class="cab-form-group">
+                        <label class="cab-label">Формат зайнятості:</label>
+                        <select id="vacEmploymentType" class="cab-input" required>
+                            <option value="full">🏢 Повна зайнятість</option>
+                            <option value="remote">🌐 Віддалена робота (Remote)</option>
+                            <option value="part">⏱️ Часткова зайнятість</option>
+                            <option value="flexible">🔄 Гнучкий графік</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="cab-form-group">
+                        <label class="cab-label">Зарплата від (грн):</label>
+                        <input type="number" id="vacSalaryMin" class="cab-input" placeholder="20000" min="0">
+                    </div>
+                    <div class="cab-form-group">
+                        <label class="cab-label">Зарплата до (грн):</label>
+                        <input type="number" id="vacSalaryMax" class="cab-input" placeholder="35000" min="0">
+                    </div>
+                </div>
+
+                <div class="cab-form-group">
+                    <label class="cab-label">Громада / Населений пункт Черкащини:</label>
+                    <input type="text" id="vacCommunity" class="cab-input" placeholder="Черкаська ТГ (м. Черкаси)" value="Черкаська ТГ (м. Черкаси)" required>
+                </div>
+
+                <div class="cab-form-group">
+                    <label class="cab-label">Опис обов'язків та умов:</label>
+                    <textarea id="vacDescription" class="cab-input" rows="3" placeholder="Опишіть задачі, графік, навчання..." required></textarea>
+                </div>
+
+                <div class="cab-form-group">
+                    <label class="cab-label">Вимоги до кандидата:</label>
+                    <input type="text" id="vacRequirements" class="cab-input" placeholder="Базові навички, досвід, готовність вчитися">
+                </div>
+
+                <div class="cab-form-group" style="background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 10px; padding: 12px;">
+                    <label class="cab-label" style="color: #10B981; margin-bottom: 8px;">♿ Інклюзивність та Ветеран-френдлі умови:</label>
+                    <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #E2E8F0; margin-bottom: 6px; cursor: pointer;">
+                        <input type="checkbox" id="chkVacAccessible" checked>
+                        <span>♿ Готовність адаптувати робоче місце (пандуси, ергономіка, спец-ПЗ)</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #E2E8F0; margin-bottom: 6px; cursor: pointer;">
+                        <input type="checkbox" id="chkVacFlexible" checked>
+                        <span>🏥 Гнучкий графік для проходження лікування та реабілітації</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #E2E8F0; cursor: pointer;">
+                        <input type="checkbox" id="chkVacCombatPriority" checked>
+                        <span>🎖️ Пряма перевага ветеранам бойових дій (УБД)</span>
+                    </label>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="cab-form-group">
+                        <label class="cab-label">Контактна особа (HR):</label>
+                        <input type="text" id="vacContactPerson" class="cab-input" placeholder="Ім'я рекрутера">
+                    </div>
+                    <div class="cab-form-group">
+                        <label class="cab-label">Телефон для зв'язку:</label>
+                        <input type="tel" id="vacContactPhone" class="cab-input" placeholder="+380 (__) ___-__-__">
+                    </div>
+                </div>
+
+                <div class="cab-modal-actions" style="margin-top: 18px;">
+                    <button type="submit" class="btn-primary" style="width: 100%; padding: 13px; font-weight: 700;">
+                        🚀 Опублікувати вакансію на платформі
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Модальне вікно: Створення освітнього курсу (Крок C2) -->
+    <div class="cab-modal-overlay" id="modalCreateCourse" style="display: none;">
+        <div class="cab-modal-box" style="max-width: 680px; width: 95%;">
+            <div class="cab-modal-header">
+                <div>
+                    <h3 style="margin: 0; color: #F8FAFC; font-size: 1.3rem;">🎓 Додати новий навчальний курс</h3>
+                    <p style="margin: 4px 0 0; color: #94A3B8; font-size: 0.85rem;">Опублікуйте програму перекваліфікації з підтримкою ваучера Держслужби зайнятості</p>
+                </div>
+                <button class="cab-modal-close" id="btnCloseModalCourse">✕</button>
+            </div>
+
+            <form id="formCreateCourse" style="margin-top: 16px;">
+                <div class="cab-form-group">
+                    <label class="cab-label">Назва освітньої програми / курсу:</label>
+                    <input type="text" id="courseTitle" class="cab-input" placeholder="Наприклад: Fullstack Web Розробка / Оператор агродронів" required>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="cab-form-group">
+                        <label class="cab-label">Напрямок навчання:</label>
+                        <select id="courseCategory" class="cab-input" required>
+                            <option value="it">💻 IT та цифрові технології</option>
+                            <option value="uav">🌾 Агросектор та керування БПЛА</option>
+                            <option value="auto">🚗 Автодіагностика та автосправа</option>
+                            <option value="management">📈 Менеджмент та муніципальне управління</option>
+                            <option value="psychology">🧠 Психологія та менторство «Рівний-Рівному»</option>
+                            <option value="other">📚 Інша професійна освіта</option>
+                        </select>
+                    </div>
+                    <div class="cab-form-group">
+                        <label class="cab-label">Формат занять:</label>
+                        <select id="courseFormat" class="cab-input" required>
+                            <option value="online">🌐 Дистанційно (Online)</option>
+                            <option value="offline">🏢 Офлайн у навчальному закладі</option>
+                            <option value="hybrid">🔄 Змішаний (Теорія online / Практика offline)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="cab-form-group">
+                        <label class="cab-label">Тривалість курсу (тижнів):</label>
+                        <input type="number" id="courseDurationWeeks" class="cab-input" placeholder="8" min="1" max="52" value="8" required>
+                    </div>
+                    <div class="cab-form-group">
+                        <label class="cab-label">Квота місць для ветеранів:</label>
+                        <input type="number" id="courseSeatsTotal" class="cab-input" placeholder="20" min="1" value="20" required>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="cab-form-group">
+                        <label class="cab-label">Повна вартість навчання (грн):</label>
+                        <input type="number" id="courseCostUah" class="cab-input" placeholder="30000" min="0" value="30000" required>
+                    </div>
+                    <div class="cab-form-group">
+                        <label class="cab-label">Місто / Регіон:</label>
+                        <input type="text" id="courseCity" class="cab-input" placeholder="м. Черкаси / Черкаська область" value="м. Черкаси" required>
+                    </div>
+                </div>
+
+                <div class="cab-form-group" style="background: rgba(37, 99, 235, 0.08); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 10px; padding: 12px;">
+                    <label style="display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: #93C5FD; cursor: pointer; font-weight: 600;">
+                        <input type="checkbox" id="chkCourseVoucherEligible" checked>
+                        <span>🏛️ Покривається державним ваучером ДСЗ (до 30 280 грн — 100% безкоштовно для УБД)</span>
+                    </label>
+                </div>
+
+                <div class="cab-form-group">
+                    <label class="cab-label">Детальний опис програми та здобутих навичок:</label>
+                    <textarea id="courseDescription" class="cab-input" rows="3" placeholder="Опишіть модулі, практичні кейси, стажування..." required></textarea>
+                </div>
+
+                <div class="cab-form-group">
+                    <label class="cab-label">Вимоги до слухачів (освіта, навички):</label>
+                    <input type="text" id="courseRequirements" class="cab-input" placeholder="Статус УБД, повна або базова вища/середня освіта">
+                </div>
+
+                <div class="cab-form-group">
+                    <label class="cab-label">Контактний Email для довідок:</label>
+                    <input type="email" id="courseContactEmail" class="cab-input" placeholder="edu@provider.ua">
+                </div>
+
+                <div class="cab-modal-actions" style="margin-top: 18px;">
+                    <button type="submit" class="btn-primary" style="width: 100%; padding: 13px; font-weight: 700;">
+                        🚀 Опублікувати курс у каталозі
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Модальне вікно: Подання заявки на отримання ваучера ДСЗ (Крок C3) -->
+    <div class="cab-modal-overlay" id="modalApplyVoucher" style="display: none;">
+        <div class="cab-modal-box" style="max-width: 600px; width: 95%;">
+            <div class="cab-modal-header">
+                <div>
+                    <h3 style="margin: 0; color: #F8FAFC; font-size: 1.25rem;" id="modalVoucherCourseTitle">🎓 Заявка на навчання за ваучером</h3>
+                    <p style="margin: 4px 0 0; color: #94A3B8; font-size: 0.85rem;" id="modalVoucherProviderName">Освітня програма</p>
+                </div>
+                <button class="cab-modal-close" id="btnCloseModalVoucher">✕</button>
+            </div>
+
+            <form id="formApplyVoucher" style="margin-top: 16px;">
+                <input type="hidden" id="applyVoucherCourseId">
+
+                <div class="cab-form-group">
+                    <label class="cab-label">ПІБ ветерана / ветеранки:</label>
+                    <input type="text" id="voucherApplicantName" class="cab-input" placeholder="Тарас Шевченко" required>
+                </div>
+
+                <div class="cab-form-group">
+                    <label class="cab-label">Контактний номер телефону:</label>
+                    <input type="tel" id="voucherApplicantPhone" class="cab-input" placeholder="+380 (__) ___-__-__" required>
+                </div>
+
+                <div class="cab-form-group">
+                    <label class="cab-label">Пільгова категорія для отримання ваучера ДСЗ:</label>
+                    <select id="voucherApplicantStatus" class="cab-input" required>
+                        <option value="ubd">🎖️ Учасник бойових дій (УБД)</option>
+                        <option value="disabled_vet">♿ Особа з інвалідністю внаслідок війни</option>
+                        <option value="discharged_service">🛡️ Звільнений з військової служби за станом здоров'я</option>
+                        <option value="war_family">👨‍👩‍👦 Член сім'ї загиблого Захисника</option>
+                    </select>
+                </div>
+
+                <div class="cab-form-group" style="background: rgba(37, 99, 235, 0.08); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 10px; padding: 12px;">
+                    <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #93C5FD; cursor: pointer;">
+                        <input type="checkbox" id="chkVoucherHasHigherEdu" checked>
+                        <span>📜 Маю професійно-технічну або вищу освіту (вимога для ваучера ДСЗ)</span>
+                    </label>
+                </div>
+
+                <!-- Прикріплення документів із Сейфу -->
+                <div class="cab-form-group">
+                    <label class="cab-label" style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>🔒 Прикріпити документи з Сейфу:</span>
+                        <small style="color: #60A5FA; font-size: 0.8rem;">Посвідчення УБД / Диплом</small>
+                    </label>
+                    <div id="voucherVaultDocsList" style="display: flex; flex-direction: column; gap: 6px; max-height: 140px; overflow-y: auto; background: rgba(0,0,0,0.25); padding: 8px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);">
+                        <!-- Заповнюється з Сейфу документів -->
+                    </div>
+                </div>
+
+                <div class="cab-form-group">
+                    <label class="cab-label">Коментар або додаткові побажання:</label>
+                    <textarea id="voucherApplicantComment" class="cab-input" rows="2" placeholder="Вкажіть зручний час для дзвінка координатора..."></textarea>
+                </div>
+
+                <div class="cab-modal-actions" style="margin-top: 18px;">
+                    <button type="submit" class="btn-primary" style="width: 100%; padding: 13px; font-weight: 700;">
+                        🚀 Надіслати заявку на отримання ваучера
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Модальне вікно: Підключення нової ролі (Крок D2) -->
+    <div class="cab-modal-overlay" id="modalUpgradeRole" style="display: none;">
+        <div class="cab-modal-box" style="max-width: 520px; width: 95%;">
+            <div class="cab-modal-header">
+                <div>
+                    <h3 style="margin: 0; color: #F8FAFC; font-size: 1.25rem;" id="modalUpgradeTitle">🚀 Підключити новий статус</h3>
+                    <p style="margin: 4px 0 0; color: #94A3B8; font-size: 0.85rem;" id="modalUpgradeDesc">Активація нової ролі в єдиному акаунті</p>
+                </div>
+                <button class="cab-modal-close" id="btnCloseModalUpgrade">✕</button>
+            </div>
+
+            <form id="formUpgradeRole" style="margin-top: 16px;">
+                <input type="hidden" id="upgradeTargetRole">
+
+                <div id="upgradeDynamicFields">
+                    <!-- Заповнюється динамічно відповідно до обраної ролі -->
+                </div>
+
+                <div class="cab-form-group" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 10px; padding: 12px; margin-top: 14px;">
+                    <span style="font-size: 0.85rem; color: #93C5FD;">
+                        🛡️ Первинний статус (генезис) зберігається назавжди. Ви зможете перемикатись між усіма підключеними ролями у шапці кабінету в 1 клік.
+                    </span>
+                </div>
+
+                <div class="cab-modal-actions" style="margin-top: 18px;">
+                    <button type="submit" class="btn-primary" style="width: 100%; padding: 12px; font-weight: 700;">
+                        ✨ Підтвердити та активувати статус
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Модальне вікно: Реєстрація офлайн-звернення у Ветеранському Хабі (Крок G1) -->
+    <div class="cab-modal-overlay" id="modalDispatcherIntake" style="display: none;">
+        <div class="cab-modal-box" style="max-width: 620px; width: 95%;">
+            <div class="cab-modal-header">
+                <div>
+                    <h3 style="margin: 0; color: #F8FAFC; font-size: 1.3rem;">🏛️ Офлайн-прийом ветерана у Ветеранському Просторі / Хабі</h3>
+                    <p style="margin: 4px 0 0; color: #94A3B8; font-size: 0.85rem;">Реєстрація звернення без обов'язкової наявності смартфона та видача Дорожньої карти А4</p>
+                </div>
+                <button class="cab-modal-close" id="btnCloseModalDispatcherIntake">✕</button>
+            </div>
+
+            <form id="formDispatcherIntake" style="margin-top: 16px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="cab-form-group">
+                        <label class="cab-label">ПІБ ветерана / ветеранки:</label>
+                        <input type="text" id="intakeVeteranName" class="cab-input" placeholder="Коваленко Іван Петрович" required>
+                    </div>
+                    <div class="cab-form-group">
+                        <label class="cab-label">Контактний телефон:</label>
+                        <input type="tel" id="intakePhone" class="cab-input" placeholder="+380 (__) ___-__-__" required>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="cab-form-group">
+                        <label class="cab-label">Категорія звернення:</label>
+                        <select id="intakeCategory" class="cab-input" required>
+                            <option value="legal">⚖️ Військове право / ВЛК / МСЕК / Виплати</option>
+                            <option value="psychology">🧠 Психологічна підтримка / ПТСР-супровід</option>
+                            <option value="education">🎓 Освіта / Державний ваучер ДСЗ</option>
+                            <option value="career">💼 Працевлаштування / Робота</option>
+                            <option value="humanitarian">📦 Гуманітарна та матеріальна допомога</option>
+                            <option value="social_adapt">🤝 Соціальна адаптація та ветеранський простір</option>
+                        </select>
+                    </div>
+                    <div class="cab-form-group">
+                        <label class="cab-label">Територіальна громада:</label>
+                        <input type="text" id="intakeCommunity" class="cab-input" placeholder="Черкаська ТГ" value="Черкаська ТГ" required>
+                    </div>
+                </div>
+
+                <div class="cab-form-group">
+                    <label class="cab-label">Суть звернення / Потреба ветерана:</label>
+                    <textarea id="intakeDescription" class="cab-input" rows="3" placeholder="Опишіть запит: допомога з оскарженням постанови ВЛК, оформлення одноразової грошової допомоги, ваучер тощо..." required></textarea>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="cab-form-group">
+                        <label class="cab-label">Терміновість:</label>
+                        <select id="intakeUrgency" class="cab-input">
+                            <option value="normal">🟢 Звичайна (до 24 год)</option>
+                            <option value="urgent">🟡 Термінова (до 4 год)</option>
+                            <option value="critical">🔴 Екстрена (негайно)</option>
+                        </select>
+                    </div>
+                    <div class="cab-form-group">
+                        <label class="cab-label">Назва Ветеранського Простору / Хабу:</label>
+                        <input type="text" id="intakeCenterName" class="cab-input" value="Ветеранський Простір Канівщини">
+                    </div>
+                </div>
+
+                <div class="cab-form-group" style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 10px; padding: 12px;">
+                    <span style="font-size: 0.85rem; color: #6EE7B7;">
+                        ✨ Після збереження система автоматично згенерує офіційну <b>Дорожню карту формату А4</b> з <b>Magic QR-кодом</b> для миттєвого входу ветерана зі смартфона без паролів.
+                    </span>
+                </div>
+
+                <div class="cab-modal-actions" style="margin-top: 18px;">
+                    <button type="submit" class="btn-primary" style="width: 100%; padding: 13px; font-weight: 700; background: #10B981; border-color: #10B981;">
+                        📄 Зареєструвати справу та відкрити Дорожню карту А4
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Модальне вікно: Друкована Дорожня Карта А4 з Magic QR-кодом (Крок G1) -->
+    <div class="cab-modal-overlay" id="modalPrintRoadmap" style="display: none;">
+        <div class="cab-modal-box" style="max-width: 820px; width: 95%; max-height: 92vh; overflow-y: auto;">
+            <!-- Панель управління друком (не друкується) -->
+            <div class="no-print" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px; margin-bottom: 16px;">
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <button type="button" class="btn-primary" id="btnPrintRoadmapExec" style="font-weight: 700; padding: 8px 18px; background: #10B981; border-color: #10B981;">
+                        🖨️ Роздрукувати на А4 (Print)
+                    </button>
+                    <button type="button" class="btn-secondary" id="btnCopyMagicLink" style="font-size: 0.85rem; padding: 8px 14px;">
+                        📋 Скопіювати Magic-посилання
+                    </button>
+                </div>
+                <button class="cab-modal-close" id="btnCloseModalRoadmap">✕</button>
+            </div>
+
+            <!-- Друкований аркуш А4 -->
+            <div class="cab-roadmap-a4-sheet" id="roadmapA4Content">
+                <!-- Заповнюється динамічно через renderRoadmapSheet(data) -->
+            </div>
         </div>
     </div>
 

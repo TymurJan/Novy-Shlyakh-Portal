@@ -24,5 +24,29 @@
       ],
       "is_veteran": true
     }
+  },
+  "vet_taras_01": {
+    "user_id": "vet_taras_01",
+    "first_seen_at": "2026-09-09T22:56:20.803775+00:00",
+    "sessions": [
+      "sess_anon_test_999"
+    ],
+    "interest_categories": [
+      "legal",
+      "psychology"
+    ],
+    "viewed_specialists": [],
+    "geo_history": [
+      "Канівська ТГ"
+    ],
+    "last_active_at": "2026-09-09T22:56:20.803815+00:00",
+    "auth_details": {
+      "id": "vet_taras_01",
+      "name": "Тарас Коваленко",
+      "roles": [
+        "ROLE_VETERAN"
+      ],
+      "phone": "+380501234567"
+    }
   }
 }

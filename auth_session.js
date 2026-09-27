@@ -299,6 +299,15 @@
                 if (res.ok) {
                     const data = await res.json();
                     console.info('[Session Merge] Successfully merged guest history with CRM profile.');
+                    if (data && data.data && data.data.restored_context) {
+                        const rc = data.data.restored_context;
+                        if (rc.preferred_community && rc.preferred_community !== 'Черкаси') {
+                            SessionManager.setSelectedCommunity(rc.preferred_community);
+                        }
+                        if (rc.top_categories && rc.top_categories.length > 0) {
+                            sessionStorage.setItem('novy_shlyakh_top_categories', JSON.stringify(rc.top_categories));
+                        }
+                    }
                     JourneyTracker.clearJourney();
                     window.dispatchEvent(new CustomEvent('novyshlyakh:session_merged', { detail: data }));
                 }

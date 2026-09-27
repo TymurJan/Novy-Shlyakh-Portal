@@ -227,6 +227,11 @@
             <p class="analytics-sub">
                 «Новий Шлях» відкриває статистику реального дефіциту соціальних та психологічних послуг, звернень ветеранів і покриття громад для органів місцевого самоврядування (ОМС) та громадянського суспільства.
             </p>
+            <div style="margin-top: 24px;">
+                <a href="superadmin.html" style="display: inline-flex; align-items: center; gap: 8px; background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: #38BDF8; padding: 10px 22px; border-radius: 30px; font-weight: 700; font-size: 14px; text-decoration: none; transition: all 0.2s;">
+                    🗺️ Відкрити Центр Стратегічної Телеметрії Громад (Super-Admin) ➔
+                </a>
+            </div>
         </div>
     </section>
 
@@ -346,6 +351,23 @@
     <script src="auth_session.js?v=46"></script>
     <script src="accessibility.js?v=46"></script>
     <script>
+        function animateCounter(elem, start, end, duration, suffix = '', isFormatted = false) {
+            if (!elem) return;
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                const current = Math.floor(progress * (end - start) + start);
+                elem.textContent = (isFormatted ? current.toLocaleString('uk-UA') : current) + suffix;
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                } else {
+                    elem.textContent = (isFormatted ? end.toLocaleString('uk-UA') : end) + suffix;
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
             try {
                 const res = await fetch('/api/v1/analytics/public-summary');
@@ -354,17 +376,22 @@
                     const metrics = data.data.metrics || {};
                     const cov = data.data.coverage || {};
 
-                    if (cov.all_ukraine_communities) {
-                        document.getElementById('anStatCommunities').textContent = cov.all_ukraine_communities.toLocaleString('uk-UA');
+                    const elComm = document.getElementById('anStatCommunities');
+                    const elSpec = document.getElementById('anStatSpecialists');
+                    const elTick = document.getElementById('anStatTickets');
+                    const elSat = document.getElementById('anStatSatisfaction');
+
+                    if (elComm && cov.all_ukraine_communities) {
+                        animateCounter(elComm, 0, cov.all_ukraine_communities, 1200, '', true);
                     }
-                    if (metrics.verified_specialists) {
-                        document.getElementById('anStatSpecialists').textContent = metrics.verified_specialists + '+';
+                    if (elSpec && metrics.verified_specialists) {
+                        animateCounter(elSpec, 0, metrics.verified_specialists, 1000, '+');
                     }
-                    if (metrics.processed_tickets) {
-                        document.getElementById('anStatTickets').textContent = metrics.processed_tickets + '+';
+                    if (elTick && metrics.processed_tickets) {
+                        animateCounter(elTick, 0, metrics.processed_tickets, 1200, '+');
                     }
-                    if (metrics.satisfaction_rate) {
-                        document.getElementById('anStatSatisfaction').textContent = metrics.satisfaction_rate;
+                    if (elSat && metrics.satisfaction_rate) {
+                        elSat.textContent = metrics.satisfaction_rate;
                     }
                 }
             } catch (e) {

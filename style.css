@@ -10,6 +10,11 @@
     --glass-border: rgba(255, 255, 255, 0.1);
 }
 
+select option {
+    background-color: #0F172A !important;
+    color: #F8FAFC !important;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -165,7 +170,8 @@ body.is-desktop-tg .logo h1 {
 
 /* Hero Section */
 .hero {
-    height: 100vh;
+    min-height: 100vh;
+    padding: 120px 0 60px;
     display: flex;
     align-items: center;
     position: relative;
@@ -222,6 +228,28 @@ body.is-desktop-tg .logo h1 {
     border-radius: 50px;
     font-weight: 600;
     transition: 0.3s;
+}
+
+.ai-chip-btn {
+    background: rgba(46, 139, 87, 0.15) !important;
+    border: 1.5px solid rgba(46, 139, 87, 0.45) !important;
+    color: #a3e635 !important;
+    padding: 7px 16px !important;
+    border-radius: 20px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.25s ease !important;
+    position: relative !important;
+    z-index: 10 !important;
+}
+
+.ai-chip-btn:hover {
+    background: rgba(46, 139, 87, 0.45) !important;
+    border-color: #a3e635 !important;
+    color: #ffffff !important;
+    transform: translateY(-2px) scale(1.03) !important;
+    box-shadow: 0 4px 14px rgba(46, 139, 87, 0.4) !important;
 }
 
 /* Common Layout Elements */

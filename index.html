@@ -168,9 +168,20 @@
                         <input type="text" id="aiSearchInput" placeholder="ШІ-асистент допоможе знайти відповідь, спеціаліста чи необхідну можливість..." style="flex: 1; min-width: 260px; padding: 16px 22px; border-radius: 50px; border: 1px solid var(--primary-green); background: rgba(17, 17, 17, 0.85); backdrop-filter: blur(10px); color: white; font-size: 14px; outline: none;">
                         <button id="aiSearchBtn" class="btn-primary" style="padding: 0 28px; height: 54px; border: none; border-radius: 50px; cursor: pointer; font-size: 16px;">Запитати</button>
                     </div>
+
+                    <!-- Швидкі підказки для Гостя (Prompt Chips) -->
+                    <div style="font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.8); margin-top: 14px; margin-bottom: 6px;">💡 Найпоширеніші запитання ветеранів:</div>
+                    <div class="ai-prompt-chips" style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 12px;">
+                        <button type="button" class="ai-chip-btn" onclick="applyHeroPrompt('Як отримати статус УБД?')" style="background: rgba(46, 139, 87, 0.15); border: 1px solid rgba(46, 139, 87, 0.4); color: #a3e635; padding: 6px 14px; border-radius: 20px; font-size: 12px; cursor: pointer; transition: all 0.2s;">🏷️ Статус УБД</button>
+                        <button type="button" class="ai-chip-btn" onclick="applyHeroPrompt('Оскарження висновку ВЛК та оцінка втрати працездатності')" style="background: rgba(46, 139, 87, 0.15); border: 1px solid rgba(46, 139, 87, 0.4); color: #a3e635; padding: 6px 14px; border-radius: 20px; font-size: 12px; cursor: pointer; transition: all 0.2s;">🏷️ ВЛК / МСЕК</button>
+                        <button type="button" class="ai-chip-btn" onclick="applyHeroPrompt('Державний ваучер на навчання для ветеранів')" style="background: rgba(46, 139, 87, 0.15); border: 1px solid rgba(46, 139, 87, 0.4); color: #a3e635; padding: 6px 14px; border-radius: 20px; font-size: 12px; cursor: pointer; transition: all 0.2s;">🏷️ Ваучер на навчання</button>
+                        <button type="button" class="ai-chip-btn" onclick="applyHeroPrompt('Грант на бізнес для ветеранів єРобота')" style="background: rgba(46, 139, 87, 0.15); border: 1px solid rgba(46, 139, 87, 0.4); color: #a3e635; padding: 6px 14px; border-radius: 20px; font-size: 12px; cursor: pointer; transition: all 0.2s;">🏷️ Гранти єРобота</button>
+                        <button type="button" class="ai-chip-btn" onclick="applyHeroPrompt('Які муніципальні пільги діють у моїй громаді?')" style="background: rgba(46, 139, 87, 0.15); border: 1px solid rgba(46, 139, 87, 0.4); color: #a3e635; padding: 6px 14px; border-radius: 20px; font-size: 12px; cursor: pointer; transition: all 0.2s;">🏷️ Пільги громади</button>
+                    </div>
+
                     <span style="font-size: 11px; color: rgba(255, 255, 255, 0.7); display: block; font-style: italic; text-align: center;">Увага: AI-помічник має виключно інформаційний характер і не замінює консультацію реального фахівця.</span>
 
-                    <div id="aiSearchResponse" class="ai-response-area" style="margin-top: 20px; text-align: left; background: rgba(21, 23, 21, 0.95); backdrop-filter: blur(15px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 20px; display: none;">
+                    <div id="aiSearchResponse" class="ai-response-area" style="margin-top: 20px; text-align: left; background: rgba(21, 23, 21, 0.96); backdrop-filter: blur(20px); border: 1px solid rgba(46, 139, 87, 0.5); border-radius: 20px; padding: 22px; display: none; position: relative; z-index: 100; box-shadow: 0 15px 35px rgba(0,0,0,0.6);">
                         <!-- Тут з'являтиметься відповідь -->
                     </div>
                 </div>
@@ -380,13 +391,23 @@
 
             </div><!-- /ns-track -->
         </div>
+    </div>
 
-        <!-- Нижня горизонтальна панель крапок (Pagination Dots) -->
+    <!-- Нижня горизонтальна панель крапок (Pagination Dots) -->
+    <div id="news-slider-dots-wrapper" style="
+        background: #0d110d;
+        padding: 8px 0 14px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-bottom: 1px solid rgba(46,139,87,0.25);
+        position: relative;
+        z-index: 5;
+    ">
         <div id="ns-dots" style="
-            position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
-            display: flex; gap: 8px; align-items: center; z-index: 10;
-            background: rgba(0,0,0,0.4); padding: 4px 12px; border-radius: 50px;
-            backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.08);
+            display: flex; gap: 8px; align-items: center;
+            background: rgba(0,0,0,0.6); padding: 5px 14px; border-radius: 50px;
+            backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,0.12);
         "></div>
     </div>
 
@@ -614,7 +635,6 @@
     <section id="mission" class="specialist-cta" style="margin: 100px 20px; display: none;">
         <!-- Перенесено в локації -->
     </section>
-
 
     <!-- БЛОК: Локація та Партнери -->
     <footer class="footer">
@@ -933,11 +953,11 @@
     </div>
 
     <!-- Scripts -->
-    <script src="soft_gate.js?v=46"></script>
-    <script src="auth_session.js?v=46"></script>
-    <script src="main.js?v=46"></script>
-    <script src="accessibility.js?v=46"></script>
-    <script src="demo_switcher.js?v=46"></script>
+    <script src="soft_gate.js?v=50"></script>
+    <script src="auth_session.js?v=50"></script>
+    <script src="main.js?v=50"></script>
+    <script src="accessibility.js?v=50"></script>
+    <script src="demo_switcher.js?v=50"></script>
     <script>
         const webapp = window.Telegram ? window.Telegram.WebApp : null;
         if (webapp) {

@@ -1,0 +1,539 @@
+[
+  {
+    "id": "TCK-CNAP-202609-6E4B3F",
+    "user_id": "phone_380674443322",
+    "client_name": "Олександр Захисник",
+    "client_callsign": "Олександр Захисник",
+    "client_phone": "+380674443322",
+    "category": "legal",
+    "category_label": "⚖️ Військове право / ВЛК / МСЕК / Виплати",
+    "description": "Консультація щодо статусу інвалідності",
+    "notes": "",
+    "status": "IN_PROGRESS",
+    "created_at": "2026-09-21T23:47:40.828402+00:00",
+    "is_offline_case": true,
+    "intake_channel": "cnap_desk",
+    "dispatcher": {
+      "id": "cnap_cherkasy_01",
+      "name": "Оксана (ЦНАП)",
+      "center": "ЦНАП м. Черкаси (Ветеранське вікно)",
+      "intake_time": "2026-09-21T23:47:40.828402+00:00"
+    },
+    "geo_context": {
+      "community": "Черкаська ТГ",
+      "settlement": "Черкаська ТГ",
+      "region": "Черкаська область",
+      "is_online": true
+    },
+    "specialist": {
+      "id": "spec_probono_lead",
+      "name": "Черкаський координаційний центр підтримки ветеранів",
+      "role_title": "Провідний фахівець соціально-правового супроводу",
+      "phone": "+38 (0472) 33-00-11",
+      "email": "support@novy-shlyakh.org",
+      "address": "Черкаська ТГ, вул. Хрещатик, 15 (Ветеранський простір)"
+    },
+    "urgency": "normal",
+    "magic_token": "magic_ebdd7c8de6e84cb39b599519a2d6e271",
+    "magic_token_expires_at": "2026-10-21T23:47:40.828402+00:00",
+    "magic_url": "/cabinet.html?magic_token=magic_ebdd7c8de6e84cb39b599519a2d6e271&case_id=TCK-CNAP-202609-6E4B3F",
+    "audit_trail": [
+      "Офлайн-звернення зареєстровано оператором ЦНАП: Оксана (ЦНАП) (ЦНАП м. Черкаси (Ветеранське вікно)).",
+      "Згенеровано захищений Magic QR-код доступу для ветерана (TCK-CNAP-202609-6E4B3F).",
+      "Призначено відповідального фахівця: Черкаський координаційний центр підтримки ветеранів (Провідний фахівець соціально-правового супроводу)."
+    ]
+  },
+  {
+    "id": "TK-EDU-76EBAA",
+    "user_id": "vet_audit_01",
+    "client_name": "Ветеран Тарас",
+    "client_phone": "+380671112233",
+    "category": "education",
+    "description": "Заявка на ваучер ДСЗ для курсу 'Кібербезпека та мережеві технології' від Черкаський Навчальний Центр. Документи: 1 шт.",
+    "status": "PENDING_OFFER",
+    "created_at": "2026-09-21T23:47:40.694023+00:00",
+    "urgency": "normal",
+    "geo_context": {
+      "community": "Черкаська ТГ",
+      "settlement": "м. Черкаси",
+      "region": "Черкаська область"
+    },
+    "education_application_id": "vapp-3817ddf0",
+    "audit_trail": [
+      "Ветеран Ветеран Тарас подав заявку на курс 'Кібербезпека та мережеві технології'.",
+      "Сформовано автоматичний кейс для супроводу в Державній службі зайнятості."
+    ]
+  },
+  {
+    "id": "TCK-CNAP-202609-CAD973",
+    "user_id": "phone_380674443322",
+    "client_name": "Олександр Захисник",
+    "client_callsign": "Олександр Захисник",
+    "client_phone": "+380674443322",
+    "category": "legal",
+    "category_label": "⚖️ Військове право / ВЛК / МСЕК / Виплати",
+    "description": "Консультація щодо статусу інвалідності",
+    "notes": "",
+    "status": "IN_PROGRESS",
+    "created_at": "2026-09-21T23:47:31.436961+00:00",
+    "is_offline_case": true,
+    "intake_channel": "cnap_desk",
+    "dispatcher": {
+      "id": "cnap_cherkasy_01",
+      "name": "Оксана (ЦНАП)",
+      "center": "ЦНАП м. Черкаси (Ветеранське вікно)",
+      "intake_time": "2026-09-21T23:47:31.436961+00:00"
+    },
+    "geo_context": {
+      "community": "Черкаська ТГ",
+      "settlement": "Черкаська ТГ",
+      "region": "Черкаська область",
+      "is_online": true
+    },
+    "specialist": {
+      "id": "spec_probono_lead",
+      "name": "Черкаський координаційний центр підтримки ветеранів",
+      "role_title": "Провідний фахівець соціально-правового супроводу",
+      "phone": "+38 (0472) 33-00-11",
+      "email": "support@novy-shlyakh.org",
+      "address": "Черкаська ТГ, вул. Хрещатик, 15 (Ветеранський простір)"
+    },
+    "urgency": "normal",
+    "magic_token": "magic_5a65c9b701a844f6b923ace5b14ddd6d",
+    "magic_token_expires_at": "2026-10-21T23:47:31.436961+00:00",
+    "magic_url": "/cabinet.html?magic_token=magic_5a65c9b701a844f6b923ace5b14ddd6d&case_id=TCK-CNAP-202609-CAD973",
+    "audit_trail": [
+      "Офлайн-звернення зареєстровано оператором ЦНАП: Оксана (ЦНАП) (ЦНАП м. Черкаси (Ветеранське вікно)).",
+      "Згенеровано захищений Magic QR-код доступу для ветерана (TCK-CNAP-202609-CAD973).",
+      "Призначено відповідального фахівця: Черкаський координаційний центр підтримки ветеранів (Провідний фахівець соціально-правового супроводу)."
+    ]
+  },
+  {
+    "id": "TK-EDU-AF0079",
+    "user_id": "vet_audit_01",
+    "client_name": "Ветеран Тарас",
+    "client_phone": "+380671112233",
+    "category": "education",
+    "description": "Заявка на ваучер ДСЗ для курсу 'Кібербезпека та мережеві технології' від Черкаський Навчальний Центр. Документи: 1 шт.",
+    "status": "PENDING_OFFER",
+    "created_at": "2026-09-21T23:47:31.311209+00:00",
+    "urgency": "normal",
+    "geo_context": {
+      "community": "Черкаська ТГ",
+      "settlement": "м. Черкаси",
+      "region": "Черкаська область"
+    },
+    "education_application_id": "vapp-2a83f8a3",
+    "audit_trail": [
+      "Ветеран Ветеран Тарас подав заявку на курс 'Кібербезпека та мережеві технології'.",
+      "Сформовано автоматичний кейс для супроводу в Державній службі зайнятості."
+    ]
+  },
+  {
+    "id": "TK-EDU-91D7AD",
+    "user_id": "vet_audit_01",
+    "client_name": "Ветеран Тарас",
+    "client_phone": "+380671112233",
+    "category": "education",
+    "description": "Заявка на ваучер ДСЗ для курсу 'Кібербезпека та мережеві технології' від Черкаський Навчальний Центр. Документи: 1 шт.",
+    "status": "PENDING_OFFER",
+    "created_at": "2026-09-21T23:47:05.964384+00:00",
+    "urgency": "normal",
+    "geo_context": {
+      "community": "Черкаська ТГ",
+      "settlement": "м. Черкаси",
+      "region": "Черкаська область"
+    },
+    "education_application_id": "vapp-0f460321",
+    "audit_trail": [
+      "Ветеран Ветеран Тарас подав заявку на курс 'Кібербезпека та мережеві технології'.",
+      "Сформовано автоматичний кейс для супроводу в Державній службі зайнятості."
+    ]
+  },
+  {
+    "id": "TCK-CNAP-202609-AD6F38",
+    "user_id": "phone_380671112233",
+    "client_name": "Тарас Бойко",
+    "client_callsign": "Тарас Бойко",
+    "client_phone": "+380671112233",
+    "category": "legal",
+    "category_label": "⚖️ Військове право / ВЛК / МСЕК / Виплати",
+    "description": "Отримання одноразової грошової допомоги та статус УБД",
+    "notes": "",
+    "status": "IN_PROGRESS",
+    "created_at": "2026-09-21T23:43:45.852149+00:00",
+    "is_offline_case": true,
+    "intake_channel": "cnap_desk",
+    "dispatcher": {
+      "id": "cnap_cherkasy_01",
+      "name": "Оксана (ЦНАП)",
+      "center": "ЦНАП м. Черкаси (Ветеранське вікно)",
+      "intake_time": "2026-09-21T23:43:45.852149+00:00"
+    },
+    "geo_context": {
+      "community": "Черкаська ТГ",
+      "settlement": "Черкаська ТГ",
+      "region": "Черкаська область",
+      "is_online": true
+    },
+    "specialist": {
+      "id": "spec_probono_lead",
+      "name": "Черкаський координаційний центр підтримки ветеранів",
+      "role_title": "Провідний фахівець соціально-правового супроводу",
+      "phone": "+38 (0472) 33-00-11",
+      "email": "support@novy-shlyakh.org",
+      "address": "Черкаська ТГ, вул. Хрещатик, 15 (Ветеранський простір)"
+    },
+    "urgency": "normal",
+    "magic_token": "magic_b71b3e23a4f74042807bdaeb05145254",
+    "magic_token_expires_at": "2026-10-21T23:43:45.852149+00:00",
+    "magic_url": "/cabinet.html?magic_token=magic_b71b3e23a4f74042807bdaeb05145254&case_id=TCK-CNAP-202609-AD6F38",
+    "audit_trail": [
+      "Офлайн-звернення зареєстровано оператором ЦНАП: Оксана (ЦНАП) (ЦНАП м. Черкаси (Ветеранське вікно)).",
+      "Згенеровано захищений Magic QR-код доступу для ветерана (TCK-CNAP-202609-AD6F38).",
+      "Призначено відповідального фахівця: Черкаський координаційний центр підтримки ветеранів (Провідний фахівець соціально-правового супроводу)."
+    ]
+  },
+  {
+    "id": "TCK-CNAP-202609-17A948",
+    "user_id": "phone_380679998877",
+    "client_name": "Михайло Волонтер",
+    "client_callsign": "Михайло Волонтер",
+    "client_phone": "+380679998877",
+    "category": "legal",
+    "category_label": "⚖️ Військове право / ВЛК / МСЕК / Виплати",
+    "description": "Отримання статусу особи з інвалідністю внаслідок війни та виплати",
+    "notes": "",
+    "status": "IN_PROGRESS",
+    "created_at": "2026-09-21T23:43:26.530034+00:00",
+    "is_offline_case": true,
+    "intake_channel": "cnap_desk",
+    "dispatcher": {
+      "id": "cnap_cherkasy_01",
+      "name": "Оксана (ЦНАП)",
+      "center": "ЦНАП м. Черкаси (Ветеранське вікно)",
+      "intake_time": "2026-09-21T23:43:26.530034+00:00"
+    },
+    "geo_context": {
+      "community": "Черкаська ТГ",
+      "settlement": "Черкаська ТГ",
+      "region": "Черкаська область",
+      "is_online": true
+    },
+    "specialist": {
+      "id": "spec_probono_lead",
+      "name": "Черкаський координаційний центр підтримки ветеранів",
+      "role_title": "Провідний фахівець соціально-правового супроводу",
+      "phone": "+38 (0472) 33-00-11",
+      "email": "support@novy-shlyakh.org",
+      "address": "Черкаська ТГ, вул. Хрещатик, 15 (Ветеранський простір)"
+    },
+    "urgency": "normal",
+    "magic_token": "magic_e7a32fdb69384ea09abbca5e540a83f4",
+    "magic_token_expires_at": "2026-10-21T23:43:26.530034+00:00",
+    "magic_url": "/cabinet.html?magic_token=magic_e7a32fdb69384ea09abbca5e540a83f4&case_id=TCK-CNAP-202609-17A948",
+    "audit_trail": [
+      "Офлайн-звернення зареєстровано оператором ЦНАП: Оксана (ЦНАП) (ЦНАП м. Черкаси (Ветеранське вікно)).",
+      "Згенеровано захищений Magic QR-код доступу для ветерана (TCK-CNAP-202609-17A948).",
+      "Призначено відповідального фахівця: Черкаський координаційний центр підтримки ветеранів (Провідний фахівець соціально-правового супроводу)."
+    ]
+  },
+  {
+    "id": "TCK-CNAP-202609-802B1C",
+    "user_id": "phone_380679998877",
+    "client_name": "Михайло Волонтер",
+    "client_callsign": "Михайло Волонтер",
+    "client_phone": "+380679998877",
+    "category": "legal",
+    "category_label": "⚖️ Військове право / ВЛК / МСЕК / Виплати",
+    "description": "Отримання статусу особи з інвалідністю внаслідок війни та виплати",
+    "notes": "",
+    "status": "IN_PROGRESS",
+    "created_at": "2026-09-21T23:41:58.438436+00:00",
+    "is_offline_case": true,
+    "intake_channel": "cnap_desk",
+    "dispatcher": {
+      "id": "cnap_cherkasy_01",
+      "name": "Оксана (ЦНАП)",
+      "center": "ЦНАП м. Черкаси (Ветеранське вікно)",
+      "intake_time": "2026-09-21T23:41:58.438436+00:00"
+    },
+    "geo_context": {
+      "community": "Черкаська ТГ",
+      "settlement": "Черкаська ТГ",
+      "region": "Черкаська область",
+      "is_online": true
+    },
+    "specialist": {
+      "id": "spec_probono_lead",
+      "name": "Черкаський координаційний центр підтримки ветеранів",
+      "role_title": "Провідний фахівець соціально-правового супроводу",
+      "phone": "+38 (0472) 33-00-11",
+      "email": "support@novy-shlyakh.org",
+      "address": "Черкаська ТГ, вул. Хрещатик, 15 (Ветеранський простір)"
+    },
+    "urgency": "normal",
+    "magic_token": "magic_7f96bf6a84144a6892908713f9f02918",
+    "magic_token_expires_at": "2026-10-21T23:41:58.438436+00:00",
+    "magic_url": "/cabinet.html?magic_token=magic_7f96bf6a84144a6892908713f9f02918&case_id=TCK-CNAP-202609-802B1C",
+    "audit_trail": [
+      "Офлайн-звернення зареєстровано оператором ЦНАП: Оксана (ЦНАП) (ЦНАП м. Черкаси (Ветеранське вікно)).",
+      "Згенеровано захищений Magic QR-код доступу для ветерана (TCK-CNAP-202609-802B1C).",
+      "Призначено відповідального фахівця: Черкаський координаційний центр підтримки ветеранів (Провідний фахівець соціально-правового супроводу)."
+    ]
+  },
+  {
+    "id": "TK-202609-E56DC9",
+    "user_id": "offline_380670001122",
+    "client_name": "Григорій Офлайн",
+    "client_callsign": "Григорій Офлайн",
+    "client_phone": "+380670001122",
+    "category": "legal",
+    "description": "Консультація щодо пільг на житло",
+    "status": "PENDING_OFFER",
+    "created_at": "2026-09-21T22:55:14.109369+00:00",
+    "is_offline_case": true,
+    "intake_channel": "cnap_desk",
+    "dispatcher": {
+      "id": "cnap_cherkasy_01",
+      "name": "Оксана (ЦНАП)",
+      "intake_time": "2026-09-21T22:55:14.109377+00:00"
+    },
+    "geo_context": {
+      "community": "Черкаська ТГ",
+      "settlement": "м. Черкаси",
+      "region": "Черкаська область",
+      "is_online": true
+    },
+    "specialist": null,
+    "urgency": "normal",
+    "audit_trail": [
+      "Офлайн-звернення зареєстровано оператором ЦНАП Оксана (ЦНАП) (cnap_cherkasy_01).",
+      "Призначено фахівця: Загальний пул громади."
+    ]
+  },
+  {
+    "id": "TK-EDU-C5F862",
+    "user_id": "audit_user_c79258",
+    "client_name": "Тарас Ветеран",
+    "client_phone": "+380671112233",
+    "category": "education",
+    "description": "Заявка на ваучер ДСЗ для курсу 'Кібербезпека та мережеві технології' від Черкаський Навчальний Центр. Документи: 1 шт.",
+    "status": "PENDING_OFFER",
+    "created_at": "2026-09-21T22:55:14.064065+00:00",
+    "urgency": "normal",
+    "geo_context": {
+      "community": "Черкаська ТГ",
+      "settlement": "м. Черкаси",
+      "region": "Черкаська область"
+    },
+    "education_application_id": "vapp-f1032153",
+    "audit_trail": [
+      "Ветеран Тарас Ветеран подав заявку на курс 'Кібербезпека та мережеві технології'.",
+      "Сформовано автоматичний кейс для супроводу в Державній службі зайнятості."
+    ]
+  },
+  {
+    "id": "TK-EDU-70749A",
+    "user_id": "vet_777",
+    "client_name": "Тарас Бойко",
+    "client_phone": "+380671234567",
+    "category": "education",
+    "description": "Заявка на ваучер ДСЗ для курсу 'Fullstack Web Розробка для ветеранів' від Mate Academy. Документи: 1 шт.",
+    "status": "PENDING_OFFER",
+    "created_at": "2026-09-21T22:24:08.875552+00:00",
+    "urgency": "normal",
+    "geo_context": {
+      "community": "Черкаська ТГ",
+      "settlement": "Вся Україна / Черкаси (Online)",
+      "region": "Черкаська область"
+    },
+    "education_application_id": "vapp-e87b5518",
+    "audit_trail": [
+      "Ветеран Тарас Бойко подав заявку на курс 'Fullstack Web Розробка для ветеранів'.",
+      "Сформовано автоматичний кейс для супроводу в Державній службі зайнятості."
+    ]
+  },
+  {
+    "id": "TK-202609-EDB39C",
+    "user_id": "vet_taras_01",
+    "category": "legal",
+    "description": "[Перепризначено після розриву TK-202609-3F3BE8] Тестова справа для перевірки кнопки SOS",
+    "status": "IN_PROGRESS",
+    "community": "Канівська ТГ",
+    "attached_documents": [],
+    "specialist": {
+      "id": "spec_senior_supervisor",
+      "name": "Старший куратор ГО «Талан ЮА»",
+      "role": "Прямий координатор правління",
+      "rating": 5.0
+    },
+    "created_at": "2026-09-10T05:32:24.157247+00:00",
+    "updated_at": "2026-09-10T05:32:24.157251+00:00",
+    "messages": [
+      {
+        "sender": "system",
+        "text": "Справу передано на особистий контроль старшого куратора платформи.",
+        "timestamp": "2026-09-10T05:32:24.157254+00:00"
+      }
+    ],
+    "audit_trail": [
+      "Reassigned automatically from revoked ticket TK-202609-3F3BE8"
+    ]
+  },
+  {
+    "id": "TK-202609-3F3BE8",
+    "user_id": "vet_taras_01",
+    "category": "legal",
+    "description": "Тестова справа для перевірки кнопки SOS",
+    "status": "REVOKED_BY_VETERAN",
+    "community": "Канівська ТГ",
+    "attached_documents": [],
+    "specialist": {
+      "id": "spec_legal_01",
+      "name": "Юридична служба ветеранів «Талан ЮА»",
+      "role": "Адвокат з питань ВЛК та пільг",
+      "rating": 4.9
+    },
+    "created_at": "2026-09-10T05:32:24.141704+00:00",
+    "updated_at": "2026-09-10T05:32:24.141711+00:00",
+    "messages": [
+      {
+        "sender": "system",
+        "text": "Звернення зареєстровано. Фахівець прийняв справу в роботу.",
+        "timestamp": "2026-09-10T05:32:24.141713+00:00"
+      }
+    ],
+    "audit_trail": [
+      "Ticket created by vet_taras_01 in category legal",
+      "SOS Revocation by user vet_taras_01. Reason: unethical. Access to vault and chat immediately blocked."
+    ],
+    "revoked_at": "2026-09-10T05:32:24.157152+00:00",
+    "revocation_reason": "unethical",
+    "revocation_feedback": "Фахівець виявив неповагу та грубість під час телефонної розмови",
+    "access_revoked": true
+  },
+  {
+    "id": "TK-202609-0443EE",
+    "user_id": "vet_taras_01",
+    "category": "legal",
+    "description": "Потрібна консультація щодо проходження МСЕК та оскарження висновку ВЛК",
+    "status": "IN_PROGRESS",
+    "community": "Канівська ТГ",
+    "attached_documents": [
+      "DOC-202609-MOCK1"
+    ],
+    "specialist": {
+      "id": "spec_jurist_01",
+      "name": "Олександр Юрист",
+      "role": "Адвокат з питань ВЛК",
+      "accepted_at": "2026-09-10T06:28:39.189904+00:00"
+    },
+    "created_at": "2026-09-09T22:59:43.875595+00:00",
+    "updated_at": "2026-09-09T22:59:43.875604+00:00",
+    "messages": [
+      {
+        "sender": "system",
+        "text": "Звернення зареєстровано. Фахівець прийняв справу в роботу.",
+        "timestamp": "2026-09-09T22:59:43.875607+00:00"
+      }
+    ],
+    "audit_trail": [
+      "Ticket created by vet_taras_01 in category legal",
+      "Accepted by specialist Олександр Юрист (spec_jurist_01)",
+      "Cascaded to next level specialist queue"
+    ]
+  },
+  {
+    "id": "TK-202609-E3EE1B",
+    "user_id": "test_vet_stage3",
+    "category": "psychology",
+    "description": "Потрібна консультація щодо подолання тривожності та безсоння.",
+    "status": "IN_PROGRESS",
+    "community": "Вся Україна / Онлайн",
+    "attached_documents": [],
+    "specialist": {
+      "id": "spec_psychologist_44",
+      "name": "Оксана Мельник",
+      "role": "Кризовий психолог",
+      "accepted_at": "2026-09-08T00:26:57.795233+00:00"
+    },
+    "created_at": "2026-09-08T00:26:57.730333+00:00",
+    "updated_at": "2026-09-08T00:26:57.730429+00:00",
+    "messages": [
+      {
+        "sender": "system",
+        "text": "Звернення зареєстровано. Фахівець прийняв справу в роботу.",
+        "timestamp": "2026-09-08T00:26:57.730464+00:00"
+      }
+    ],
+    "audit_trail": [
+      "Ticket created by test_vet_stage3 in category psychology",
+      "Accepted by specialist Оксана Мельник (spec_psychologist_44)",
+      "Cascaded to next level specialist queue"
+    ]
+  },
+  {
+    "id": "TK-202609-712309",
+    "user_id": "test_vet_9988",
+    "category": "legal",
+    "description": "[Перепризначено після розриву TK-202609-861C91] Потрібна допомога з оскарженням рішення ВЛК та виплатами.",
+    "status": "IN_PROGRESS",
+    "community": "Канівська ТГ",
+    "attached_documents": [
+      "DOC-202609-9A0AA0"
+    ],
+    "specialist": {
+      "id": "spec_senior_supervisor",
+      "name": "Старший куратор ГО «Талан ЮА»",
+      "role": "Прямий координатор правління",
+      "rating": 5.0
+    },
+    "created_at": "2026-09-08T00:23:42.227629+00:00",
+    "updated_at": "2026-09-08T00:23:42.227682+00:00",
+    "messages": [
+      {
+        "sender": "system",
+        "text": "Справу передано на особистий контроль старшого куратора платформи.",
+        "timestamp": "2026-09-08T00:23:42.227712+00:00"
+      }
+    ],
+    "audit_trail": [
+      "Reassigned automatically from revoked ticket TK-202609-861C91"
+    ]
+  },
+  {
+    "id": "TK-202609-861C91",
+    "user_id": "test_vet_9988",
+    "category": "legal",
+    "description": "Потрібна допомога з оскарженням рішення ВЛК та виплатами.",
+    "status": "REVOKED_BY_VETERAN",
+    "community": "Канівська ТГ",
+    "attached_documents": [
+      "DOC-202609-9A0AA0"
+    ],
+    "specialist": {
+      "id": "spec_legal_01",
+      "name": "Юридична служба ветеранів «Талан ЮА»",
+      "role": "Адвокат з питань ВЛК та пільг",
+      "rating": 4.9
+    },
+    "created_at": "2026-09-08T00:23:41.965377+00:00",
+    "updated_at": "2026-09-08T00:23:41.965444+00:00",
+    "messages": [
+      {
+        "sender": "system",
+        "text": "Звернення зареєстровано. Фахівець прийняв справу в роботу.",
+        "timestamp": "2026-09-08T00:23:41.965478+00:00"
+      }
+    ],
+    "audit_trail": [
+      "Ticket created by test_vet_9988 in category legal",
+      "SOS Revocation by user test_vet_9988. Reason: unethical. Access to vault and chat immediately blocked."
+    ],
+    "revoked_at": "2026-09-08T00:23:42.226957+00:00",
+    "revocation_reason": "unethical",
+    "revocation_feedback": "Фахівець некоректно спілкувався",
+    "access_revoked": true
+  }
+]
