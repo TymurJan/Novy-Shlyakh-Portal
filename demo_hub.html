@@ -404,34 +404,115 @@
                 </button>
             </div>
 
-            <!-- 2. Фахівець (Юрист / Психолог) -->
-            <div class="hub-card card-specialist">
+            <!-- 4. Фахівець із супроводу ветеранів (Окрема посада) -->
+            <div class="hub-card card-specialist" style="border-top: 4px solid #3B82F6;">
                 <div>
                     <div class="card-header-row">
                         <div class="card-icon-title">
-                            <div class="card-icon">💼</div>
+                            <div class="card-icon" style="background: rgba(59, 130, 246, 0.15);">🏛️</div>
                             <div>
-                                <h3 class="card-title">Фахівець (Юрист / Психолог)</h3>
+                                <h3 class="card-title">Фахівець із супроводу ветеранів</h3>
                             </div>
                         </div>
-                        <span class="card-role-tag">ROLE_SPECIALIST</span>
+                        <span class="card-role-tag" style="background: rgba(59, 130, 246, 0.2); color: #93C5FD;">ROLE_SPECIALIST_GOV</span>
                     </div>
                     <p class="card-description">
-                        Робоче місце верифікованого експерта підтримки ветеранів та їхніх сімей.
+                        Офіційний фахівець супроводу ветеранів та демобілізованих осіб (Постанова КМУ № 881, Наказ № 7).
                     </p>
                     <ul class="card-features-list">
-                        <li><span>✓</span> 📬 Вхідні звернення ветеранів за категоріями</li>
-                        <li><span>✓</span> 📜 Юридичний договір та NDA з реквізитами ГО</li>
-                        <li><span>✓</span> 🛡️ 403 Security Gate для непідписаних партнерів</li>
+                        <li><span>✓</span> 📋 Оцінка потреб за 5 сферами (Додаток 1 до Наказу № 7)</li>
+                        <li><span>✓</span> 📑 Формування Індивідуального плану заходів</li>
+                        <li><span>✓</span> 📤 Швидкий експорт 3 блоків справи для внесення в CRM «ОСКАР»</li>
+                        <li><span>✓</span> 🛡️ Вхід через Варіант Б (особиста Дія) або Варіант А (штат установи)</li>
+                    </ul>
+                </div>
+                <button class="btn-launch-role" onclick="launchProfile('specialist', 'partner-inbox')">
+                    🚀 Відкрити Кабінет Фахівця Супроводу
+                </button>
+            </div>
+
+            <!-- 5. Профільний Експерт-Партнер (Юрист / Психолог ProBono) -->
+            <div class="hub-card card-specialist" style="border-top: 4px solid #8B5CF6;">
+                <div>
+                    <div class="card-header-row">
+                        <div class="card-icon-title">
+                            <div class="card-icon" style="background: rgba(139, 92, 246, 0.15);">⚖️</div>
+                            <div>
+                                <h3 class="card-title">Профільний Експерт (Юрист / Психолог)</h3>
+                            </div>
+                        </div>
+                        <span class="card-role-tag" style="background: rgba(139, 92, 246, 0.2); color: #C4B5FD;">ROLE_PARTNER_EXPERT</span>
+                    </div>
+                    <p class="card-description">
+                        Залучений фахівець партнерської мережі ГО «Талан ЮА» для надання вузькопрофільних консультацій.
+                    </p>
+                    <ul class="card-features-list">
+                        <li><span>✓</span> 📬 Вхідні звернення ветеранів за фахом (ВЛК, ПТСР, реабілітація)</li>
+                        <li><span>✓</span> 📜 Юридичний договір та NDA з ГО «Талан ЮА»</li>
+                        <li><span>✓</span> 🛡️ 403 Security Gate для непідписаних експертів</li>
                         <li><span>✓</span> ✍️ Підписання через BankID / Дія.Підпис / КЕП</li>
                     </ul>
                 </div>
                 <button class="btn-launch-role" onclick="launchProfile('specialist', 'partner-inbox')">
-                    🚀 Відкрити Кабінет Фахівця
+                    🚀 Відкрити Кабінет Експерта-Партнера
                 </button>
             </div>
 
-            <!-- 3. Роботодавець -->
+            <!-- 6. Державна / Комунальна Установа (ОМС / Простір громади) -->
+            <div class="hub-card card-dispatcher" style="border-top: 4px solid #06B6D4;">
+                <div>
+                    <div class="card-header-row">
+                        <div class="card-icon-title">
+                            <div class="card-icon" style="background: rgba(6, 182, 212, 0.15);">🏛️</div>
+                            <div>
+                                <h3 class="card-title">Комунальна Установа / ОМС</h3>
+                            </div>
+                        </div>
+                        <span class="card-role-tag" style="background: rgba(6, 182, 212, 0.2); color: #67E8F9;">ROLE_STATE_BODY</span>
+                    </div>
+                    <p class="card-description">
+                        Офіційний кабінет органу місцевого самоврядування або комунального закладу громади.
+                    </p>
+                    <ul class="card-features-list">
+                        <li><span>✓</span> 👥 Управління штатом Фахівців із супроводу громади</li>
+                        <li><span>✓</span> 📑 Реєстр офіційних Меморандумів з ГО «Талан ЮА»</li>
+                        <li><span>✓</span> 🗺️ Моніторинг загальної ємності та звернень ветеранів ТГ</li>
+                        <li><span>✓</span> 🔑 Автоматичне закріплення прав для штатних фахівців</li>
+                    </ul>
+                </div>
+                <button class="btn-launch-role" onclick="launchProfile('state_body', 'overview')">
+                    🚀 Відкрити Кабінет Установи / ОМС
+                </button>
+            </div>
+
+            <!-- 7. Координатор Ветеранського Простору / Хабу (ГО / БФ) -->
+            <div class="hub-card card-dispatcher">
+                <div>
+                    <div class="card-header-row">
+                        <div class="card-icon-title">
+                            <div class="card-icon">🤝</div>
+                            <div>
+                                <h3 class="card-title">Координатор Простору / Хабу ГО</h3>
+                            </div>
+                        </div>
+                        <span class="card-role-tag">ROLE_DISPATCHER</span>
+                    </div>
+                    <p class="card-description">
+                        Робоче місце координатора громадського або волонтерського ветеранського простору.
+                    </p>
+                    <ul class="card-features-list">
+                        <li><span>✓</span> 📋 Первинний офлайн-прийом ветеранів без смартфона</li>
+                        <li><span>✓</span> 🔑 Автогенерація Magic Token (30 днів, без пароля)</li>
+                        <li><span>✓</span> 🖨️ Друк Дорожньої карти на бланку А4 з QR-кодом</li>
+                        <li><span>✓</span> 📲 Маршрутизація до фахівців супроводу та партнерів</li>
+                    </ul>
+                </div>
+                <button class="btn-launch-role" onclick="launchProfile('dispatcher', 'dispatcher')">
+                    🚀 Відкрити Робоче Місце Координатора
+                </button>
+            </div>
+
+            <!-- 8. Роботодавець -->
             <div class="hub-card card-employer">
                 <div>
                     <div class="card-header-row">
@@ -458,7 +539,7 @@
                 </button>
             </div>
 
-            <!-- 4. Освітній Провайдер -->
+            <!-- 9. Освітній Провайдер -->
             <div class="hub-card card-provider">
                 <div>
                     <div class="card-header-row">
@@ -485,34 +566,7 @@
                 </button>
             </div>
 
-            <!-- 5. Оператор прийому / Ветеранський простір (Офлайн-прийом) -->
-            <div class="hub-card card-dispatcher">
-                <div>
-                    <div class="card-header-row">
-                        <div class="card-icon-title">
-                            <div class="card-icon">🏛️</div>
-                            <div>
-                                <h3 class="card-title">Оператор Ветеранського Простору / Хабу</h3>
-                            </div>
-                        </div>
-                        <span class="card-role-tag">ROLE_DISPATCHER</span>
-                    </div>
-                    <p class="card-description">
-                        Офлайн-інструмент для фахівців супроводу та координаторів ветеранських просторів громад.
-                    </p>
-                    <ul class="card-features-list">
-                        <li><span>✓</span> 📋 Первинна реєстрація ветерана без гаджета</li>
-                        <li><span>✓</span> 🔑 Автогенерація Magic Token (30 днів, без пароля)</li>
-                        <li><span>✓</span> 🖨️ Друк Дорожньої карти на бланку А4 з QR-кодом</li>
-                        <li><span>✓</span> 📲 Миттєвий перехід ветерана в онлайн-кабінет</li>
-                    </ul>
-                </div>
-                <button class="btn-launch-role" onclick="launchProfile('dispatcher', 'dispatcher')">
-                    🚀 Відкрити Робоче Місце Оператора
-                </button>
-            </div>
-
-            <!-- 6. Керівник ГО «Талан ЮА» -->
+            <!-- 10. Керівник ГО «Талан ЮА» -->
             <div class="hub-card card-orglead">
                 <div>
                     <div class="card-header-row">
@@ -785,13 +839,40 @@
                     is_online: true
                 }
             },
+            state_body: {
+                id: 'org_state_kaniv_01',
+                name: 'Канівська міська рада (ОМС / Комунальна установа)',
+                callsign: 'Адміністратор громади',
+                phone: '+380 (4736) 3-00-11',
+                primary_role: 'state_body',
+                roles: ['ROLE_STATE_BODY', 'ROLE_ORGANIZATION', 'ROLE_PARTNER'],
+                veteran_role: 'state_body',
+                is_veteran: false,
+                is_family_member: false,
+                auth_provider: 'diia_kep',
+                diia_verified: true,
+                community: 'Канівська ТГ',
+                profiles_by_role: {
+                    state_body: {
+                        institution_name: 'Виконавчий комітет Канівської міської ради',
+                        edrpou: '04061545',
+                        position: 'Уповноважена особа з ветеранської політики'
+                    }
+                },
+                geo_context: {
+                    community: 'Канівська ТГ',
+                    settlement: 'м. Канів',
+                    region: 'Черкаська область',
+                    is_online: true
+                }
+            },
             dispatcher: {
                 id: 'hub_kaniv_01',
                 name: 'Ірина (Ветеранський простір Канівщини)',
                 callsign: 'Оператор прийому',
                 phone: '+380 (4736) 3-45-67',
                 primary_role: 'dispatcher',
-                roles: ['ROLE_STATE_BODY', 'ROLE_DISPATCHER', 'ROLE_PARTNER'],
+                roles: ['ROLE_DISPATCHER', 'ROLE_PARTNER'],
                 veteran_role: 'dispatcher',
                 is_veteran: false,
                 is_family_member: false,

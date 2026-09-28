@@ -231,7 +231,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 cabStatusTag.style.background = "rgba(139, 92, 246, 0.2)";
                 cabStatusTag.style.color = "#c4b5fd";
             } else if (roleKey === 'dispatcher') {
-                cabStatusTag.textContent = "🏛️ Оператор Ветеранського Простору / ЦНАП";
+                cabStatusTag.textContent = "🏛️ Оператор Ветеранського Простору";
                 cabStatusTag.style.background = "rgba(236, 72, 153, 0.2)";
                 cabStatusTag.style.color = "#fbcfe8";
             } else if (roleKey === 'org_lead') {

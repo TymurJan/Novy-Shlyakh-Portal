@@ -117,13 +117,13 @@
                             </div>
                         </form>
 
-                        <!-- 4. Офлайн через ЦНАП / Ветеранський простір -->
+                        <!-- 4. Офлайн через Ветеранський простір / Хаб -->
                         <a href="communities.html" class="softgate-btn-option" id="btnSoftgateOffline">
                             <div class="softgate-btn-left">
                                 <div class="softgate-opt-icon">🏛️</div>
                                 <div>
-                                    <span class="softgate-opt-title">Звернутися особисто (ЦНАП)</span>
-                                    <span class="softgate-opt-sub">Ветеранські простори та ЦНАПи у громадах</span>
+                                    <span class="softgate-opt-title">Звернутися особисто (Ветеранський простір)</span>
+                                    <span class="softgate-opt-sub">Офлайн-центри та ветеранські простори громад</span>
                                 </div>
                             </div>
                             <span class="softgate-arrow" aria-hidden="true">➔</span>
