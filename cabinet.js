@@ -231,7 +231,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 cabStatusTag.style.background = "rgba(139, 92, 246, 0.2)";
                 cabStatusTag.style.color = "#c4b5fd";
             } else if (roleKey === 'dispatcher') {
-                cabStatusTag.textContent = "🏛️ Оператор прийому / Супровід";
+                cabStatusTag.textContent = "🏛️ Оператор Ветеранського Простору / ЦНАП";
                 cabStatusTag.style.background = "rgba(236, 72, 153, 0.2)";
                 cabStatusTag.style.color = "#fbcfe8";
             } else if (roleKey === 'org_lead') {
@@ -239,15 +239,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                 cabStatusTag.style.background = "rgba(20, 184, 166, 0.2)";
                 cabStatusTag.style.color = "#99f6e4";
             } else if (roleKey === 'specialist') {
-                cabStatusTag.textContent = "💼 Верифікований партнер";
+                cabStatusTag.textContent = "💼 Фахівець супроводу (Кейс-менеджер)";
                 cabStatusTag.style.background = "rgba(59, 130, 246, 0.2)";
                 cabStatusTag.style.color = "#93c5fd";
             } else if (currentUser.veteran_role === 'family') {
                 cabStatusTag.textContent = "👨‍👩‍👧 Член родини ветерана";
                 cabStatusTag.style.background = "rgba(168, 85, 247, 0.2)";
                 cabStatusTag.style.color = "#d8b4fe";
+            } else if (!currentUser.diia_verified && !currentUser.is_verified_gov) {
+                cabStatusTag.textContent = "📝 Ветеран (До верифікації)";
+                cabStatusTag.style.background = "rgba(239, 68, 68, 0.15)";
+                cabStatusTag.style.color = "#fca5a5";
             } else {
-                cabStatusTag.textContent = "🎖️ Ветеран (УБД)";
+                cabStatusTag.textContent = "🎖️ Ветеран (🛡️ Верифікований)";
                 cabStatusTag.style.background = "rgba(16, 185, 129, 0.2)";
                 cabStatusTag.style.color = "#6ee7b7";
             }
@@ -259,10 +263,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             else if (roleKey === 'org_lead') cabAvatar.textContent = '🏢';
             else if (roleKey === 'specialist') cabAvatar.textContent = '💼';
             else if (currentUser.veteran_role === 'family') cabAvatar.textContent = '👨‍👩‍👧';
+            else if (!currentUser.diia_verified && !currentUser.is_verified_gov) cabAvatar.textContent = '🆕';
             else cabAvatar.textContent = '🎖️';
         }
         if (cabVerifiedBadge) {
-            cabVerifiedBadge.style.display = (!isGuest && (currentUser.diia_verified || currentUser.auth_provider)) ? 'inline-flex' : 'none';
+            cabVerifiedBadge.style.display = (!isGuest && (currentUser.diia_verified || currentUser.is_verified_gov)) ? 'inline-flex' : 'none';
         }
     }
 
