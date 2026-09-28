@@ -15,7 +15,43 @@
     "phone": "+380501234567",
     "community": "Канівська ТГ (м. Канів)",
     "preferred_channel": "telegram",
-    "updated_at": "2026-09-09T22:58:31.925792+00:00"
+    "updated_at": "2026-09-27T20:19:33.918905+00:00",
+    "roles": [
+      "undefined"
+    ],
+    "veteran_status_type": "ubd",
+    "military_unit": "72 ОМБр",
+    "needs_matrix": {
+      "medical": true,
+      "legal": false,
+      "psychological": false,
+      "housing": false,
+      "employment": false
+    },
+    "auth_source": "manual",
+    "is_verified_gov": true,
+    "profiles_by_role": {
+      "undefined": {
+        "callsign": "Друг Сокіл",
+        "phone": "+380501234567",
+        "community": "Канівська ТГ (м. Канів)",
+        "preferred_channel": "telegram",
+        "veteran_status_type": "ubd",
+        "certificate_series": "",
+        "certificate_number": "",
+        "military_unit": "72 ОМБр",
+        "needs_matrix": {
+          "medical": true,
+          "legal": false,
+          "psychological": false,
+          "housing": false,
+          "employment": false
+        },
+        "auth_source": "manual",
+        "is_verified_gov": true,
+        "updated_at": "2026-09-27T20:19:33.918905+00:00"
+      }
+    }
   },
   "vet_multi_001": {
     "user_id": "vet_multi_001",

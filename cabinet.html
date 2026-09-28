@@ -165,16 +165,88 @@
                         
                         <!-- 1. КОНТЕКСТНА СЕКЦІЯ: ВЕТЕРАН (УБД) -->
                         <div id="sectionFieldsVeteran" class="cab-role-context-section full-width">
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                            
+                            <!-- Блок 1-клікового автозаповнення (Дія / BankID) виключно для ветерана -->
+                            <div id="cabVeteranAutofillBanner" class="cab-autofill-banner">
+                                <div class="cab-autofill-header">
+                                    <div class="cab-autofill-icon" aria-hidden="true">⚡</div>
+                                    <div>
+                                        <h4 class="cab-autofill-title">Швидке автозаповнення анкети</h4>
+                                        <p class="cab-autofill-desc">Бажаєте заповнити анкету без ручного вводу? Підтягніть офіційні дані та статус за 5 секунд:</p>
+                                    </div>
+                                </div>
+                                <div class="cab-autofill-actions" id="cabAutofillActions">
+                                    <button type="button" class="btn-autofill-diia" id="btnAutofillDiia" title="Підтягнути дані з застосунку Дія">
+                                        <span class="diia-logo-pill">Дія</span> 🛡️ Автозаповнити через Дію
+                                    </button>
+                                    <button type="button" class="btn-autofill-bankid" id="btnAutofillBankId" title="Підтягнути дані через BankID НБУ">
+                                        🏦 Автозаповнити через BankID
+                                    </button>
+                                </div>
+                                <div id="cabAutofillStatusVerified" class="cab-autofill-verified-box" style="display: none;">
+                                    <span class="badge-verified-glow">🛡️ ВЕРИФІКОВАНО ДЕРЖАВОЮ</span>
+                                    <span id="cabVerifiedDetailsText" style="font-size: 12px; color: #94A3B8;">Дані та посвідчення підтверджено</span>
+                                </div>
+                            </div>
+
+                            <!-- Поля анкети ветерана -->
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px;">
                                 <div class="cab-form-group">
-                                    <label class="cab-label" for="cabInputCallsign">Як до мене звертатися (Ім'я або позивний):</label>
+                                    <label class="cab-label" for="cabInputCallsign">Як до мене звертатися (Ім'я або позивний): <span class="cab-opt-hint">(за бажанням)</span></label>
                                     <input type="text" id="cabInputCallsign" class="cab-input" placeholder="Наприклад: Друг Сивий або Тарас">
                                 </div>
+                                <div class="cab-form-group">
+                                    <label class="cab-label" for="cabVeteranStatusSelect">Соціально-військовий статус: <span class="cab-opt-hint">(за бажанням)</span></label>
+                                    <select id="cabVeteranStatusSelect" class="cab-input">
+                                        <option value="ubd">🎖️ Учасник бойових дій (УБД)</option>
+                                        <option value="disability_war_1">♿ Особа з інвалідністю внаслідок війни I групи</option>
+                                        <option value="disability_war_2">♿ Особа з інвалідністю внаслідок війни II групи</option>
+                                        <option value="disability_war_3">♿ Особа з інвалідністю внаслідок війни III групи</option>
+                                        <option value="combatant">⚔️ Учасник війни / Демобілізований</option>
+                                        <option value="family_member">👨‍👩‍👦 Член сім'ї Захисника / Захисниці</option>
+                                        <option value="family_deceased">🕯️ Член сім'ї полеглого Героя</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px;">
+                                <div class="cab-form-group">
+                                    <label class="cab-label" for="cabInputCertNumber">Серія та № посвідчення: <span class="cab-opt-hint">(за бажанням / з Дії)</span></label>
+                                    <input type="text" id="cabInputCertNumber" class="cab-input" placeholder="Наприклад: УБД № 123456">
+                                </div>
                                 <div class="cab-form-group" id="groupMilitaryUnit">
-                                    <label class="cab-label" for="cabInputMilitaryUnit">Військова частина / Підрозділ (за бажанням):</label>
+                                    <label class="cab-label" for="cabInputMilitaryUnit">Військова частина / Підрозділ: <span class="cab-opt-hint">(за бажанням)</span></label>
                                     <input type="text" id="cabInputMilitaryUnit" class="cab-input" placeholder="Наприклад: 72 ОМБр / 118 ОБрТрО">
                                 </div>
                             </div>
+
+                            <!-- Матриця 5 сфер потреб Наказу Мінветеранів № 7 -->
+                            <div class="cab-form-group full-width" style="margin-top: 14px;">
+                                <label class="cab-label">Актуальні напрямки підтримки (Наказ Мінветеранів № 7): <span class="cab-opt-hint">(оберіть потрібне за бажанням)</span></label>
+                                <div class="cab-needs-matrix-grid">
+                                    <label class="cab-need-chip">
+                                        <input type="checkbox" id="needMedRehab" value="medical">
+                                        <span>🏥 Здоров'я, реабілітація, протезування, Ашрам</span>
+                                    </label>
+                                    <label class="cab-need-chip">
+                                        <input type="checkbox" id="needLegal" value="legal">
+                                        <span>⚖️ Юридична допомога, ВЛК, МСЕК, виплати</span>
+                                    </label>
+                                    <label class="cab-need-chip">
+                                        <input type="checkbox" id="needPsy" value="psychological">
+                                        <span>🧠 Психологічна підтримка, декомпресія</span>
+                                    </label>
+                                    <label class="cab-need-chip">
+                                        <input type="checkbox" id="needHousing" value="housing">
+                                        <span>🏠 Житлово-побутові потреби, субсидії ЖКП</span>
+                                    </label>
+                                    <label class="cab-need-chip">
+                                        <input type="checkbox" id="needJobEdu" value="employment">
+                                        <span>💼 Робота, ваучери ДСЗ, ветеранський бізнес</span>
+                                    </label>
+                                </div>
+                            </div>
+
                         </div>
 
                         <!-- 1.1. КОНТЕКСТНА СЕКЦІЯ: ЧЛЕН РОДИНИ ВЕТЕРАНА -->
@@ -309,7 +381,7 @@
 
                         <!-- ЗАГАЛЬНІ КОНТАКТНІ ПОЛЯ -->
                         <div class="cab-form-group">
-                            <label class="cab-label" for="cabInputPhone">Контактний номер телефону:</label>
+                            <label class="cab-label" for="cabInputPhone">Контактний номер телефону: <span style="color: #EF4444; font-weight: 700;">* (обов'язково для зв'язку)</span></label>
                             <div style="display: flex; gap: 8px;">
                                 <input type="tel" id="cabInputPhone" class="cab-input" placeholder="+380 (__) ___-__-__">
                                 <button type="button" class="btn-secondary" id="btnCabSharePhone" style="white-space: nowrap; font-size: 13px; font-weight: 700; padding: 0 14px; background: #0F172A; color: #38BDF8; border: 1.5px solid #38BDF8; border-radius: 8px; cursor: pointer;">
@@ -944,40 +1016,80 @@
                 <p>Заповнюється оператором Ветеранського простору / Хабу зі слів людини. Після збереження буде сформовано дорожню карту для друку.</p>
             </div>
             <form id="formDispatcherIntake" class="cab-modal-form">
-                <div class="cab-form-group">
-                    <label class="cab-label">ПІБ або позивний ветерана / члена родини:</label>
-                    <input type="text" id="dispVeteranName" class="cab-input" placeholder="Наприклад: Коваленко Тарас Іванович (або Друг Сокіл)" required>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="cab-form-group">
+                        <label class="cab-label">ПІБ або позивний ветерана / родини: <span style="color: #ef4444;">*</span></label>
+                        <input type="text" id="dispVeteranName" class="cab-input" placeholder="Наприклад: Коваленко Тарас Іванович" required>
+                    </div>
+                    <div class="cab-form-group">
+                        <label class="cab-label">Контактний телефон: <span style="color: #ef4444;">*</span></label>
+                        <input type="tel" id="dispVeteranPhone" class="cab-input" placeholder="+380 (__) ___-__-__" required>
+                    </div>
                 </div>
-                <div class="cab-form-group">
-                    <label class="cab-label">Контактний телефон (мобільний або кнопочний):</label>
-                    <input type="tel" id="dispVeteranPhone" class="cab-input" placeholder="+380 (__) ___-__-__" required>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="cab-form-group">
+                        <label class="cab-label">Соціально-військовий статус (Наказ № 7):</label>
+                        <select id="dispVeteranStatus" class="cab-input">
+                            <option value="ubd">🎖️ Учасник бойових дій (УБД)</option>
+                            <option value="disability_war_1">♿ Особа з інвалідністю внаслідок війни I групи</option>
+                            <option value="disability_war_2">♿ Особа з інвалідністю внаслідок війни II групи</option>
+                            <option value="disability_war_3">♿ Особа з інвалідністю внаслідок війни III групи</option>
+                            <option value="combatant">⚔️ Учасник війни / Демобілізований</option>
+                            <option value="family_member">👨‍👩‍👦 Член сім'ї Захисника / Захисниці</option>
+                            <option value="family_deceased">🕯️ Член сім'ї полеглого Героя</option>
+                        </select>
+                    </div>
+                    <div class="cab-form-group">
+                        <label class="cab-label">№ посвідчення (за наявності):</label>
+                        <input type="text" id="dispCertNumber" class="cab-input" placeholder="Наприклад: УБД № 123456">
+                    </div>
                 </div>
+
                 <div class="cab-form-group">
                     <label class="cab-label">Громада / Населений пункт (КАТОТТГ):</label>
                     <input type="text" id="dispVeteranCommunity" class="cab-input" placeholder="Введіть село або місто (Черкаська область)" required autocomplete="off">
                     <div id="dispGeoAutocomplete" class="cab-autocomplete-dropdown"></div>
                 </div>
+
+                <!-- 5 сфер потреб за Наказом Мінветеранів № 7 -->
                 <div class="cab-form-group">
-                    <label class="cab-label">Напрямок допомоги:</label>
-                    <select id="dispCategory" class="cab-input" required>
-                        <option value="legal">⚖️ Юридична допомога (ВЛК, МСЕК, виплати, УБД)</option>
-                        <option value="psychology">🌿 Психологічна підтримка та адаптація</option>
-                        <option value="education">🎓 Освіта, перекваліфікація та ваучери</option>
-                        <option value="rehab">🏥 Реабілітація, санаторії та здоров'я</option>
-                        <option value="social">🏢 Соціальні пільги громади та житло</option>
-                    </select>
+                    <label class="cab-label">Виявлені потреби ветерана (Наказ Мінветеранів № 7):</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px;">
+                        <label class="cab-need-chip" style="padding: 8px 10px; font-size: 11px;">
+                            <input type="checkbox" id="dispNeedMed" value="medical">
+                            <span>🏥 Здоров'я / Протези / Ашрам</span>
+                        </label>
+                        <label class="cab-need-chip" style="padding: 8px 10px; font-size: 11px;">
+                            <input type="checkbox" id="dispNeedLegal" value="legal" checked>
+                            <span>⚖️ Юридична допомога / ВЛК</span>
+                        </label>
+                        <label class="cab-need-chip" style="padding: 8px 10px; font-size: 11px;">
+                            <input type="checkbox" id="dispNeedPsy" value="psychological">
+                            <span>🧠 Психологічна допомога</span>
+                        </label>
+                        <label class="cab-need-chip" style="padding: 8px 10px; font-size: 11px;">
+                            <input type="checkbox" id="dispNeedHousing" value="housing">
+                            <span>🏠 Житло / Субсидії ЖКП</span>
+                        </label>
+                        <label class="cab-need-chip" style="grid-column: span 2; padding: 8px 10px; font-size: 11px;">
+                            <input type="checkbox" id="dispNeedJob" value="employment">
+                            <span>💼 Робота / Ваучери ДСЗ (30 280 грн) / Бізнес</span>
+                        </label>
+                    </div>
                 </div>
+
                 <div class="cab-form-group">
                     <label class="cab-label">Короткий опис проблеми зі слів ветерана:</label>
-                    <textarea id="dispDescription" class="cab-input" rows="3" placeholder="Опишіть ситуацію та з чим конкретно потрібна допомога" required></textarea>
+                    <textarea id="dispDescription" class="cab-input" rows="2" placeholder="Опишіть ситуацію та з чим конкретно потрібна допомога" required></textarea>
                 </div>
                 <div class="cab-form-group">
-                    <label class="cab-label">Маршрутизація (Призначити фахівця або у загальний пул):</label>
+                    <label class="cab-label">Маршрутизація (Призначити фахівця або у відкритий пул):</label>
                     <select id="dispAssignSpecialist" class="cab-input">
                         <option value="">🌐 Направити у відкритий пул фахівців громади (Швидкий підбір)</option>
                         <option value="spec_jurist_01">⚖️ Юрист ГО «Талан ЮА» (Адвокатський супровід ВЛК)</option>
                         <option value="spec_psych_02">🌿 Психологічна служба ветеранів Черкащини</option>
-                        <option value="spec_rehab_03">🏥 Центр медичної та фізичної реабілітації</option>
+                        <option value="spec_rehab_03">🏥 Центр реабілітації та декомпресії «Ашрам»</option>
                     </select>
                 </div>
                 <div class="cab-modal-actions" style="margin-top: 20px;">
@@ -1614,10 +1726,84 @@
         </div>
     </div>
 
+    <!-- Модальне вікно: Швидке копіювання блоків справи (Стандарт Мінветеранів) -->
+    <div class="cab-modal-overlay" id="modalExportCaseBlocks" style="display: none;">
+        <div class="cab-modal-box" style="max-width: 720px; width: 95%; max-height: 90vh; overflow-y: auto;">
+            <div class="cab-modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px; margin-bottom: 16px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 24px;">📋</span>
+                    <div>
+                        <h3 style="margin: 0; color: #F8FAFC; font-size: 1.25rem;">Швидке копіювання даних справи</h3>
+                        <p style="margin: 2px 0 0; color: #94A3B8; font-size: 0.85rem;">Стандарт Мінветеранів (Наказ № 7) • Копіювання готовими блоками</p>
+                    </div>
+                </div>
+                <button class="cab-modal-close" id="btnCloseModalExportBlocks">✕</button>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; margin-bottom: 14px;">
+                <button type="button" class="btn-primary btn-sm" id="btnCopyAllBlocks" style="background: #3B82F6; border-color: #3B82F6; font-weight: 700; padding: 8px 16px;">
+                    📋 Скопіювати ВСЮ справу одним текстом
+                </button>
+            </div>
+
+            <!-- Блок 1: Профіль ветерана -->
+            <div class="cab-export-block" style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 14px; margin-bottom: 14px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <b style="color: #60A5FA; font-size: 0.95rem;">👤 Блок 1: Профіль та контакти</b>
+                    <button type="button" class="btn-secondary btn-sm btn-copy-part" data-target="exportBlock1Text" style="padding: 4px 12px; font-size: 12px;">
+                        📋 Скопіювати блок 1
+                    </button>
+                </div>
+                <pre id="exportBlock1Text" style="margin: 0; white-space: pre-wrap; font-family: monospace; font-size: 12.5px; color: #E2E8F0; background: rgba(0,0,0,0.25); padding: 10px; border-radius: 6px;"></pre>
+            </div>
+
+            <!-- Блок 2: Оцінка потреб 5 сфер -->
+            <div class="cab-export-block" style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 14px; margin-bottom: 14px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <b style="color: #34D399; font-size: 0.95rem;">🎯 Блок 2: Оцінка потреб (5 сфер Наказу № 7)</b>
+                    <button type="button" class="btn-secondary btn-sm btn-copy-part" data-target="exportBlock2Text" style="padding: 4px 12px; font-size: 12px;">
+                        📋 Скопіювати блок 2
+                    </button>
+                </div>
+                <pre id="exportBlock2Text" style="margin: 0; white-space: pre-wrap; font-family: monospace; font-size: 12.5px; color: #E2E8F0; background: rgba(0,0,0,0.25); padding: 10px; border-radius: 6px;"></pre>
+            </div>
+
+            <!-- Блок 3: План заходів та маршрутизація -->
+            <div class="cab-export-block" style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 14px; margin-bottom: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <b style="color: #FBBF24; font-size: 0.95rem;">🤝 Блок 3: План заходів та закріплений фахівець</b>
+                    <button type="button" class="btn-secondary btn-sm btn-copy-part" data-target="exportBlock3Text" style="padding: 4px 12px; font-size: 12px;">
+                        📋 Скопіювати блок 3
+                    </button>
+                </div>
+                <pre id="exportBlock3Text" style="margin: 0; white-space: pre-wrap; font-family: monospace; font-size: 12.5px; color: #E2E8F0; background: rgba(0,0,0,0.25); padding: 10px; border-radius: 6px;"></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальне вікно: Друкований бланк Наказу Мінветеранів № 7 (PDF) -->
+    <div class="cab-modal-overlay" id="modalPrintOrder7" style="display: none;">
+        <div class="cab-modal-box" style="max-width: 820px; width: 95%; max-height: 92vh; overflow-y: auto;">
+            <div class="no-print" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px; margin-bottom: 16px;">
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <button type="button" class="btn-primary" id="btnPrintOrder7Exec" style="font-weight: 700; padding: 8px 18px; background: #10B981; border-color: #10B981;">
+                        🖨️ Друкувати офіційний бланк (PDF / А4)
+                    </button>
+                </div>
+                <button class="cab-modal-close" id="btnCloseModalOrder7">✕</button>
+            </div>
+
+            <!-- Бланк А4 за стандартом Наказу № 7 -->
+            <div class="cab-roadmap-a4-sheet" id="order7A4Content" style="background: #FFFFFF; color: #000000; padding: 24px; font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.3;">
+                <!-- Динамічний рендеринг бланка Наказу № 7 -->
+            </div>
+        </div>
+    </div>
+
     <!-- Підключення скриптів -->
-    <script src="soft_gate.js?v=46"></script>
-    <script src="auth_session.js?v=46"></script>
-    <script src="cabinet.js?v=46"></script>
-    <script src="demo_switcher.js?v=46"></script>
+    <script src="soft_gate.js?v=48"></script>
+    <script src="auth_session.js?v=48"></script>
+    <script src="cabinet.js?v=48"></script>
+    <script src="demo_switcher.js?v=48"></script>
 </body>
 </html>

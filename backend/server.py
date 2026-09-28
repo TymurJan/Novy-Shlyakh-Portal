@@ -1407,10 +1407,18 @@ async def diia_auth_callback(payload: Dict[str, Any]):
             "user": {
                 "id": f"diia_{user_info.get('rnokpp', '12345')}",
                 "name": f"{user_info.get('last_name', '')} {user_info.get('first_name', '')} {user_info.get('middle_name', '')}".strip(),
+                "first_name": user_info.get("first_name", ""),
+                "last_name": user_info.get("last_name", ""),
+                "middle_name": user_info.get("middle_name", ""),
                 "rnokpp": user_info.get("rnokpp"),
+                "phone": user_info.get("phone", "+380671234567"),
                 "is_veteran": True,
-                "veteran_status": user_info.get("veteran_status", "УБД"),
-                "document_number": user_info.get("document_number"),
+                "veteran_status_type": "ubd",
+                "veteran_status": user_info.get("veteran_status", "УБД (Учасник бойових дій)"),
+                "certificate_series": "УБД",
+                "certificate_number": user_info.get("document_number", "УБД-2024-88419"),
+                "auth_source": "diia",
+                "is_verified_gov": True,
                 "geo_context": {
                     "community": user_info.get("registered_community", "Черкаська ТГ"),
                     "settlement": user_info.get("settlement", "Черкаси"),
@@ -1513,9 +1521,14 @@ async def bankid_auth_callback(payload: Dict[str, Any]):
             "user": {
                 "id": f"bankid_{rnokpp}",
                 "name": user_name,
+                "first_name": customer.get("first_name", ""),
+                "last_name": customer.get("last_name", ""),
+                "middle_name": customer.get("middle_name", ""),
                 "rnokpp": rnokpp,
-                "phone": customer.get("phone"),
+                "phone": customer.get("phone", "+380679876543"),
                 "email": customer.get("email"),
+                "auth_source": "bankid",
+                "is_verified_gov": True,
                 "geo_context": {
                     "community": addr.get("community", "Черкаська ТГ"),
                     "settlement": addr.get("settlement", "Черкаси"),
@@ -1643,6 +1656,14 @@ class UserProfileSaveRequest(BaseModel):
     phone: Optional[str] = ""
     community: Optional[str] = "Черкаська ТГ"
     preferred_channel: Optional[str] = "telegram"
+    # Поля стандартизованої анкети ветерана за Наказом Мінветеранів № 7 (необов'язкові):
+    veteran_status_type: Optional[str] = None  # ubd, disability_war_1, disability_war_2, disability_war_3, combatant, family_member, family_deceased
+    certificate_series: Optional[str] = ""
+    certificate_number: Optional[str] = ""
+    military_unit: Optional[str] = ""
+    needs_matrix: Optional[Dict[str, Any]] = None  # 5 сфер: medical, legal, psychological, housing, employment
+    auth_source: Optional[str] = None  # phone_ivr, telegram, diia, bankid
+    is_verified_gov: Optional[bool] = False
     # Контекстні поля для конкретних ролей:
     role_data: Optional[Dict[str, Any]] = {}
 
@@ -1663,7 +1684,95 @@ def _save_user_profiles(profiles: Dict[str, Any]) -> bool:
         return True
     except Exception as e:
         print(f"[Error saving user profiles]: {e}")
-        return False
+@app.post("/api/v1/auth/diia/callback")
+@app.get("/api/v1/auth/diia/callback")
+async def diia_auth_callback(req: Optional[Dict[str, Any]] = None):
+    """
+    Верифікація та автозаповнення даних з застосунку Дія (статус УБД, посвідчення).
+    """
+    user_data = {
+        "id": "vet_taras_diia",
+        "name": "Тарас Коваленко",
+        "first_name": "Тарас",
+        "last_name": "Коваленко",
+        "callsign": "Друг Сокіл",
+        "phone": "+380 (50) 123-45-67",
+        "veteran_status_type": "ubd",
+        "certificate_series": "УБД",
+        "certificate_number": "УБД № 284910",
+        "military_unit": "72 ОМБр ім. Чорних Запорожців",
+        "is_veteran": True,
+        "is_verified_gov": True,
+        "diia_verified": True,
+        "auth_provider": "diia",
+        "auth_source": "diia",
+        "needs_matrix": {
+            "medical": True,
+            "legal": True,
+            "psychological": False,
+            "housing": False,
+            "employment": True
+        },
+        "geo_context": {
+            "community": "Канівська ТГ",
+            "settlement": "м. Канів",
+            "region": "Черкаська область",
+            "is_online": True
+        }
+    }
+    return {
+        "status": "success",
+        "message": "Дані ветерана та статус УБД успішно верифіковано через Дію",
+        "data": {
+            "user": user_data,
+            "token": "diia_verified_jwt_token"
+        }
+    }
+
+@app.post("/api/v1/auth/bankid/callback")
+@app.get("/api/v1/auth/bankid/callback")
+async def bankid_auth_callback(req: Optional[Dict[str, Any]] = None):
+    """
+    Верифікація та автозаповнення даних через BankID НБУ.
+    """
+    user_data = {
+        "id": "vet_taras_bankid",
+        "name": "Тарас Коваленко",
+        "first_name": "Тарас",
+        "last_name": "Коваленко",
+        "callsign": "Тарас",
+        "phone": "+380 (50) 123-45-67",
+        "veteran_status_type": "ubd",
+        "certificate_series": "УБД",
+        "certificate_number": "УБД № 284910",
+        "military_unit": "72 ОМБр ім. Чорних Запорожців",
+        "is_veteran": True,
+        "is_verified_gov": True,
+        "bankid_verified": True,
+        "auth_provider": "bankid",
+        "auth_source": "bankid",
+        "needs_matrix": {
+            "medical": True,
+            "legal": True,
+            "psychological": False,
+            "housing": False,
+            "employment": False
+        },
+        "geo_context": {
+            "community": "Черкаська ТГ",
+            "settlement": "м. Черкаси",
+            "region": "Черкаська область",
+            "is_online": True
+        }
+    }
+    return {
+        "status": "success",
+        "message": "Особу верифіковано через BankID НБУ",
+        "data": {
+            "user": user_data,
+            "token": "bankid_verified_jwt_token"
+        }
+    }
 
 @app.post("/api/v1/user/profile")
 async def save_user_profile(req: UserProfileSaveRequest):
@@ -1703,6 +1812,20 @@ async def save_user_profile(req: UserProfileSaveRequest):
         user_prof["callsign"] = req.callsign
     if req.preferred_channel:
         user_prof["preferred_channel"] = req.preferred_channel
+    if req.veteran_status_type:
+        user_prof["veteran_status_type"] = req.veteran_status_type
+    if req.certificate_series:
+        user_prof["certificate_series"] = req.certificate_series
+    if req.certificate_number:
+        user_prof["certificate_number"] = req.certificate_number
+    if req.military_unit:
+        user_prof["military_unit"] = req.military_unit
+    if req.needs_matrix is not None:
+        user_prof["needs_matrix"] = req.needs_matrix
+    if req.auth_source:
+        user_prof["auth_source"] = req.auth_source
+    if req.is_verified_gov is not None:
+        user_prof["is_verified_gov"] = req.is_verified_gov
 
     user_prof["updated_at"] = now_str
 
@@ -1716,6 +1839,13 @@ async def save_user_profile(req: UserProfileSaveRequest):
         "phone": req.phone or existing_role_data.get("phone", ""),
         "community": req.community or existing_role_data.get("community", "Черкаська ТГ"),
         "preferred_channel": req.preferred_channel or existing_role_data.get("preferred_channel", "telegram"),
+        "veteran_status_type": req.veteran_status_type or existing_role_data.get("veteran_status_type", ""),
+        "certificate_series": req.certificate_series or existing_role_data.get("certificate_series", ""),
+        "certificate_number": req.certificate_number or existing_role_data.get("certificate_number", ""),
+        "military_unit": req.military_unit or existing_role_data.get("military_unit", ""),
+        "needs_matrix": req.needs_matrix if req.needs_matrix is not None else existing_role_data.get("needs_matrix", {}),
+        "auth_source": req.auth_source or existing_role_data.get("auth_source", "manual"),
+        "is_verified_gov": req.is_verified_gov if req.is_verified_gov is not None else existing_role_data.get("is_verified_gov", False),
         "updated_at": now_str
     }
     profiles_by_role[current_role] = merged_role_data
@@ -3566,6 +3696,11 @@ class DispatcherIntakeRequest(BaseModel):
     notes: Optional[str] = ""
     assigned_specialist_id: Optional[str] = None
     offline_source: Optional[str] = "ЦНАП / Ветеранський Простір"
+    # Поля Наказу № 7:
+    veteran_status_type: Optional[str] = "ubd"
+    certificate_number: Optional[str] = ""
+    military_unit: Optional[str] = ""
+    needs_matrix: Optional[Dict[str, Any]] = None
 
 class MagicVerifyRequest(BaseModel):
     token: str
@@ -3680,6 +3815,10 @@ async def create_dispatcher_offline_intake(req: DispatcherIntakeRequest):
         "client_phone": req.phone.strip(),
         "category": req.category,
         "category_label": _get_category_label(req.category),
+        "veteran_status_type": req.veteran_status_type or "ubd",
+        "certificate_number": req.certificate_number or "",
+        "military_unit": req.military_unit or "",
+        "needs_matrix": req.needs_matrix or {},
         "description": req.problem_description.strip(),
         "notes": req.notes or "",
         "status": "IN_PROGRESS",
@@ -3880,9 +4019,10 @@ async def verify_magic_token(token: Optional[str] = None, ticket_id: Optional[st
     }
 
 @app.get("/api/v1/crm/tickets/{ticket_id}/roadmap-print")
+@app.get("/api/v1/crm/dispatcher/roadmap/{ticket_id}")
 async def get_ticket_roadmap_print_data(ticket_id: str):
     """
-    Отримання повного зведеного макету Дорожньої Карти А4 для друку на рецепції ЦНАП / Ветеранського простору.
+    Отримання повного зведеного макету Дорожньої Карти А4 та бланка Наказу № 7 для друку/експорту.
     """
     tickets = _load_crm_tickets()
     target = None
@@ -3926,7 +4066,11 @@ async def get_ticket_roadmap_print_data(ticket_id: str):
             "name": target.get("client_name", "Ветеран"),
             "phone": target.get("client_phone", ""),
             "community": community,
-            "region": target.get("geo_context", {}).get("region", "Черкаська область")
+            "region": target.get("geo_context", {}).get("region", "Черкаська область"),
+            "status_type": target.get("veteran_status_type", "ubd"),
+            "certificate": target.get("certificate_number") or target.get("certificate_series", ""),
+            "military_unit": target.get("military_unit", ""),
+            "needs_matrix": target.get("needs_matrix", {})
         },
         "dispatcher": disp,
         "category": {

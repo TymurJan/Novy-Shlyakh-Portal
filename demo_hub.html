@@ -323,30 +323,84 @@
         <!-- Сітка Рольових Кабінетів -->
         <div class="hub-grid">
 
-            <!-- 1. Ветеран / Родина -->
+            <!-- 1. Ветеран (ДО верифікації — Чиста анкета) -->
+            <div class="hub-card card-veteran" style="border: 2px dashed rgba(16, 185, 129, 0.4);">
+                <div>
+                    <div class="card-header-row">
+                        <div class="card-icon-title">
+                            <div class="card-icon" style="background: rgba(16, 185, 129, 0.1);">🆕</div>
+                            <div>
+                                <h3 class="card-title">Ветеран (до верифікації)</h3>
+                            </div>
+                        </div>
+                        <span class="card-role-tag" style="background: rgba(239, 68, 68, 0.2); color: #FCA5A5;">НЕВЕРИФІКОВАНИЙ</span>
+                    </div>
+                    <p class="card-description">
+                        Стан нового користувача після реєстрації телефоном або першого входу. Чиста анкета без верифікації.
+                    </p>
+                    <ul class="card-features-list">
+                        <li><span>✓</span> 📝 Порожня анкетна картка для тестування ручного вводу</li>
+                        <li><span>✓</span> 🛡️ Кнопка «Автозаповнити через Дію» (імітація держреєстрів)</li>
+                        <li><span>✓</span> 🏦 Кнопка «Автозаповнити через BankID»</li>
+                        <li><span>✓</span> 📋 Тестування переходу в статус «🛡️ ВЕРИФІКОВАНО ДЕРЖАВОЮ»</li>
+                    </ul>
+                </div>
+                <button class="btn-launch-role" onclick="launchProfile('vet_new', 'profile')">
+                    🚀 Тестувати Анкету (До верифікації)
+                </button>
+            </div>
+
+            <!-- 2. Ветеран (Верифікований клієнт) -->
             <div class="hub-card card-veteran">
                 <div>
                     <div class="card-header-row">
                         <div class="card-icon-title">
                             <div class="card-icon">🎖️</div>
                             <div>
-                                <h3 class="card-title">Ветеран / Родина</h3>
+                                <h3 class="card-title">Ветеран (Верифікований)</h3>
                             </div>
                         </div>
-                        <span class="card-role-tag">ROLE_VETERAN</span>
+                        <span class="card-role-tag" style="background: rgba(16, 185, 129, 0.2); color: #6EE7B7;">🛡️ ДІЯ / УБД</span>
                     </div>
                     <p class="card-description">
-                        Особистий простір отримувача допомоги. Доступ до всіх міських та державних сервісів.
+                        Повноцінний кабінет ветерана з підтвердженим статусом УБД та заповненим профілем.
                     </p>
                     <ul class="card-features-list">
                         <li><span>✓</span> 🤖 Персональний ШІ-Штурман (Open & Personal RAG)</li>
                         <li><span>✓</span> 📁 Захищений Сейф документів та резюме</li>
-                        <li><span>✓</span> 💼 Заявки на безбар'єрні вакансії роботодавців</li>
+                        <li><span>✓</span> 💼 Подача на інклюзивні вакансії роботодавців</li>
                         <li><span>✓</span> 🎓 Отримання державних освітніх ваучерів ДСЗ</li>
                     </ul>
                 </div>
                 <button class="btn-launch-role" onclick="launchProfile('veteran', 'overview')">
                     🚀 Відкрити Кабінет Ветерана
+                </button>
+            </div>
+
+            <!-- 3. Член родини ветерана -->
+            <div class="hub-card card-veteran" style="border-top-color: #EC4899;">
+                <div>
+                    <div class="card-header-row">
+                        <div class="card-icon-title">
+                            <div class="card-icon" style="background: rgba(236, 72, 153, 0.15);">👨‍👩‍👧</div>
+                            <div>
+                                <h3 class="card-title">Член родини ветерана</h3>
+                            </div>
+                        </div>
+                        <span class="card-role-tag" style="background: rgba(236, 72, 153, 0.2); color: #F472B6;">ROLE_FAMILY</span>
+                    </div>
+                    <p class="card-description">
+                        Спеціалізований інтерфейс для дружин, чоловіків та дітей захисників і захисниць.
+                    </p>
+                    <ul class="card-features-list">
+                        <li><span>✓</span> 🧠 Доступ до програм сімейної психологічної підтримки</li>
+                        <li><span>✓</span> ⚖️ Юридичні консультації щодо виплат та пільг для сімей</li>
+                        <li><span>✓</span> 🏠 Пільги на ЖКП та житлові програми громади</li>
+                        <li><span>✓</span> 🎓 Освітні програми та перекваліфікація для членів родин</li>
+                    </ul>
+                </div>
+                <button class="btn-launch-role" onclick="launchProfile('family', 'overview')">
+                    🚀 Відкрити Кабінет Родини
                 </button>
             </div>
 
@@ -563,9 +617,39 @@
     </div>
 
     <!-- Підключення універсального тулбара -->
-    <script src="demo_switcher.js?v=47"></script>
+    <script src="demo_switcher.js?v=48"></script>
     <script>
         const PROFILES = {
+            vet_new: {
+                id: 'vet_new_guest_01',
+                name: 'Ветеран (Новий)',
+                callsign: 'Побратим',
+                phone: '+380 (50) 000-11-22',
+                primary_role: 'veteran',
+                roles: ['ROLE_VETERAN'],
+                veteran_role: 'veteran',
+                is_veteran: true,
+                is_family_member: false,
+                is_verified_gov: false,
+                diia_verified: false,
+                bankid_verified: false,
+                auth_provider: 'phone',
+                community: 'Черкаська ТГ',
+                profiles_by_role: {
+                    veteran: {
+                        military_unit: '',
+                        veteran_status_type: 'ubd',
+                        certificate_number: '',
+                        needs_matrix: {}
+                    }
+                },
+                geo_context: {
+                    community: 'Черкаська ТГ',
+                    settlement: 'м. Черкаси',
+                    region: 'Черкаська область',
+                    is_online: true
+                }
+            },
             veteran: {
                 id: 'vet_taras_01',
                 name: 'Тарас Коваленко',
@@ -576,12 +660,44 @@
                 veteran_role: 'veteran',
                 is_veteran: true,
                 is_family_member: false,
+                is_verified_gov: true,
                 auth_provider: 'diia',
                 diia_verified: true,
                 community: 'Канівська ТГ',
+                profiles_by_role: {
+                    veteran: {
+                        military_unit: '72 ОМБр'
+                    }
+                },
                 geo_context: {
                     community: 'Канівська ТГ',
                     settlement: 'м. Канів',
+                    region: 'Черкаська область',
+                    is_online: true
+                }
+            },
+            family: {
+                id: 'fam_olena_01',
+                name: 'Олена Коваленко',
+                callsign: 'Олена',
+                phone: '+380 (67) 999-88-77',
+                primary_role: 'family',
+                roles: ['ROLE_FAMILY'],
+                veteran_role: 'family',
+                is_veteran: false,
+                is_family_member: true,
+                auth_provider: 'diia',
+                diia_verified: true,
+                community: 'Черкаська ТГ',
+                profiles_by_role: {
+                    family: {
+                        name: 'Олена Коваленко',
+                        relationship: 'spouse'
+                    }
+                },
+                geo_context: {
+                    community: 'Черкаська ТГ',
+                    settlement: 'м. Черкаси',
                     region: 'Черкаська область',
                     is_online: true
                 }
