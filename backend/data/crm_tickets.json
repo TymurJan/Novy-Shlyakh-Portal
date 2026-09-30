@@ -1,5 +1,53 @@
 [
   {
+    "id": "TCK-CNAP-202609-2652E8",
+    "user_id": "phone_380679998877",
+    "client_name": "Михайло Волонтер",
+    "client_callsign": "Михайло Волонтер",
+    "client_phone": "+380679998877",
+    "category": "legal",
+    "category_label": "⚖️ Військове право / ВЛК / МСЕК / Виплати",
+    "veteran_status_type": "ubd",
+    "certificate_number": "",
+    "military_unit": "",
+    "needs_matrix": {},
+    "description": "Отримання статусу особи з інвалідністю внаслідок війни та виплати",
+    "notes": "",
+    "status": "IN_PROGRESS",
+    "created_at": "2026-09-30T20:42:32.518524+00:00",
+    "is_offline_case": true,
+    "intake_channel": "cnap_desk",
+    "dispatcher": {
+      "id": "cnap_cherkasy_01",
+      "name": "Оксана (ЦНАП)",
+      "center": "ЦНАП м. Черкаси (Ветеранське вікно)",
+      "intake_time": "2026-09-30T20:42:32.518524+00:00"
+    },
+    "geo_context": {
+      "community": "Черкаська ТГ",
+      "settlement": "Черкаська ТГ",
+      "region": "Черкаська область",
+      "is_online": true
+    },
+    "specialist": {
+      "id": "spec_probono_lead",
+      "name": "Черкаський координаційний центр підтримки ветеранів",
+      "role_title": "Провідний фахівець соціально-правового супроводу",
+      "phone": "+38 (0472) 33-00-11",
+      "email": "support@novy-shlyakh.org",
+      "address": "Черкаська ТГ, вул. Хрещатик, 15 (Ветеранський простір)"
+    },
+    "urgency": "normal",
+    "magic_token": "magic_789e48d93b7e4f55a0be1d81f6ec7f5c",
+    "magic_token_expires_at": "2026-10-30T20:42:32.518524+00:00",
+    "magic_url": "/cabinet.html?magic_token=magic_789e48d93b7e4f55a0be1d81f6ec7f5c&case_id=TCK-CNAP-202609-2652E8",
+    "audit_trail": [
+      "Офлайн-звернення зареєстровано оператором ЦНАП: Оксана (ЦНАП) (ЦНАП м. Черкаси (Ветеранське вікно)).",
+      "Згенеровано захищений Magic QR-код доступу для ветерана (TCK-CNAP-202609-2652E8).",
+      "Призначено відповідального фахівця: Черкаський координаційний центр підтримки ветеранів (Провідний фахівець соціально-правового супроводу)."
+    ]
+  },
+  {
     "id": "TCK-CNAP-202609-4527ED",
     "user_id": "phone_380671112233",
     "client_name": "Сергій Бондаренко",

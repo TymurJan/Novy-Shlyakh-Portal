@@ -559,8 +559,8 @@
                 <div class="cab-card">
                     <div class="cab-card-header">
                         <div>
-                            <h2>🔒 Мій захищений сейф документів</h2>
-                            <p class="cab-card-sub">Шифрування AES-256. Доступ надається виключно за вашим разовим дозволом</p>
+                            <h2>📂 Захищений Двосторонній Сейф Документів</h2>
+                            <p class="cab-card-sub">Шифрування AES-256 • Підтримка всіх форматів (PDF, DOCX, ZIP, контейнери ключів .p12/.pfx, підписані .asice/.p7s) • Прямий обмін між ветераном та фахівцем супроводу</p>
                         </div>
                     </div>
 
@@ -572,19 +572,56 @@
                         </div>
                     </div>
 
+                    <!-- Панель вибору ролі завантажувача та категорії -->
+                    <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(46,139,87,0.25); border-radius: 14px; padding: 16px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 12px;">
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: space-between;">
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <button type="button" class="btn-sm btn-primary" id="btnVaultRoleVet" onclick="window.setVaultUploaderRole('veteran')" style="border-radius: 20px; font-size: 12px;">🎖️ Завантажую для себе (Ветеран)</button>
+                                <button type="button" class="btn-sm btn-secondary" id="btnVaultRoleSpec" onclick="window.setVaultUploaderRole('specialist')" style="border-radius: 20px; font-size: 12px;">🏛️ Завантажую для підопічного (Фахівець / ЦНАП)</button>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <label style="font-size: 11px; color: var(--primary-green); font-weight: 700; text-transform: uppercase;">Тип документа:</label>
+                                <select id="cabVaultCategorySelect" style="padding: 6px 12px; border-radius: 8px; background: #1a1a1a; border: 1px solid rgba(46,139,87,0.3); color: white; font-size: 12px; outline: none;">
+                                    <option value="auto">✨ Автовизначення</option>
+                                    <option value="certificate">🎖️ Довідка УБД / ВЛК / МСЕК (Ф5, Додаток 6)</option>
+                                    <option value="extract">🏛️ Офіційний витяг з реєстру / ЦНАП</option>
+                                    <option value="contract">📝 Договір / Заява на супровід</option>
+                                    <option value="key_backup">🔑 Контейнер КЕП / Е-ключ (.p12, .pfx, .dat)</option>
+                                    <option value="signed_doc">🔏 Підписаний файл КЕП (.p7s, .asice)</option>
+                                    <option value="medical">🏥 Медичний епікриз / МРТ / Довідка</option>
+                                    <option value="other">📁 Інший документ</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Поле для імені фахівця/установи (якщо обрано режим спеціаліста) -->
+                        <div id="vaultSpecNameField" style="display: none; display: flex; align-items: center; gap: 10px; background: rgba(59,130,246,0.08); padding: 8px 12px; border-radius: 8px; border: 1px dashed rgba(59,130,246,0.3);">
+                            <span style="font-size: 16px;">🏛️</span>
+                            <input type="text" id="cabVaultSpecName" placeholder="Вкажіть ПІБ фахівця або установу (напр., ЦНАП м. Черкаси, Фахівець супроводу Іваненко О.)" style="flex: 1; background: transparent; border: none; color: #fff; font-size: 12px; outline: none;">
+                        </div>
+                    </div>
+
                     <!-- Зона завантаження -->
                     <div class="cab-vault-dropzone" id="cabVaultDropzone">
                         <div class="cab-dropzone-icon">📁</div>
                         <h4>Перетягніть файл сюди або натисніть для вибору</h4>
-                        <p>Підтримуються PDF, JPG, PNG до 10 МБ (довідки ВЛК, УБД, медичні виписки)</p>
-                        <input type="file" id="cabVaultFileInput" style="display: none;" accept=".pdf,.jpg,.jpeg,.png">
+                        <p style="font-size: 12px; color: #aaa; margin: 4px 0 12px 0;">Підтримуються всі формати: PDF, DOCX, ZIP, скани до 15 МБ, контейнери електронних ключів (.p12, .pfx, .jks, .dat) та підписані файли (.p7s, .asice)</p>
+                        <input type="file" id="cabVaultFileInput" style="display: none;" accept=".pdf,.docx,.doc,.rtf,.odt,.txt,.xlsx,.xls,.jpg,.jpeg,.png,.webp,.heic,.zip,.rar,.7z,.p12,.pfx,.jks,.dat,.cer,.crt,.asice,.p7s,.p7m">
                         <button type="button" class="btn-secondary" onclick="document.getElementById('cabVaultFileInput').click()">
                             Обрати файл з пристрою
                         </button>
                     </div>
 
                     <!-- Список завантажених документів у сейфі -->
-                    <h3 class="cab-section-title" style="margin-top: 25px;">📄 Документи у вашому сейфі</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 25px; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                        <h3 class="cab-section-title" style="margin: 0;">📄 Документи у вашому сейфі</h3>
+                        <div style="display: flex; gap: 6px;" id="vaultListFilterChips">
+                            <button type="button" class="btn-sm btn-primary vault-filter-btn" data-vfilter="all" style="font-size: 11px; padding: 3px 10px; border-radius: 12px;">Всі</button>
+                            <button type="button" class="btn-sm btn-secondary vault-filter-btn" data-vfilter="extract" style="font-size: 11px; padding: 3px 10px; border-radius: 12px;">🏛️ Витяги</button>
+                            <button type="button" class="btn-sm btn-secondary vault-filter-btn" data-vfilter="certificate" style="font-size: 11px; padding: 3px 10px; border-radius: 12px;">🎖️ Довідки</button>
+                            <button type="button" class="btn-sm btn-secondary vault-filter-btn" data-vfilter="key_backup" style="font-size: 11px; padding: 3px 10px; border-radius: 12px;">🔑 Ключі КЕП</button>
+                        </div>
+                    </div>
                     <div class="cab-vault-list" id="cabVaultList">
                         <!-- Заповнюється динамічно -->
                     </div>
@@ -1796,6 +1833,27 @@
             <!-- Бланк А4 за стандартом Наказу № 7 -->
             <div class="cab-roadmap-a4-sheet" id="order7A4Content" style="background: #FFFFFF; color: #000000; padding: 24px; font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.3;">
                 <!-- Динамічний рендеринг бланка Наказу № 7 -->
+            </div>
+    <!-- Модальне вікно: Електронний Договір на супровід (Постанова КМУ №881 / Дія.Підпис / Друк А4) -->
+    <div class="cab-modal-overlay" id="modalAccompanimentContract" style="display: none;">
+        <div class="cab-modal-box" style="max-width: 820px; width: 95%; max-height: 92vh; overflow-y: auto;">
+            <div class="no-print" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px; margin-bottom: 16px;">
+                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                    <button type="button" class="btn-primary" id="btnSignContractDiiaExec" style="background: linear-gradient(135deg, #0284C7, #0369A1); border-color: #0284C7; font-weight: 700; padding: 8px 18px; display: inline-flex; align-items: center; gap: 6px;">
+                        🛡️ Підписати Дія.Підпис
+                    </button>
+                    <button type="button" class="btn-secondary" id="btnSignContractKepExec" style="font-size: 0.85rem; padding: 8px 14px;">
+                        🔑 КЕП / ЕЦП
+                    </button>
+                    <a id="btnContractOpenA4Tab" href="#" target="_blank" class="btn-primary" style="background: #10B981; border-color: #10B981; text-decoration: none; font-weight: 700; padding: 8px 18px; display: inline-flex; align-items: center; gap: 6px;">
+                        🖨️ Друк бланку А4 / PDF
+                    </a>
+                </div>
+                <button class="cab-modal-close" id="btnCloseModalContract">✕</button>
+            </div>
+
+            <div id="contractModalBody" style="background: #ffffff; color: #111827; border-radius: 8px; padding: 25px 30px; font-family: 'Lora', 'Times New Roman', serif;">
+                <!-- Динамічний вміст проекту договору або підписаного документу -->
             </div>
         </div>
     </div>

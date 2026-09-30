@@ -1251,6 +1251,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     <button class="btn-primary btn-sm" onclick="alert('Підключення до захищеного чату зі спеціалістом ${spec.name}...')">
                                         💬 Написати фахівцю
                                     </button>
+                                    <button type="button" class="btn-secondary btn-sm" onclick="window.openContractModal('${t.id}')" style="font-weight: 600; border-color: rgba(59, 130, 246, 0.4); color: #93C5FD;">
+                                        📝 Договір (Постанова №881)
+                                    </button>
                                     <button type="button" class="btn-secondary btn-sm" onclick="window.openPrintRoadmapModal('${t.id}')" style="font-weight: 600; border-color: rgba(16, 185, 129, 0.4); color: #6EE7B7;">
                                         🖨️ Дорожня карта (А4)
                                     </button>
@@ -1655,54 +1658,128 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadEducation();
 
     // ─── 8. Вкладка 4: Захищений Сейф Документів ──────────────────────────────
+    // ─── 8. Вкладка 4: Захищений Двосторонній Сейф Документів (v2.0) ──────────
     const cabVaultDropzone = document.getElementById('cabVaultDropzone');
     const cabVaultFileInput = document.getElementById('cabVaultFileInput');
     const cabVaultList = document.getElementById('cabVaultList');
+    const cabVaultCategorySelect = document.getElementById('cabVaultCategorySelect');
+    const cabVaultSpecName = document.getElementById('cabVaultSpecName');
+    const vaultSpecNameField = document.getElementById('vaultSpecNameField');
+
+    let currentVaultUploaderRole = 'veteran';
+    let currentVaultCategoryFilter = 'all';
+
+    window.setVaultUploaderRole = function(role) {
+        currentVaultUploaderRole = role;
+        const btnVet = document.getElementById('btnVaultRoleVet');
+        const btnSpec = document.getElementById('btnVaultRoleSpec');
+        if (role === 'veteran') {
+            btnVet?.classList.add('btn-primary');
+            btnVet?.classList.remove('btn-secondary');
+            btnSpec?.classList.remove('btn-primary');
+            btnSpec?.classList.add('btn-secondary');
+            if (vaultSpecNameField) vaultSpecNameField.style.display = 'none';
+        } else {
+            btnSpec?.classList.add('btn-primary');
+            btnSpec?.classList.remove('btn-secondary');
+            btnVet?.classList.remove('btn-primary');
+            btnVet?.classList.add('btn-secondary');
+            if (vaultSpecNameField) vaultSpecNameField.style.display = 'flex';
+        }
+    };
+
+    function getVaultFileIcon(filename, category) {
+        const ext = (filename.split('.').pop() || '').toLowerCase();
+        if (category === 'key_backup' || ['p12', 'pfx', 'jks', 'dat', 'cer', 'crt'].includes(ext)) return '🔑';
+        if (category === 'signed_doc' || ['asice', 'p7s', 'p7m'].includes(ext)) return '🔏';
+        if (['pdf'].includes(ext)) return '📜';
+        if (['docx', 'doc', 'rtf', 'odt', 'txt'].includes(ext)) return '📝';
+        if (['xlsx', 'xls', 'csv'].includes(ext)) return '📊';
+        if (['jpg', 'jpeg', 'png', 'webp', 'heic'].includes(ext)) return '🖼️';
+        if (['zip', 'rar', '7z', 'tar', 'gz'].includes(ext)) return '📦';
+        return '📄';
+    }
+
+    function getVaultCategoryBadge(cat) {
+        switch(cat) {
+            case 'extract': return '<span style="font-size: 10px; font-weight: 700; background: rgba(59,130,246,0.18); color: #60a5fa; padding: 2px 8px; border-radius: 12px; border: 1px solid rgba(59,130,246,0.35);">🏛️ Витяг з реєстру / ЦНАП</span>';
+            case 'certificate': return '<span style="font-size: 10px; font-weight: 700; background: rgba(16,185,129,0.18); color: #34d399; padding: 2px 8px; border-radius: 12px; border: 1px solid rgba(16,185,129,0.35);">🎖️ Довідка УБД / ВЛК</span>';
+            case 'contract': return '<span style="font-size: 10px; font-weight: 700; background: rgba(168,85,247,0.18); color: #c084fc; padding: 2px 8px; border-radius: 12px; border: 1px solid rgba(168,85,247,0.35);">📝 Договір супроводу</span>';
+            case 'key_backup': return '<span style="font-size: 10px; font-weight: 700; background: rgba(245,158,11,0.18); color: #fbbf24; padding: 2px 8px; border-radius: 12px; border: 1px solid rgba(245,158,11,0.35);">🔑 Контейнер КЕП / Ключ</span>';
+            case 'signed_doc': return '<span style="font-size: 10px; font-weight: 700; background: rgba(236,72,153,0.18); color: #f472b6; padding: 2px 8px; border-radius: 12px; border: 1px solid rgba(236,72,153,0.35);">🔏 Підписано КЕП</span>';
+            case 'medical': return '<span style="font-size: 10px; font-weight: 700; background: rgba(14,165,233,0.18); color: #38bdf8; padding: 2px 8px; border-radius: 12px; border: 1px solid rgba(14,165,233,0.35);">🏥 Медвиписка / Епікриз</span>';
+            default: return '<span style="font-size: 10px; font-weight: 700; background: rgba(255,255,255,0.08); color: #ccc; padding: 2px 8px; border-radius: 12px;">📁 Документ</span>';
+        }
+    }
 
     async function loadVault() {
         if (!cabVaultList) return;
         try {
             const res = await fetch(`/api/v1/crm/documents/vault?user_id=${encodeURIComponent(userId)}`);
             const data = await res.json();
-            const docs = (data && data.status === 'success') ? data.data : [];
+            let docs = (data && data.status === 'success') ? data.data : [];
+
+            // Фільтрація за активним табом сейфа
+            if (currentVaultCategoryFilter !== 'all') {
+                docs = docs.filter(d => d.doc_category === currentVaultCategoryFilter);
+            }
 
             if (docs.length === 0) {
                 cabVaultList.innerHTML = `
                     <div class="cab-empty-state">
                         <span style="font-size: 32px;">🔒</span>
-                        <h4>У сейфі ще немає документів</h4>
-                        <p>Завантажте довідку УБД, висновок ВЛК чи резюме. Вони зберігаються у зашифрованому вигляді і передаються тільки за вашим кліком.</p>
+                        <h4>У сейфі немає документів за цим фільтром</h4>
+                        <p>Завантажте довідку УБД/ВЛК, витяг з реєстру або резервний ключ КЕП. Усі файли зберігаються в ізольованому зашифрованому просторі.</p>
                     </div>
                 `;
             } else {
-                cabVaultList.innerHTML = docs.map(doc => `
-                    <div class="cab-vault-item">
-                        <div class="cab-vault-item-left">
-                            <span class="cab-vault-file-icon">📄</span>
-                            <div>
-                                <b>${doc.original_name}</b>
-                                <div style="font-size: 11px; color: #94a3b8;">
-                                    ${(doc.file_size / 1024).toFixed(1)} КБ • Завантажено: ${new Date(doc.uploaded_at).toLocaleDateString('uk-UA')}
+                cabVaultList.innerHTML = docs.map(doc => {
+                    const icon = getVaultFileIcon(doc.original_name, doc.doc_category);
+                    const catBadge = getVaultCategoryBadge(doc.doc_category);
+                    const isCompanion = doc.uploaded_by_role === 'specialist' || doc.uploaded_by_role === 'state_coordinator';
+                    const senderBadge = isCompanion 
+                        ? `<span style="font-size: 10px; background: rgba(59,130,246,0.15); color: #93c5fd; padding: 2px 8px; border-radius: 12px; border: 1px solid rgba(59,130,246,0.3);">🏛️ Від: ${doc.uploaded_by_name || 'Фахівець супроводу'}</span>`
+                        : `<span style="font-size: 10px; background: rgba(16,185,129,0.12); color: #6ee7b7; padding: 2px 8px; border-radius: 12px;">🎖️ Завантажено вами</span>`;
+
+                    return `
+                        <div class="cab-vault-item" style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 12px 16px; margin-bottom: 8px; transition: all 0.2s;" onmouseover="this.style.borderColor='rgba(46,139,87,0.4)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)'">
+                            <div class="cab-vault-item-left" style="display: flex; align-items: center; gap: 14px; flex: 1;">
+                                <span class="cab-vault-file-icon" style="font-size: 26px; line-height: 1;">${icon}</span>
+                                <div style="display: flex; flex-direction: column; gap: 3px;">
+                                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                        <b style="font-size: 14px; color: #fff;">${doc.original_name}</b>
+                                        ${catBadge}
+                                        ${senderBadge}
+                                    </div>
+                                    <div style="font-size: 11px; color: #94a3b8;">
+                                        ${(doc.file_size / 1024).toFixed(1)} КБ • Додано: ${new Date(doc.uploaded_at).toLocaleDateString('uk-UA')} ${new Date(doc.uploaded_at).toLocaleTimeString('uk-UA', {hour: '2-digit', minute:'2-digit'})}
+                                    </div>
                                 </div>
                             </div>
+                            <div class="cab-vault-item-right" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                                <span class="cab-encrypted-pill" style="font-size: 10px; padding: 3px 8px; background: rgba(16,185,129,0.1); color: #10b981; border: 1px solid rgba(16,185,129,0.25); border-radius: 20px;">🛡️ AES-256</span>
+                                
+                                <a href="/api/v1/crm/documents/vault/${encodeURIComponent(doc.id)}/download?user_id=${encodeURIComponent(userId)}" target="_blank" download class="btn-sm btn-primary" style="font-size: 11px; padding: 5px 10px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                                    ⬇️ Скачати
+                                </a>
+
+                                <button type="button" class="btn-sm btn-secondary btn-share-doc" data-id="${doc.id}" style="font-size: 11px; padding: 5px 10px; border-radius: 8px;">
+                                    🔗 Доступ (48г)
+                                </button>
+
+                                <button type="button" class="btn-sm btn-danger-outline btn-delete-doc" data-id="${doc.id}" style="font-size: 11px; padding: 5px 8px; border-radius: 8px; background: transparent; border: 1px solid rgba(239,68,68,0.3); color: #f87171; cursor: pointer;">
+                                    🗑️
+                                </button>
+                            </div>
                         </div>
-                        <div class="cab-vault-item-right" style="display: flex; gap: 8px; align-items: center;">
-                            <span class="cab-encrypted-pill">🛡️ AES-256 Захищено</span>
-                            <button class="btn-sm btn-secondary btn-preview-doc" onclick="alert('Документ зашифровано та захищено. Доступ можливий тільки з вашого авторизованого пристрою.')">
-                                👁️ Переглянути
-                            </button>
-                            <button class="btn-sm btn-danger-outline btn-delete-doc" data-id="${doc.id}" style="font-size: 11px; padding: 4px 8px;">
-                                🗑️
-                            </button>
-                        </div>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
 
                 // Прив'язка видалення документа із сейфа
                 cabVaultList.querySelectorAll('.btn-delete-doc').forEach(btn => {
                     btn.addEventListener('click', async () => {
                         const docId = btn.getAttribute('data-id');
-                        if (confirm('Видалити цей документ із вашого захищеного сейфу?')) {
+                        if (confirm('Видалити цей документ із вашого захищеного сейфу? Файл буде безповоротно стерто зі сховища.')) {
                             try {
                                 const res = await fetch(`/api/v1/crm/documents/vault/${encodeURIComponent(docId)}?user_id=${encodeURIComponent(userId)}`, {
                                     method: 'DELETE'
@@ -1717,11 +1794,51 @@ document.addEventListener('DOMContentLoaded', async () => {
                         }
                     });
                 });
+
+                // Прив'язка генерації тимчасового доступу
+                cabVaultList.querySelectorAll('.btn-share-doc').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        const docId = btn.getAttribute('data-id');
+                        try {
+                            const res = await fetch(`/api/v1/crm/documents/vault/${encodeURIComponent(docId)}/grant-access`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    user_id: userId,
+                                    duration_hours: 48
+                                })
+                            });
+                            const json = await res.json();
+                            if (json.status === 'success') {
+                                const fullUrl = window.location.origin + json.data.download_url;
+                                navigator.clipboard?.writeText(fullUrl);
+                                alert(`🔒 Тимчасове посилання згенеровано (діє 48 годин) та скопійовано в буфер обміну:\n\n${fullUrl}`);
+                            }
+                        } catch (e) {
+                            console.error('[Grant Access Error]', e);
+                            alert('Не вдалося згенерувати посилання доступу.');
+                        }
+                    });
+                });
             }
         } catch (err) {
             console.error('[Vault Load Error]', err);
         }
     }
+
+    // Прив'язка табів фільтрації сейфа
+    document.querySelectorAll('.vault-filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.vault-filter-btn').forEach(b => {
+                b.classList.remove('btn-primary');
+                b.classList.add('btn-secondary');
+            });
+            btn.classList.remove('btn-secondary');
+            btn.classList.add('btn-primary');
+            currentVaultCategoryFilter = btn.dataset.vfilter || 'all';
+            loadVault();
+        });
+    });
 
     await loadVault();
 
@@ -1752,8 +1869,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function uploadFileToVault(file) {
-        if (file.size > 10 * 1024 * 1024) {
-            alert('Помилка: Файл перевищує ліміт 10 МБ.');
+        if (file.size > 15 * 1024 * 1024) {
+            alert('Помилка: Файл перевищує ліміт 15 МБ.');
             return;
         }
 
@@ -1761,6 +1878,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         formData.append('file', file);
         formData.append('user_id', userId);
         formData.append('doc_type', 'veteran_doc');
+        formData.append('uploaded_by_role', currentVaultUploaderRole);
+        
+        const specNameVal = cabVaultSpecName?.value?.trim();
+        if (currentVaultUploaderRole !== 'veteran' && specNameVal) {
+            formData.append('uploaded_by_name', specNameVal);
+        }
+
+        const categoryVal = cabVaultCategorySelect?.value;
+        if (categoryVal && categoryVal !== 'auto') {
+            formData.append('doc_category', categoryVal);
+        }
 
         try {
             const res = await fetch('/api/v1/crm/documents/vault-upload', {
@@ -1770,10 +1898,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             const result = await res.json();
             if (result.status === 'success') {
                 alert(`✅ Документ «${file.name}» успішно зашифровано та додано до Сейфу.`);
+                if (cabVaultFileInput) cabVaultFileInput.value = '';
                 await loadVault();
                 if (tracker) {
-                    tracker.trackEvent('document_vault_uploaded', { file_size: file.size, filename: file.name });
+                    tracker.trackEvent('document_vault_uploaded', { file_size: file.size, filename: file.name, role: currentVaultUploaderRole });
                 }
+            } else {
+                alert(`Помилка: ${result.detail || 'Не вдалося завантажити файл'}`);
             }
         } catch (err) {
             console.error('[Vault Upload Error]', err);
@@ -3914,6 +4045,131 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
+    // ─── 11.7. Електронний Договір на супровід (Постанова КМУ №881 / Дія.Підпис) ──
+    window.openContractModal = async function(ticketId) {
+        const modal = document.getElementById('modalAccompanimentContract');
+        const container = document.getElementById('contractModalBody');
+        const btnPrintTab = document.getElementById('btnContractOpenA4Tab');
+        const btnSignDiia = document.getElementById('btnSignContractDiiaExec');
+        const btnSignKep = document.getElementById('btnSignContractKepExec');
+        if (!modal || !container) return;
+
+        container.innerHTML = '<div style="text-align:center; padding: 40px; color: #475569;">⏳ Завантаження та перевірка договору на супровід...</div>';
+        modal.style.display = 'flex';
+
+        try {
+            let contract = null;
+            const res = await fetch(`/api/v1/crm/contracts?user_id=${encodeURIComponent(userId)}${ticketId ? `&ticket_id=${encodeURIComponent(ticketId)}` : ''}`);
+            const json = await res.json();
+            if (json.status === 'success' && json.data && json.data.length > 0) {
+                contract = json.data[0];
+            }
+
+            if (!contract) {
+                const genRes = await fetch('/api/v1/crm/contracts/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        ticket_id: ticketId || null,
+                        veteran_name: currentUser.name || "Ветеран",
+                        veteran_rnokpp: currentUser.rnokpp || "1234567890",
+                        veteran_status_type: currentUser.veteran_status_type || "ubd",
+                        veteran_certificate: currentUser.certificate_number || "УБД",
+                        veteran_phone: currentUser.phone || "",
+                        veteran_address: currentUser.community || "Черкаська область",
+                        military_unit: currentUser.military_unit || "",
+                        specialist_name: "Черкаський координаційний центр ветеранів",
+                        specialist_org: "Координаційний HUB «Новий Шлях» / ГО «Талан ЮА»"
+                    })
+                });
+                const genJson = await genRes.json();
+                if (genJson.status === 'success') {
+                    contract = genJson.data;
+                }
+            }
+
+            if (!contract) throw new Error('Не вдалося сформувати договір');
+            window._currentContractData = contract;
+
+            if (btnPrintTab) {
+                btnPrintTab.href = `/api/v1/crm/contracts/${contract.id}/print`;
+            }
+
+            const isSigned = contract.status === 'SIGNED_DIIA';
+            const signatures = contract.signatures || [];
+            const vetSig = signatures.find(s => s.signer_role === 'veteran');
+
+            let sigStatusHtml = '';
+            if (isSigned && vetSig) {
+                sigStatusHtml = `
+                    <div style="background: #f0fdf4; border: 1.5px solid #22c55e; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; color: #15803d; display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <b style="font-size: 14px;">✅ ДОГОВІР ПІДПИСАНО ЕЛЕКТРОННИМ ПІДПИСОМ</b>
+                            <div style="font-size: 12px; margin-top: 2px;">Підписант: ${vetSig.signer_name} • ${vetSig.auth_method_label} • Хеш: <code>${(vetSig.signature_hash || '').slice(0, 16)}...</code></div>
+                        </div>
+                        <span style="font-size: 24px;">🛡️</span>
+                    </div>
+                `;
+                if (btnSignDiia) btnSignDiia.style.display = 'none';
+                if (btnSignKep) btnSignKep.style.display = 'none';
+            } else {
+                sigStatusHtml = `
+                    <div style="background: #eff6ff; border: 1.5px solid #3b82f6; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; color: #1d4ed8; display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <b style="font-size: 14px;">⏳ ПРОЕКТ ДОГОВОРУ ОЧІКУЄ ПІДПИСАННЯ</b>
+                            <div style="font-size: 12px; margin-top: 2px;">Підпишіть через застосунок «Дія» або завантажте файл КЕП для надання юридичної сили.</div>
+                        </div>
+                        <span style="font-size: 24px;">📝</span>
+                    </div>
+                `;
+                if (btnSignDiia) btnSignDiia.style.display = 'inline-flex';
+                if (btnSignKep) btnSignKep.style.display = 'inline-flex';
+            }
+
+            container.innerHTML = `
+                ${sigStatusHtml}
+                <div style="text-align: center; border-bottom: 2px solid #0f172a; padding-bottom: 12px; margin-bottom: 16px;">
+                    <div style="font-size: 24px;">🔱</div>
+                    <div style="font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: #475569;">МІНІСТЕРСТВО У СПРАВАХ ВЕТЕРАНІВ УКРАЇНИ</div>
+                    <h3 style="margin: 6px 0; font-size: 16px; text-transform: uppercase; color: #0f172a;">ТИПОВИЙ ДОГОВІР № ${contract.id}</h3>
+                    <div style="font-size: 12px; color: #64748b;">про надання послуги з фахового супроводу ветерана війни (Постанова КМУ № 881)</div>
+                </div>
+
+                <div style="font-size: 13px; line-height: 1.5; color: #334155;">
+                    <p><b>Отримувач:</b> ${contract.veteran.name} (${contract.veteran.status_label}, посвідчення: ${contract.veteran.certificate})</p>
+                    <p><b>Надавач:</b> ${contract.specialist.org} (Фахівець: ${contract.specialist.name})</p>
+                    
+                    <h4 style="margin: 14px 0 6px 0; font-size: 13px; text-transform: uppercase; color: #0f172a; border-left: 3px solid #10b981; padding-left: 8px;">1. Послуги фахового супроводу:</h4>
+                    <ul style="margin: 4px 0 12px 18px; padding: 0; font-size: 12.5px;">
+                        ${(contract.services_scope || []).map(s => `<li>${s}</li>`).join('')}
+                    </ul>
+
+                    <h4 style="margin: 14px 0 6px 0; font-size: 13px; text-transform: uppercase; color: #0f172a; border-left: 3px solid #10b981; padding-left: 8px;">2. Індивідуальний план супроводу (Додаток 1):</h4>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 11.5px; margin-bottom: 15px;" border="1" cellpadding="6">
+                        <tr style="background: #f8fafc;">
+                            <th style="width: 30px;">№</th>
+                            <th>Захід / Послуга</th>
+                            <th>Термін</th>
+                            <th>Відповідальний</th>
+                        </tr>
+                        ${(contract.individual_plan || []).map(p => `
+                            <tr>
+                                <td style="text-align: center; font-weight: bold;">${p.step}</td>
+                                <td>${p.action}</td>
+                                <td>${p.term}</td>
+                                <td>${p.responsible}</td>
+                            </tr>
+                        `).join('')}
+                    </table>
+                </div>
+            `;
+
+        } catch (err) {
+            container.innerHTML = `<div style="text-align:center; padding: 40px; color: #dc2626;">⚠️ Помилка завантаження договору: ${err.message}</div>`;
+        }
+    };
+
     function initDispatcherWorkspace() {
         const btnOpenIntake = document.getElementById('btnOpenDispatcherIntake');
         const modalIntake = document.getElementById('modalDispatcherIntake');
@@ -3950,6 +4206,83 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         if (btnCloseOrder7 && modalOrder7) {
             btnCloseOrder7.addEventListener('click', () => { modalOrder7.style.display = 'none'; });
+        }
+
+        const modalContract = document.getElementById('modalAccompanimentContract');
+        const btnCloseContract = document.getElementById('btnCloseModalContract');
+        const btnSignDiia = document.getElementById('btnSignContractDiiaExec');
+        const btnSignKep = document.getElementById('btnSignContractKepExec');
+
+        if (btnCloseContract && modalContract) {
+            btnCloseContract.addEventListener('click', () => { modalContract.style.display = 'none'; });
+        }
+
+        if (btnSignDiia) {
+            btnSignDiia.addEventListener('click', async () => {
+                if (!window._currentContractData) return;
+                try {
+                    btnSignDiia.disabled = true;
+                    btnSignDiia.textContent = '⏳ Перевірка в Дія...';
+                    const res = await fetch('/api/v1/crm/contracts/sign-diia', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contract_id: window._currentContractData.id,
+                            user_id: userId,
+                            signer_role: 'veteran',
+                            signer_name: currentUser.name || "Ветеран",
+                            signer_rnokpp: currentUser.rnokpp || "1234567890",
+                            auth_method: 'diia_sign'
+                        })
+                    });
+                    const json = await res.json();
+                    if (json.status === 'success') {
+                        alert(`🛡️ Договір № ${window._currentContractData.id} успішно підписано за допомогою Дія.Підпис!\n\nПідписаний примірник додано у ваш Сейф Документів.`);
+                        await window.openContractModal(window._currentContractData.ticket_id);
+                        if (typeof loadTickets === 'function') await loadTickets();
+                        if (typeof loadVault === 'function') await loadVault();
+                    }
+                } catch (e) {
+                    alert('Помилка підписання: ' + e.message);
+                } finally {
+                    btnSignDiia.disabled = false;
+                    btnSignDiia.textContent = '🛡️ Підписати Дія.Підпис';
+                }
+            });
+        }
+
+        if (btnSignKep) {
+            btnSignKep.addEventListener('click', async () => {
+                if (!window._currentContractData) return;
+                try {
+                    btnSignKep.disabled = true;
+                    btnSignKep.textContent = '⏳ Підписання КЕП...';
+                    const res = await fetch('/api/v1/crm/contracts/sign-diia', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contract_id: window._currentContractData.id,
+                            user_id: userId,
+                            signer_role: 'veteran',
+                            signer_name: currentUser.name || "Ветеран",
+                            signer_rnokpp: currentUser.rnokpp || "1234567890",
+                            auth_method: 'kep'
+                        })
+                    });
+                    const json = await res.json();
+                    if (json.status === 'success') {
+                        alert(`🔑 Договір № ${window._currentContractData.id} успішно завірено кваліфікованим електронним підписом (КЕП)!`);
+                        await window.openContractModal(window._currentContractData.ticket_id);
+                        if (typeof loadTickets === 'function') await loadTickets();
+                        if (typeof loadVault === 'function') await loadVault();
+                    }
+                } catch (e) {
+                    alert('Помилка КЕП: ' + e.message);
+                } finally {
+                    btnSignKep.disabled = false;
+                    btnSignKep.textContent = '🔑 КЕП / ЕЦП';
+                }
+            });
         }
 
         if (btnPrintExec) {

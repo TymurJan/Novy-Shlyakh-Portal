@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Рендеримо тільки верифікованих для публічного списку
             renderSpecialists();
             initNetworkMap();
+            applyUrlParams();
         } catch (error) {
             console.warn("Локальний запуск (без сервера), використовуємо fallback дані", error);
             specialists = [
@@ -42,31 +43,302 @@ document.addEventListener('DOMContentLoaded', () => {
             ];
             renderSpecialists();
             initNetworkMap();
+            applyUrlParams();
         }
     }
 
-    // --- ЛОГІКА МЕРЕЖЕВОЇ МАПИ ---
-    function initNetworkMap() {
+    function applyUrlParams() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const catParam = urlParams.get('category');
+        const tagParam = urlParams.get('tag') || urlParams.get('q');
+        
+        let shouldRender = false;
+        if (catParam) {
+            const targetTab = document.querySelector(`.tab-btn[data-category="${catParam}"]`);
+            if (targetTab) {
+                specTabs.forEach(b => b.classList.remove('active'));
+                targetTab.classList.add('active');
+                currentCategoryFilter = catParam;
+                shouldRender = true;
+            }
+        }
+        if (tagParam) {
+            const filterSpec = document.getElementById('filterSpecialization');
+            if (filterSpec) {
+                filterSpec.value = tagParam;
+                shouldRender = true;
+            }
+        }
+        if (shouldRender) {
+            renderSpecialists(currentCategoryFilter);
+        }
+    }
+
+    // --- ЛОГІКА ІНТЕРАКТИВНОЇ МЕРЕЖЕВОЇ МАПИ ЧЕРКАЩИНИ (v2.0 Hybrid) ---
+    let networkMapInstance = null;
+    let mapMarkersList = [];
+
+    window.focusMapMarker = function(lat, lon, zoom = 15, openPopup = true) {
+        const mapContainer = document.getElementById('networkMap');
+        if (!mapContainer) return;
+        
+        // Плавний скрол до блоку карти, якщо він не у фокусі
+        const locSection = document.getElementById('locations');
+        if (locSection) {
+            locSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        if (networkMapInstance) {
+            networkMapInstance.setView([lat, lon], zoom, { animate: true, duration: 1.0 });
+            if (openPopup) {
+                // Знаходимо маркер за координатами
+                const targetMarker = mapMarkersList.find(m => {
+                    const pos = m.getLatLng();
+                    return Math.abs(pos.lat - lat) < 0.001 && Math.abs(pos.lng - lon) < 0.001;
+                });
+                if (targetMarker) {
+                    setTimeout(() => targetMarker.openPopup(), 400);
+                }
+            }
+        }
+    };
+
+    async function initNetworkMap() {
         const mapContainer = document.getElementById('networkMap');
         if (!mapContainer) return;
 
-        const map = L.map('networkMap').setView([49.4444, 32.0597], 13);
-        
+        // Захист від повторної ініціалізації
+        if (networkMapInstance) {
+            networkMapInstance.remove();
+            networkMapInstance = null;
+            mapMarkersList = [];
+        }
+
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+
+        // Ініціалізація Leaflet з безпечними налаштуваннями жестів для мобільних
+        const map = L.map('networkMap', {
+            scrollWheelZoom: false, // Забороняє випадкове перехоплення скролу коліщатком на десктопі
+            dragging: !isMobile,    // На мобільному 1 палець вільно скролить всю сторінку!
+            tap: !isMobile,
+            touchZoom: true
+        }).setView([49.4444, 32.0597], 10);
+
+        networkMapInstance = map;
+
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
+            attribution: '&copy; <a href="https://carto.com/">CARTO</a> | &copy; OpenStreetMap',
+            maxZoom: 19
         }).addTo(map);
 
-        specialists.filter(s => s.status === 'verified').forEach(spec => {
-            const marker = L.marker(spec.coordinates).addTo(map);
+        // Створюємо LayerGroups для швидкої фільтрації
+        const layerGov = L.layerGroup();
+        const layerNgo = L.layerGroup();
+        const layerPortal = L.layerGroup();
+
+        // Створюємо кастомні DivIcon для красивих маркерів
+        const createPinIcon = (type, emoji) => L.divIcon({
+            className: 'custom-pin-wrapper',
+            html: `<div class="custom-pin pin-${type}"><div class="pin-inner">${emoji}</div></div>`,
+            iconSize: [32, 32],
+            iconAnchor: [16, 32],
+            popupAnchor: [0, -30]
+        });
+
+        const iconGov = createPinIcon('gov', '🏛️');
+        const iconNgo = createPinIcon('ngo', '🤝');
+        const iconPortal = createPinIcon('portal', '🟢');
+
+        // 1. Завантажуємо точки інфраструктури Черкащини
+        let locationPoints = [];
+        try {
+            const resp = await fetch('data/locations_cherkasy.json');
+            if (resp.ok) {
+                locationPoints = await resp.json();
+            } else {
+                const respBack = await fetch('backend/data/locations_cherkasy.json');
+                if (respBack.ok) locationPoints = await respBack.json();
+            }
+        } catch (e) {
+            console.warn('Не вдалося завантажити locations_cherkasy.json, використовуємо локальний fallback', e);
+        }
+
+        let countGov = 0, countNgo = 0, countPortal = 0;
+
+        // Додаємо точки з реєстру
+        locationPoints.forEach(loc => {
+            if (!loc.lat || !loc.lon) return;
+
+            const isGov = loc.category === 'government' || loc.ownership_type === 'Government';
+            const icon = isGov ? iconGov : iconNgo;
+            const marker = L.marker([loc.lat, loc.lon], { icon });
+
+            const tagClass = isGov ? 'popup-tag-gov' : 'popup-tag-ngo';
+            const tagLabel = isGov ? '🏛️ Державна установа' : '🤝 Ветеранський простір / ГО';
+
+            let phoneHtml = loc.phone ? `<a href="tel:${loc.phone}" class="popup-btn popup-btn-primary">📞 ${loc.phone}</a>` : '';
+            let routeHtml = `<a href="https://www.google.com/maps/dir/?api=1&destination=${loc.lat},${loc.lon}" target="_blank" class="popup-btn popup-btn-secondary">🗺️ Маршрут у Google Maps</a>`;
+            let webHtml = loc.website ? `<a href="${loc.website}" target="_blank" class="popup-btn popup-btn-secondary">🌐 Офіційний сайт / Чат</a>` : '';
+
             marker.bindPopup(`
-                <div style="color: #333; font-family: 'Inter', sans-serif;">
-                    <b style="color: var(--primary-green);">${spec.name}</b><br>
-                    <small>${spec.role || spec.category}</small><br>
-                    <p style="margin: 5px 0; font-size: 12px;">📍 ${spec.address}</p>
-                    <a href="tel:${spec.phone}" class="btn-primary" style="display:block; text-align:center; padding: 5px; font-size: 11px; margin-top: 5px;">Зателефонувати</a>
+                <div class="popup-card">
+                    <span class="popup-tag ${tagClass}">${tagLabel}</span>
+                    <h4 class="popup-title">${loc.name}</h4>
+                    <p class="popup-address">📍 ${loc.address || 'Черкаська область'}</p>
+                    ${loc.bio ? `<p class="popup-bio">${loc.bio}</p>` : ''}
+                    <div class="popup-actions">
+                        ${phoneHtml}
+                        ${routeHtml}
+                        ${webHtml}
+                    </div>
                 </div>
             `);
+
+            mapMarkersList.push(marker);
+
+            if (isGov) {
+                layerGov.addLayer(marker);
+                countGov++;
+            } else {
+                layerNgo.addLayer(marker);
+                countNgo++;
+            }
         });
+
+        // 2. Додаємо приватних верифікованих фахівців порталу
+        specialists.filter(s => s.status === 'verified' && s.coordinates).forEach(spec => {
+            const coords = Array.isArray(spec.coordinates) 
+                ? spec.coordinates 
+                : (typeof spec.coordinates === 'string' ? spec.coordinates.split(',').map(Number) : null);
+            
+            if (!coords || isNaN(coords[0]) || isNaN(coords[1])) return;
+
+            const marker = L.marker([coords[0], coords[1]], { icon: iconPortal });
+            marker.bindPopup(`
+                <div class="popup-card">
+                    <span class="popup-tag popup-tag-portal">🟢 Верифікований партнер «Новий Шлях»</span>
+                    <h4 class="popup-title">${spec.name}</h4>
+                    <p class="popup-address">📍 ${spec.address || 'м. Черкаси'}</p>
+                    <p class="popup-bio">${spec.role || spec.category || 'Фахівець із супроводу'}</p>
+                    <div class="popup-actions">
+                        <a href="tel:${spec.phone}" class="popup-btn popup-btn-primary">📞 Зателефонувати</a>
+                        <a href="catalog.html?q=${encodeURIComponent(spec.name)}" class="popup-btn popup-btn-secondary">📅 Профіль та запис</a>
+                    </div>
+                </div>
+            `);
+
+            mapMarkersList.push(marker);
+            layerPortal.addLayer(marker);
+            countPortal++;
+        });
+
+        // За замовчуванням додаємо всі шари
+        layerGov.addTo(map);
+        layerNgo.addTo(map);
+        layerPortal.addTo(map);
+
+        // Створюємо елементи керування: фільтри, підказка жестів, кнопка повного екрану
+        let filterContainer = document.getElementById('mapFilterChipsContainer');
+        if (!filterContainer) {
+            filterContainer = document.createElement('div');
+            filterContainer.id = 'mapFilterChipsContainer';
+            filterContainer.className = 'map-filter-chips';
+            mapContainer.parentNode.insertBefore(filterContainer, mapContainer);
+        }
+
+        const totalPoints = countGov + countNgo + countPortal;
+
+        filterContainer.innerHTML = `
+            <button class="map-chip-btn active" data-filter="all">📍 Всі точки <span class="map-chip-badge">${totalPoints}</span></button>
+            <button class="map-chip-btn" data-filter="gov">🏛️ Державні заклади <span class="map-chip-badge">${countGov}</span></button>
+            <button class="map-chip-btn" data-filter="ngo">🤝 Хаби та ГО <span class="map-chip-badge">${countNgo}</span></button>
+            <button class="map-chip-btn" data-filter="portal">🟢 Фахівці «Новий Шлях» <span class="map-chip-badge">${countPortal}</span></button>
+        `;
+
+        filterContainer.querySelectorAll('.map-chip-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterContainer.querySelectorAll('.map-chip-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const filter = btn.dataset.filter;
+
+                if (filter === 'all') {
+                    if (!map.hasLayer(layerGov)) map.addLayer(layerGov);
+                    if (!map.hasLayer(layerNgo)) map.addLayer(layerNgo);
+                    if (!map.hasLayer(layerPortal)) map.addLayer(layerPortal);
+                } else if (filter === 'gov') {
+                    if (!map.hasLayer(layerGov)) map.addLayer(layerGov);
+                    if (map.hasLayer(layerNgo)) map.removeLayer(layerNgo);
+                    if (map.hasLayer(layerPortal)) map.removeLayer(layerPortal);
+                } else if (filter === 'ngo') {
+                    if (map.hasLayer(layerGov)) map.removeLayer(layerGov);
+                    if (!map.hasLayer(layerNgo)) map.addLayer(layerNgo);
+                    if (map.hasLayer(layerPortal)) map.removeLayer(layerPortal);
+                } else if (filter === 'portal') {
+                    if (map.hasLayer(layerGov)) map.removeLayer(layerGov);
+                    if (map.hasLayer(layerNgo)) map.removeLayer(layerNgo);
+                    if (!map.hasLayer(layerPortal)) map.addLayer(layerPortal);
+                }
+            });
+        });
+
+        // 3. Додаємо підказку жестів на мобільних при спробі тягнути 1 пальцем
+        const gestureHint = document.createElement('div');
+        gestureHint.className = 'map-gesture-hint';
+        gestureHint.innerHTML = '👆 Для переміщення мапи проведіть <b>двома пальцями</b> або відкрийте на весь екран';
+        mapContainer.appendChild(gestureHint);
+
+        let hintTimer = null;
+        mapContainer.addEventListener('touchstart', (e) => {
+            if (!mapContainer.classList.contains('map-fullscreen-active')) {
+                if (e.touches.length === 1) {
+                    gestureHint.classList.add('show');
+                    clearTimeout(hintTimer);
+                    hintTimer = setTimeout(() => {
+                        gestureHint.classList.remove('show');
+                    }, 1800);
+                } else if (e.touches.length >= 2) {
+                    map.dragging.enable();
+                    gestureHint.classList.remove('show');
+                }
+            }
+        }, { passive: true });
+
+        mapContainer.addEventListener('touchend', () => {
+            if (!mapContainer.classList.contains('map-fullscreen-active')) {
+                map.dragging.disable();
+            }
+        });
+
+        // 4. Кнопка повного екрану для комфортної мобільної навігації
+        const fsBtn = document.createElement('button');
+        fsBtn.className = 'map-fullscreen-btn';
+        fsBtn.innerHTML = '⛶ На весь екран';
+        mapContainer.appendChild(fsBtn);
+
+        fsBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isFs = mapContainer.classList.toggle('map-fullscreen-active');
+            if (isFs) {
+                fsBtn.innerHTML = '✕ Згорнути карту';
+                map.dragging.enable();
+                map.scrollWheelZoom.enable();
+                document.body.style.overflow = 'hidden';
+            } else {
+                fsBtn.innerHTML = '⛶ На весь екран';
+                if (isMobile) map.dragging.disable();
+                map.scrollWheelZoom.disable();
+                document.body.style.overflow = '';
+            }
+            setTimeout(() => map.invalidateSize(), 200);
+        });
+
+        // Перевіряємо URL search params для авто-фокусу точки
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlLat = parseFloat(urlParams.get('lat'));
+        const urlLon = parseFloat(urlParams.get('lon'));
+        if (!isNaN(urlLat) && !isNaN(urlLon)) {
+            setTimeout(() => window.focusMapMarker(urlLat, urlLon, 16), 500);
+        }
     }
 
     // --- ТЕЛЕГРАМ MINI APP ДЕТЕКЦІЯ ---
@@ -111,11 +383,17 @@ document.addEventListener('DOMContentLoaded', () => {
         // 1. Фільтрація по категорії (вкладки)
         if (categoryFilter !== 'all') {
             if (categoryFilter === 'legal') {
-                filtered = filtered.filter(s => ['lawyer_consult', 'lawyer_docs', 'advocate'].includes(s.category));
+                filtered = filtered.filter(s => ['lawyer_consult', 'lawyer_docs', 'advocate', 'legal'].includes(s.category));
             } else if (categoryFilter === 'psychology') {
-                filtered = filtered.filter(s => ['psychologist', 'narcologist'].includes(s.category));
+                filtered = filtered.filter(s => ['psychologist', 'narcologist', 'psychology'].includes(s.category));
             } else if (categoryFilter === 'rehab') {
-                filtered = filtered.filter(s => ['rehabilitation', 'prosthetist'].includes(s.category));
+                filtered = filtered.filter(s => ['rehabilitation', 'prosthetist', 'rehab'].includes(s.category));
+            } else if (categoryFilter === 'edu') {
+                filtered = filtered.filter(s => ['edu', 'education', 'courses'].includes(s.category));
+            } else if (categoryFilter === 'career') {
+                filtered = filtered.filter(s => ['career', 'business', 'job', 'hr'].includes(s.category));
+            } else if (categoryFilter === 'social') {
+                filtered = filtered.filter(s => ['social', 'cnap', 'government', 'accompaniment'].includes(s.category));
             } else {
                 filtered = filtered.filter(s => s.category === categoryFilter);
             }

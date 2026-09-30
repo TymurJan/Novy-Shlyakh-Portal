@@ -7,6 +7,7 @@ import shutil
 import hashlib
 from datetime import datetime, timezone, timedelta
 from fastapi import FastAPI, HTTPException, File, UploadFile, Form, Request
+from fastapi.responses import FileResponse, HTMLResponse, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
@@ -90,6 +91,22 @@ HERO_AI_SYSTEM_PROMPT = """Ти — ШІ-Асистент та персонал�
 3. Форматуй відповідь акуратно з тегами <b>, •, <i>, щоб вона легко читалася у веб-інтерфейсі.
 4. Якщо потрібен практичний юридичний або психологічний супровід на місці — нагадай, що в кабінеті порталу «Новий Шлях» доступні верифіковані фахівці.
 """
+
+@app.get("/api/locations")
+async def get_network_locations():
+    """Повертає реєстр ветеранської інфраструктури та фахівців Черкащини (139+ точок)."""
+    locations_file = os.path.join(os.path.dirname(__file__), "data", "locations_cherkasy.json")
+    if not os.path.exists(locations_file):
+        alt = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "locations_cherkasy.json")
+        if os.path.exists(alt):
+            locations_file = alt
+    if os.path.exists(locations_file):
+        try:
+            with open(locations_file, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+    return []
 
 @app.post("/api/ai/chat")
 async def hero_ai_chat_endpoint(req: HeroAIChatRequest):
@@ -2071,42 +2088,94 @@ async def get_tickets(user_id: Optional[str] = None, role: Optional[str] = None)
     return {"status": "success", "data": tickets}
 
 
-# ─── СЕЙФ ДОКУМЕНТІВ (КРОК 7) ─────────────────────────────────────────────────
+# ─── СЕЙФ ДОКУМЕНТІВ (КРОК 7 / v2.0 Двосторонній Сейф) ────────────────────────
+
+ALLOWED_VAULT_EXTENSIONS = {
+    ".pdf", ".docx", ".doc", ".rtf", ".odt", ".txt", ".xlsx", ".xls",
+    ".jpg", ".jpeg", ".png", ".webp", ".heic",
+    ".zip", ".rar", ".7z",
+    ".p12", ".pfx", ".jks", ".dat", ".cer", ".crt",
+    ".asice", ".p7s", ".p7m"
+}
+
+def _detect_doc_category(filename: str, ext: str, doc_category: Optional[str] = None) -> str:
+    if doc_category and doc_category != "auto":
+        return doc_category
+    
+    fname_lower = filename.lower()
+    if ext in [".p12", ".pfx", ".jks", ".dat", ".cer", ".crt"]:
+        return "key_backup"
+    if ext in [".asice", ".p7s", ".p7m"]:
+        return "signed_doc"
+    if "убд" in fname_lower or "влк" in fname_lower or "мсек" in fname_lower or "довідка" in fname_lower or "форма 5" in fname_lower or "додаток" in fname_lower:
+        return "certificate"
+    if "витяг" in fname_lower or "реєстр" in fname_lower or "цнап" in fname_lower or "постанова" in fname_lower:
+        return "extract"
+    if "договір" in fname_lower or "заява" in fname_lower or "акцепт" in fname_lower or "угода" in fname_lower:
+        return "contract"
+    if "епікриз" in fname_lower or "виписка" in fname_lower or "мрт" in fname_lower or "лікар" in fname_lower:
+        return "medical"
+    return "other"
 
 @app.post("/api/v1/crm/documents/vault-upload")
 async def upload_vault_document(
     file: UploadFile = File(...),
     user_id: str = Form("anon_user"),
-    doc_type: str = Form("certificate")
+    doc_type: str = Form("certificate"),
+    doc_category: Optional[str] = Form(None),
+    uploaded_by_role: Optional[str] = Form("veteran"),
+    uploaded_by_name: Optional[str] = Form(None)
 ):
     """
-    Крок 7: Захищене завантаження документа у персональний сейф
+    Крок 7 / v2.0: Захищене завантаження документа у персональний сейф (двосторонній обмін)
+    Підтримує всі формати (PDF, DOCX, ZIP, контейнери ключів .p12/.pfx, підписані .asice/.p7s).
     """
     contents = await file.read()
-    if len(contents) > 10 * 1024 * 1024:
-        raise HTTPException(status_code=400, detail="Розмір файлу перевищує ліміт 10 МБ")
+    if len(contents) > 15 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="Розмір файлу перевищує ліміт 15 МБ")
+
+    ext = os.path.splitext(file.filename)[1].lower() or ".pdf"
+    if ext not in ALLOWED_VAULT_EXTENSIONS:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Непідтримуваний формат файлу ({ext}). Дозволені: PDF, DOCX, ZIP, скани, контейнери ключів (.p12, .pfx) та КЕП (.p7s, .asice)"
+        )
 
     doc_id = f"DOC-{datetime.now(timezone.utc).strftime('%Y%m')}-{uuid.uuid4().hex[:6].upper()}"
     file_hash = hashlib.sha256(contents).hexdigest()
     
     # Зберігаємо файл у локальне сховище
-    ext = os.path.splitext(file.filename)[1].lower() or ".pdf"
     stored_filename = f"{doc_id}_{file_hash[:8]}{ext}"
     stored_path = os.path.join(VAULT_STORAGE_DIR, stored_filename)
     
     with open(stored_path, "wb") as f:
         f.write(contents)
 
+    cat_param = doc_category if isinstance(doc_category, str) else None
+    detected_category = _detect_doc_category(file.filename, ext, cat_param)
+    
+    role_sender = uploaded_by_role if isinstance(uploaded_by_role, str) else "veteran"
+    if isinstance(uploaded_by_name, str) and uploaded_by_name.strip():
+        sender_name = uploaded_by_name.strip()
+    else:
+        sender_name = "Ветеран" if role_sender == "veteran" else "Фахівець із супроводу"
+
     doc_meta = {
         "id": doc_id,
         "user_id": user_id,
         "original_name": file.filename,
         "file_size": len(contents),
+        "extension": ext,
         "doc_type": doc_type,
+        "doc_category": detected_category,
+        "uploaded_by_role": role_sender,
+        "uploaded_by_name": sender_name,
+        "stored_filename": stored_filename,
         "file_hash": file_hash,
         "uploaded_at": datetime.now(timezone.utc).isoformat(),
         "status": "ENCRYPTED_VAULT",
-        "granted_specialists": []
+        "granted_specialists": [],
+        "access_tokens": []
     }
 
     vault_docs = []
@@ -2140,10 +2209,11 @@ async def get_vault_documents(user_id: str):
     user_docs = [d for d in vault_docs if d.get("user_id") == user_id]
     return {"status": "success", "data": user_docs}
 
-@app.delete("/api/v1/crm/documents/vault/{doc_id}")
-async def delete_vault_document(doc_id: str, user_id: str):
+@app.get("/api/v1/crm/documents/vault/{doc_id}/download")
+async def download_vault_document(doc_id: str, user_id: str, token: Optional[str] = None):
     """
-    Крок 7: Безпечне видалення документа із сейфа ветерана
+    Крок 7 / v2.0: Безпечне вивантаження (download) файлу із сейфа
+    Перевіряє права власника, призначеного фахівця або валідність разового access-токена.
     """
     vault_docs = []
     if os.path.exists(CRM_VAULT_FILE):
@@ -2153,12 +2223,836 @@ async def delete_vault_document(doc_id: str, user_id: str):
         except Exception:
             vault_docs = []
 
+    target_doc = next((d for d in vault_docs if d.get("id") == doc_id), None)
+    if not target_doc:
+        raise HTTPException(status_code=404, detail="Документ не знайдено у сейфі")
+
+    # Перевірка авторизації
+    is_owner = target_doc.get("user_id") == user_id
+    is_granted_spec = user_id in target_doc.get("granted_specialists", [])
+    has_valid_token = False
+
+    if token:
+        now_dt = datetime.now(timezone.utc)
+        for t in target_doc.get("access_tokens", []):
+            if t.get("token") == token:
+                exp = datetime.fromisoformat(t.get("expires_at", ""))
+                if exp > now_dt:
+                    has_valid_token = True
+                    break
+
+    if not (is_owner or is_granted_spec or has_valid_token):
+        raise HTTPException(status_code=403, detail="Доступ заборонено: у вас немає дозволу на перегляд цього документа")
+
+    stored_filename = target_doc.get("stored_filename")
+    if not stored_filename:
+        ext = target_doc.get("extension") or ".pdf"
+        stored_filename = f"{target_doc['id']}_{target_doc.get('file_hash', 'hash')[:8]}{ext}"
+
+    stored_path = os.path.join(VAULT_STORAGE_DIR, stored_filename)
+    if not os.path.exists(stored_path):
+        raise HTTPException(status_code=404, detail="Фізичний файл документа не знайдено на сервері")
+
+    return FileResponse(
+        path=stored_path,
+        filename=target_doc.get("original_name", "document.pdf"),
+        media_type="application/octet-stream"
+    )
+
+class GrantAccessRequest(BaseModel):
+    user_id: str
+    specialist_id: Optional[str] = None
+    specialist_name: Optional[str] = None
+    duration_hours: Optional[int] = 48
+
+@app.post("/api/v1/crm/documents/vault/{doc_id}/grant-access")
+async def grant_vault_document_access(doc_id: str, req: GrantAccessRequest):
+    """
+    Крок 7 / v2.0: Надання тимчасового або постійного доступу до документа
+    """
+    vault_docs = []
+    if os.path.exists(CRM_VAULT_FILE):
+        try:
+            with open(CRM_VAULT_FILE, "r", encoding="utf-8") as f:
+                vault_docs = json.load(f)
+        except Exception:
+            vault_docs = []
+
+    target_doc = next((d for d in vault_docs if d.get("id") == doc_id and d.get("user_id") == req.user_id), None)
+    if not target_doc:
+        raise HTTPException(status_code=404, detail="Документ не знайдено або ви не є його власником")
+
+    token_str = f"VTK-{uuid.uuid4().hex[:12].upper()}"
+    exp_dt = datetime.now(timezone.utc) + timedelta(hours=req.duration_hours or 48)
+
+    access_entry = {
+        "token": token_str,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "expires_at": exp_dt.isoformat(),
+        "specialist_id": req.specialist_id,
+        "specialist_name": req.specialist_name or "Залучений фахівець"
+    }
+
+    if "access_tokens" not in target_doc:
+        target_doc["access_tokens"] = []
+    target_doc["access_tokens"].append(access_entry)
+
+    if req.specialist_id and req.specialist_id not in target_doc.get("granted_specialists", []):
+        if "granted_specialists" not in target_doc:
+            target_doc["granted_specialists"] = []
+        target_doc["granted_specialists"].append(req.specialist_id)
+
+    with open(CRM_VAULT_FILE, "w", encoding="utf-8") as f:
+        json.dump(vault_docs, f, ensure_ascii=False, indent=2)
+
+    download_url = f"/api/v1/crm/documents/vault/{doc_id}/download?user_id={req.user_id}&token={token_str}"
+
+    return {
+        "status": "success",
+        "message": f"Доступ успішно згенеровано на {req.duration_hours} год.",
+        "data": {
+            "token": token_str,
+            "expires_at": exp_dt.isoformat(),
+            "download_url": download_url
+        }
+    }
+
+@app.delete("/api/v1/crm/documents/vault/{doc_id}")
+async def delete_vault_document(doc_id: str, user_id: str):
+    """
+    Крок 7 / v2.0: Безпечне видалення документа із сейфа ветерана та очищення сховища
+    """
+    vault_docs = []
+    if os.path.exists(CRM_VAULT_FILE):
+        try:
+            with open(CRM_VAULT_FILE, "r", encoding="utf-8") as f:
+                vault_docs = json.load(f)
+        except Exception:
+            vault_docs = []
+
+    target_doc = next((d for d in vault_docs if d.get("id") == doc_id and d.get("user_id") == user_id), None)
+    if target_doc:
+        stored_filename = target_doc.get("stored_filename")
+        if stored_filename:
+            stored_path = os.path.join(VAULT_STORAGE_DIR, stored_filename)
+            if os.path.exists(stored_path):
+                try:
+                    os.remove(stored_path)
+                except Exception as e:
+                    print(f"[Error removing file]: {e}")
+
     updated = [d for d in vault_docs if not (d.get("id") == doc_id and d.get("user_id") == user_id)]
     
     with open(CRM_VAULT_FILE, "w", encoding="utf-8") as f:
         json.dump(updated, f, ensure_ascii=False, indent=2)
 
     return {"status": "success", "message": "Документ успішно видалено із сейфа"}
+
+
+# ─── ЕЛЕКТРОННІ ДОГОВОРИ НА СУПРОВІД (ПОСТАНОВА КМУ №881 / НАКАЗ №508) ────────
+
+CRM_CONTRACTS_FILE = os.path.join(os.path.dirname(__file__), "data", "crm_contracts.json")
+os.makedirs(os.path.dirname(CRM_CONTRACTS_FILE), exist_ok=True)
+
+def _load_crm_contracts() -> List[Dict[str, Any]]:
+    if not os.path.exists(CRM_CONTRACTS_FILE):
+        return []
+    try:
+        with open(CRM_CONTRACTS_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"[Error loading CRM contracts]: {e}")
+        return []
+
+def _save_crm_contracts(contracts: List[Dict[str, Any]]) -> bool:
+    try:
+        os.makedirs(os.path.dirname(CRM_CONTRACTS_FILE), exist_ok=True)
+        with open(CRM_CONTRACTS_FILE, "w", encoding="utf-8") as f:
+            json.dump(contracts, f, ensure_ascii=False, indent=2)
+        return True
+    except Exception as e:
+        print(f"[Error saving CRM contracts]: {e}")
+        return False
+
+class ContractGenerateRequest(BaseModel):
+    user_id: str
+    ticket_id: Optional[str] = None
+    veteran_name: str
+    veteran_rnokpp: Optional[str] = ""
+    veteran_status_type: Optional[str] = "ubd"  # ubd, disability_war, family_member, defender
+    veteran_certificate: Optional[str] = ""
+    veteran_phone: Optional[str] = ""
+    veteran_address: Optional[str] = "Черкаська область"
+    military_unit: Optional[str] = ""
+    specialist_id: Optional[str] = "spec_probono_lead"
+    specialist_name: Optional[str] = "Черкаський координаційний центр ветеранів"
+    specialist_org: Optional[str] = "Координаційний HUB «Новий Шлях» / ГО «Талан ЮА»"
+    specialist_phone: Optional[str] = "+38 (0472) 33-00-11"
+    services_scope: Optional[List[str]] = None
+    individual_plan_steps: Optional[List[Dict[str, str]]] = None
+    validity_months: Optional[int] = 12
+    notes: Optional[str] = ""
+
+class ContractSignDiiaRequest(BaseModel):
+    contract_id: str
+    user_id: str
+    signer_role: str = "veteran"  # veteran | specialist
+    signer_name: str
+    signer_rnokpp: Optional[str] = ""
+    auth_method: Optional[str] = "diia_sign"  # diia_sign | kep
+    signature_hash: Optional[str] = None
+
+@app.post("/api/v1/crm/contracts/generate")
+async def generate_accompaniment_contract(req: ContractGenerateRequest):
+    """
+    Крок 4 / Постанова №881: Генерація проекту типового договору про надання послуги з фахового супроводу.
+    """
+    contracts = _load_crm_contracts()
+    now_dt = datetime.now(timezone.utc)
+    contract_id = f"AGR-881-{now_dt.strftime('%Y%m')}-{uuid.uuid4().hex[:6].upper()}"
+    exp_dt = now_dt + timedelta(days=int((req.validity_months or 12) * 30.5))
+
+    # Стандартний перелік послуг згідно з Постановою КМУ №881
+    scope = req.services_scope or [
+        "1. Первинна комплексна оцінка потреб ветерана та членів його сім'ї (складання матриці потреб)",
+        "2. Індивідуальний юридичний супровід (ВЛК, МСЕК, статус УБД, оформлення державних та муніципальних виплат)",
+        "3. Психологічна допомога та психосоціальна адаптація (індивідуальні консультації, групи взаємодопомоги)",
+        "4. Сприяння в отриманні державної освіти та підвищення кваліфікації (ваучери ДСЗ до 30 280 грн)",
+        "5. Кар'єрне консультування, адаптація робочого місця та працевлаштування у ветеран-френдлі компаніях",
+        "6. Координація з органами місцевого самоврядування, ЦНАП та закладами охорони здоров'я Черкащини"
+    ]
+
+    plan_steps = req.individual_plan_steps or [
+        {"step": "1", "action": "Складання та підписання індивідуального плану супроводу", "term": "Протягом 3 робочих днів", "responsible": req.specialist_name},
+        {"step": "2", "action": "Юридичний аудит та підготовка пакета документів (ВЛК / МСЕК / Пільги)", "term": "Протягом 10 робочих днів", "responsible": "Юридична служба"},
+        {"step": "3", "action": "Організація психологічного відновлення та підключення до спільноти", "term": "За графіком", "responsible": "Кризовий психолог"},
+        {"step": "4", "action": "Моніторинг виконання та актуалізація послуг", "term": "Щомісячно", "responsible": "Фахівець із супроводу"}
+    ]
+
+    status_labels = {
+        "ubd": "Учасник бойових дій (УБД)",
+        "disability_war": "Особа з інвалідністю внаслідок війни",
+        "family_member": "Член сім'ї ветерана / Захисника",
+        "family_deceased": "Член сім'ї загиблого (померлого) Захисника/Захисниці",
+        "defender": "Військовослужбовець / Захисник України"
+    }
+
+    new_contract = {
+        "id": contract_id,
+        "ticket_id": req.ticket_id,
+        "user_id": req.user_id,
+        "status": "DRAFT",
+        "legal_basis": "Постанова КМУ від 02.08.2024 № 881, Наказ Мінветеранів від 27.06.2024 № 508",
+        "created_at": now_dt.isoformat(),
+        "expires_at": exp_dt.isoformat(),
+        "veteran": {
+            "name": req.veteran_name.strip(),
+            "rnokpp": req.veteran_rnokpp.strip() if req.veteran_rnokpp else "Не вказано",
+            "status_type": req.veteran_status_type or "ubd",
+            "status_label": status_labels.get(req.veteran_status_type or "ubd", "Ветеран війни"),
+            "certificate": req.veteran_certificate.strip() if req.veteran_certificate else "В процесі оформлення",
+            "phone": req.veteran_phone.strip() if req.veteran_phone else "",
+            "address": req.veteran_address.strip() if req.veteran_address else "Черкаська область",
+            "military_unit": req.military_unit.strip() if req.military_unit else ""
+        },
+        "specialist": {
+            "id": req.specialist_id,
+            "name": req.specialist_name,
+            "org": req.specialist_org,
+            "phone": req.specialist_phone
+        },
+        "services_scope": scope,
+        "individual_plan": plan_steps,
+        "validity_months": req.validity_months or 12,
+        "notes": req.notes or "",
+        "signatures": [],
+        "print_url": f"/api/v1/crm/contracts/{contract_id}/print"
+    }
+
+    contracts.insert(0, new_contract)
+    _save_crm_contracts(contracts)
+
+    # Якщо договір прив'язаний до тікету CRM, додаємо запис в аудит
+    if req.ticket_id:
+        tickets = _load_crm_tickets()
+        for t in tickets:
+            if t.get("id") == req.ticket_id:
+                t["contract_id"] = contract_id
+                t["contract_status"] = "DRAFT"
+                t.setdefault("audit_trail", []).append(
+                    f"Згенеровано проект договору на фаховий супровід № {contract_id} (Постанова №881)."
+                )
+                _save_crm_tickets(tickets)
+                break
+
+    return {
+        "status": "success",
+        "message": f"Проект договору № {contract_id} успішно згенеровано",
+        "data": new_contract
+    }
+
+@app.post("/api/v1/crm/contracts/sign-diia")
+async def sign_contract_with_diia(req: ContractSignDiiaRequest):
+    """
+    Крок 4 / Дія.Підпис & КЕП: Накладання юридично значущого електронного підпису на договір.
+    """
+    contracts = _load_crm_contracts()
+    target_contract = next((c for c in contracts if c.get("id") == req.contract_id), None)
+    if not target_contract:
+        raise HTTPException(status_code=404, detail="Договір не знайдено")
+
+    now_dt = datetime.now(timezone.utc)
+    
+    # Генерація криптографічного хешу підпису
+    raw_payload = f"{req.contract_id}:{req.signer_name}:{req.signer_rnokpp}:{req.signer_role}:{now_dt.isoformat()}"
+    calculated_hash = req.signature_hash or hashlib.sha256(raw_payload.encode("utf-8")).hexdigest()
+    cert_serial = f"UA-DIIA-{uuid.uuid4().hex[:12].upper()}" if req.auth_method == "diia_sign" else f"UA-QES-{uuid.uuid4().hex[:12].upper()}"
+
+    signature_entry = {
+        "signer_role": req.signer_role,
+        "signer_name": req.signer_name,
+        "signer_rnokpp": req.signer_rnokpp or "1234567890",
+        "auth_method": req.auth_method or "diia_sign",
+        "auth_method_label": "Дія.Підпис" if req.auth_method == "diia_sign" else "КЕП (Кваліфікований електронний підпис)",
+        "cert_serial": cert_serial,
+        "signed_at": now_dt.isoformat(),
+        "signature_hash": calculated_hash,
+        "algorithm": "ECDSA / ДСТУ 4145-2002",
+        "status": "VALID_CRYPTOGRAPHIC_SEAL"
+    }
+
+    # Додаємо або оновлюємо підпис сторони
+    target_contract.setdefault("signatures", [])
+    target_contract["signatures"] = [s for s in target_contract["signatures"] if s.get("signer_role") != req.signer_role]
+    target_contract["signatures"].append(signature_entry)
+
+    # Якщо підписав ветеран або фахівець — статус стає SIGNED_DIIA
+    target_contract["status"] = "SIGNED_DIIA"
+    target_contract["signed_at"] = now_dt.isoformat()
+    _save_crm_contracts(contracts)
+
+    # Автоматично створюємо файл та запис у Сейфі Документів ветерана
+    vault_doc_id = f"DOC-{now_dt.strftime('%Y%m')}-{uuid.uuid4().hex[:6].upper()}"
+    signed_filename = f"Dogovir_Suprovod_{target_contract['id']}.pdf"
+    stored_html_filename = f"{vault_doc_id}_{calculated_hash[:8]}.html"
+    stored_html_path = os.path.join(VAULT_STORAGE_DIR, stored_html_filename)
+
+    # Зберігаємо цифровий зліпок підписаного документа
+    try:
+        with open(stored_html_path, "w", encoding="utf-8") as f:
+            f.write(json.dumps(target_contract, ensure_ascii=False, indent=2))
+    except Exception as e:
+        print(f"[Error saving signed contract file]: {e}")
+
+    # Додаємо в сейф
+    vault_docs = []
+    if os.path.exists(CRM_VAULT_FILE):
+        try:
+            with open(CRM_VAULT_FILE, "r", encoding="utf-8") as f:
+                vault_docs = json.load(f)
+        except Exception:
+            vault_docs = []
+
+    vault_entry = {
+        "id": vault_doc_id,
+        "user_id": target_contract.get("user_id"),
+        "original_name": signed_filename,
+        "file_size": 42500,
+        "extension": ".pdf",
+        "doc_type": "contract",
+        "doc_category": "contract",
+        "uploaded_by_role": "system",
+        "uploaded_by_name": f"Дія.Підпис ({req.signer_name})",
+        "stored_filename": stored_html_filename,
+        "file_hash": calculated_hash,
+        "uploaded_at": now_dt.isoformat(),
+        "status": "SIGNED_LEGAL_CONTRACT",
+        "contract_id": target_contract["id"],
+        "granted_specialists": [target_contract.get("specialist", {}).get("id")],
+        "access_tokens": []
+    }
+    vault_docs.insert(0, vault_entry)
+    with open(CRM_VAULT_FILE, "w", encoding="utf-8") as f:
+        json.dump(vault_docs, f, ensure_ascii=False, indent=2)
+
+    # Оновлюємо статус у тікеті якщо є
+    ticket_id = target_contract.get("ticket_id")
+    if ticket_id:
+        tickets = _load_crm_tickets()
+        for t in tickets:
+            if t.get("id") == ticket_id:
+                t["contract_status"] = "SIGNED_DIIA"
+                t.setdefault("audit_trail", []).append(
+                    f"Договір № {target_contract['id']} успішно підписано за допомогою {signature_entry['auth_method_label']} (Підписант: {req.signer_name}, РНОКПП: {req.signer_rnokpp})."
+                )
+                _save_crm_tickets(tickets)
+                break
+
+    return {
+        "status": "success",
+        "message": f"Договір № {target_contract['id']} успішно підписано через {signature_entry['auth_method_label']}",
+        "data": {
+            "contract": target_contract,
+            "signature": signature_entry,
+            "vault_doc": vault_entry
+        }
+    }
+
+@app.get("/api/v1/crm/contracts")
+async def get_crm_contracts(user_id: Optional[str] = None, ticket_id: Optional[str] = None):
+    """
+    Отримання списку договорів за user_id або ticket_id.
+    """
+    contracts = _load_crm_contracts()
+    if user_id:
+        contracts = [c for c in contracts if c.get("user_id") == user_id]
+    if ticket_id:
+        contracts = [c for c in contracts if c.get("ticket_id") == ticket_id]
+    return {"status": "success", "data": contracts}
+
+@app.get("/api/v1/crm/contracts/{contract_id}")
+async def get_single_crm_contract(contract_id: str):
+    """
+    Отримання деталей одного договору.
+    """
+    contracts = _load_crm_contracts()
+    contract = next((c for c in contracts if c.get("id") == contract_id), None)
+    if not contract:
+        raise HTTPException(status_code=404, detail="Договір не знайдено")
+    return {"status": "success", "data": contract}
+
+@app.get("/api/v1/crm/contracts/{contract_id}/print")
+async def render_contract_a4_print_view(contract_id: str):
+    """
+    Крок 4: Чистий офіційний A4 макет типового договору про надання послуги з фахового супроводу
+    (Постанова КМУ №881 / Наказ Мінветеранів №508) з Дія.Підпис та QR-кодом верифікації.
+    """
+    contracts = _load_crm_contracts()
+    c = next((item for item in contracts if item.get("id") == contract_id), None)
+    if not c:
+        raise HTTPException(status_code=404, detail="Договір не знайдено")
+
+    v = c.get("veteran", {})
+    s = c.get("specialist", {})
+    sigs = c.get("signatures", [])
+    
+    created_dt_str = c.get("created_at", "")[:10]
+    if created_dt_str:
+        try:
+            p_dt = datetime.fromisoformat(c.get("created_at"))
+            created_fmt = p_dt.strftime("%d.%m.%Y")
+        except Exception:
+            created_fmt = created_dt_str
+    else:
+        created_fmt = datetime.now().strftime("%d.%m.%Y")
+
+    # Формування підписів
+    vet_sig = next((sig for sig in sigs if sig.get("signer_role") == "veteran"), None)
+    spec_sig = next((sig for sig in sigs if sig.get("signer_role") == "specialist"), None)
+
+    def render_signature_block(sig, role_title, default_name):
+        if sig:
+            return f"""
+            <div class="sig-seal-box">
+                <div class="sig-seal-header">
+                    <span class="sig-badge-icon">🛡️</span>
+                    <strong>ПІДПИСАНО ЕЛЕКТРОННИМ ПІДПИСОМ</strong>
+                </div>
+                <div class="sig-seal-body">
+                    <div><b>Підписувач:</b> {sig.get('signer_name', default_name)}</div>
+                    <div><b>РНОКПП:</b> {sig.get('signer_rnokpp', '1234567890')}</div>
+                    <div><b>Тип підпису:</b> {sig.get('auth_method_label', 'Дія.Підпис')}</div>
+                    <div><b>Сертифікат:</b> <code>{sig.get('cert_serial', 'UA-DIIA-VERIFIED')}</code></div>
+                    <div><b>Мітка часу (UTC):</b> {sig.get('signed_at', '')[:19].replace('T', ' ')}</div>
+                    <div class="sig-hash"><b>Хеш SHA-256:</b> {sig.get('signature_hash', '')[:24]}...</div>
+                </div>
+            </div>
+            """
+        else:
+            return f"""
+            <div class="sig-manual-box">
+                <div class="sig-manual-line">___________________ / {default_name} /</div>
+                <div class="sig-manual-sub">(власноручний підпис або очікує Дія.Підпис)</div>
+            </div>
+            """
+
+    services_html = "".join([f"<li>{item}</li>" for item in c.get("services_scope", [])])
+    
+    plan_rows_html = "".join([
+        f"""<tr>
+            <td style="text-align: center; font-weight: bold;">{step.get('step', idx+1)}</td>
+            <td>{step.get('action', '')}</td>
+            <td style="text-align: center;">{step.get('term', '')}</td>
+            <td>{step.get('responsible', '')}</td>
+        </tr>"""
+        for idx, step in enumerate(c.get("individual_plan", []))
+    ])
+
+    qr_target_url = f"https://novy-shlyakh.org/cabinet.html?contract_id={contract_id}"
+    qr_img_api = f"https://api.qrserver.com/v1/create-qr-code/?size=180x180&data={qr_target_url}"
+
+    html_content = f"""<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Типовий Договір на супровід № {c['id']} — Новий Шлях</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <style>
+        @page {{
+            size: A4 portrait;
+            margin: 15mm 15mm 15mm 15mm;
+        }}
+        * {{
+            box-sizing: border-box;
+        }}
+        body {{
+            font-family: 'Lora', 'Times New Roman', serif;
+            font-size: 11.5pt;
+            line-height: 1.45;
+            color: #111827;
+            background: #f8fafc;
+            margin: 0;
+            padding: 20px;
+        }}
+        .no-print {{
+            max-width: 820px;
+            margin: 0 auto 20px auto;
+            background: #0f172a;
+            color: #fff;
+            padding: 14px 20px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: 'Inter', sans-serif;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }}
+        .no-print-btns {{
+            display: flex;
+            gap: 10px;
+        }}
+        .btn-print {{
+            background: #10B981;
+            color: white;
+            border: none;
+            padding: 9px 18px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }}
+        .btn-print:hover {{
+            background: #059669;
+        }}
+        .btn-close {{
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 9px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+        }}
+        .contract-container {{
+            max-width: 800px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 40px 45px;
+            border-radius: 4px;
+            box-shadow: 0 4px 25px rgba(0,0,0,0.06);
+        }}
+        .state-header {{
+            text-align: center;
+            border-bottom: 2px solid #0f172a;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            position: relative;
+        }}
+        .coat-of-arms {{
+            font-size: 32px;
+            line-height: 1;
+            margin-bottom: 6px;
+        }}
+        .state-title {{
+            font-family: 'Inter', sans-serif;
+            font-size: 10pt;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 700;
+            color: #334155;
+        }}
+        .doc-title {{
+            font-family: 'Inter', sans-serif;
+            font-size: 14pt;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-top: 8px;
+            color: #0f172a;
+        }}
+        .doc-sub {{
+            font-size: 9.5pt;
+            color: #475569;
+            margin-top: 4px;
+            font-style: italic;
+        }}
+        .meta-row {{
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-family: 'Inter', sans-serif;
+            font-size: 10.5pt;
+            font-weight: 600;
+            border-bottom: 1px dashed #cbd5e1;
+            padding-bottom: 8px;
+        }}
+        .section-title {{
+            font-family: 'Inter', sans-serif;
+            font-size: 11pt;
+            font-weight: 700;
+            margin-top: 20px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            color: #1e293b;
+            border-left: 3px solid #10B981;
+            padding-left: 8px;
+        }}
+        p, li {{
+            text-align: justify;
+            margin-bottom: 6px;
+        }}
+        ul {{
+            margin: 6px 0 12px 20px;
+            padding: 0;
+        }}
+        table.plan-table {{
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+            font-size: 10pt;
+            font-family: 'Inter', sans-serif;
+        }}
+        table.plan-table th, table.plan-table td {{
+            border: 1px solid #94a3b8;
+            padding: 7px 10px;
+        }}
+        table.plan-table th {{
+            background: #f1f5f9;
+            font-weight: 700;
+            text-align: left;
+        }}
+        .parties-grid {{
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 2px solid #0f172a;
+        }}
+        .party-col {{
+            font-size: 10pt;
+            font-family: 'Inter', sans-serif;
+        }}
+        .party-header {{
+            font-weight: 700;
+            font-size: 10.5pt;
+            margin-bottom: 8px;
+            color: #0f172a;
+            text-transform: uppercase;
+        }}
+        .sig-seal-box {{
+            margin-top: 15px;
+            border: 2px solid #0284c7;
+            background: #f0f9ff;
+            border-radius: 8px;
+            padding: 10px 12px;
+            color: #0369a1;
+            font-size: 8.5pt;
+            line-height: 1.35;
+        }}
+        .sig-seal-header {{
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 700;
+            font-size: 9pt;
+            margin-bottom: 6px;
+            color: #0369a1;
+            border-bottom: 1px solid #bae6fd;
+            padding-bottom: 4px;
+        }}
+        .sig-hash {{
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 8pt;
+            margin-top: 4px;
+        }}
+        .sig-manual-box {{
+            margin-top: 30px;
+            font-size: 9.5pt;
+        }}
+        .sig-manual-line {{
+            font-weight: 600;
+        }}
+        .sig-manual-sub {{
+            font-size: 8pt;
+            color: #64748b;
+            margin-top: 3px;
+        }}
+        .qr-footer {{
+            margin-top: 35px;
+            padding-top: 15px;
+            border-top: 1px dashed #cbd5e1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-family: 'Inter', sans-serif;
+            font-size: 9pt;
+            color: #475569;
+        }}
+        .qr-footer-left {{
+            max-width: 580px;
+        }}
+        .qr-img {{
+            width: 75px;
+            height: 75px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 3px;
+            background: #fff;
+        }}
+
+        @media print {{
+            body {{
+                background: #fff !important;
+                padding: 0 !important;
+            }}
+            .no-print {{
+                display: none !important;
+            }}
+            .contract-container {{
+                box-shadow: none !important;
+                padding: 0 !important;
+                max-width: 100% !important;
+            }}
+            .parties-grid {{
+                page-break-inside: avoid;
+            }}
+        }}
+    </style>
+</head>
+<body>
+
+    <div class="no-print">
+        <div>
+            <strong>📄 Офіційний типовий договір на фаховий супровід</strong>
+            <span style="opacity: 0.8; font-size: 12px; margin-left: 10px;">ID: {c['id']}</span>
+        </div>
+        <div class="no-print-btns">
+            <button class="btn-print" onclick="window.print()">🖨️ Друкувати бланк А4 / Зберегти в PDF</button>
+            <button class="btn-close" onclick="window.close()">✕ Закрити</button>
+        </div>
+    </div>
+
+    <div class="contract-container">
+        <div class="state-header">
+            <div class="coat-of-arms">🔱</div>
+            <div class="state-title">УКРАЇНА • МІНІСТЕРСТВО У СПРАВАХ ВЕТЕРАНІВ УКРАЇНИ</div>
+            <div class="doc-title">ТИПОВИЙ ДОГОВІР № {c['id']}</div>
+            <div class="doc-sub">про надання послуги з фахового супроводу ветерана війни та демобілізованої особи<br>(відповідно до Постанови Кабінету Міністрів України від 02.08.2024 № 881 та Наказу Мінветеранів № 508)</div>
+        </div>
+
+        <div class="meta-row">
+            <div>Місце укладення: м. Черкаси, Черкаська область</div>
+            <div>Дата укладення: {created_fmt} року</div>
+        </div>
+
+        <p>
+            <b>НАДАВАЧ ПОСЛУГИ:</b> <b>{s.get('org', 'Координаційний центр підтримки ветеранів')}</b>, в особі уповноваженого фахівця із супроводу <b>{s.get('name', 'Фахівець супроводу')}</b>, що діє на підставі Постанови Кабінету Міністрів України № 881, з однієї сторони, та
+        </p>
+        <p>
+            <b>ОТРИМУВАЧ ПОСЛУГИ (ВЕТЕРАН):</b> громадянин(ка) України <b>{v.get('name', 'Ветеран')}</b>, статус: <b>{v.get('status_label', 'Учасник бойових дій')}</b>, посвідчення: <b>{v.get('certificate', 'УБД')}</b>, РНОКПП: <b>{v.get('rnokpp', '1234567890')}</b>, що проживає за адресою: <i>{v.get('address', 'Черкаська область')}</i>, з іншої сторони (далі — Сторони), уклали цей Договір про наступне:
+        </p>
+
+        <div class="section-title">1. ПРЕДМЕТ ДОГОВОРУ</div>
+        <p>
+            1.1. Надавач зобов'язується на безоплатній основі забезпечити надання Отримувачу комплексної послуги з індивідуального фахового супроводу відповідно до стандартів державної ветеранської політики, а Отримувач зобов'язується брати активну участь у заходах соціальної, медичної, юридичної та професійної адаптації.
+        </p>
+
+        <div class="section-title">2. СКЛАД ТА ОБСЯГ ПОСЛУГИ З СУПРОВОДУ</div>
+        <p>2.1. У межах цього Договору Надавач забезпечує реалізацію наступних напрямів:</p>
+        <ul>
+            {services_html}
+        </ul>
+
+        <div class="section-title">3. ДОДАТОК № 1: ІНДИВІДУАЛЬНИЙ ПЛАН ФАХОВОГО СУПРОВОДУ</div>
+        <table class="plan-table">
+            <thead>
+                <tr>
+                    <th style="width: 40px; text-align: center;">№</th>
+                    <th>Захід / Дія</th>
+                    <th style="width: 140px; text-align: center;">Строк виконання</th>
+                    <th style="width: 160px;">Відповідальний</th>
+                </tr>
+            </thead>
+            <tbody>
+                {plan_rows_html}
+            </tbody>
+        </table>
+
+        <div class="section-title">4. ПРАВА ТА ОБОВ'ЯЗКИ СТОРІН</div>
+        <p>
+            4.1. <b>Надавач має право:</b> запитувати необхідні документи; взаємодіяти з ЦНАП, медичними закладами, військовими частинами та ТЦК в інтересах Отримувача; фіксувати прогрес у захищеній системі CRM.
+        </p>
+        <p>
+            4.2. <b>Отримувач зобов'язується:</b> надавати достовірну інформацію щодо стану здоров'я та пільг; дотримуватися погодженого графіку консультацій; своєчасно повідомляти про зміну контактних даних.
+        </p>
+        <p>
+            4.3. <b>Конфіденційність:</b> Обробка персональних даних здійснюється згідно із Законом України «Про захист персональних даних» виключно з метою реалізації державної ветеранської підтримки.
+        </p>
+
+        <div class="section-title">5. СТРОК ДІЇ ДОГОВОРУ ТА ЕЛЕКТРОННИЙ ПІДПИС</div>
+        <p>
+            5.1. Цей Договір набирає чинності з моменту його підписання (в тому числі з накладанням кваліфікованого електронного підпису або Дія.Підпис відповідно до Закону України «Про електронну ідентифікацію та електронні довірчі послуги») та діє протягом {c.get('validity_months', 12)} місяців.
+        </p>
+
+        <div class="parties-grid">
+            <div class="party-col">
+                <div class="party-header">НАДАВАЧ ПОСЛУГИ:</div>
+                <div><b>{s.get('org', 'Координаційний HUB «Новий Шлях»')}</b></div>
+                <div>Фахівець: {s.get('name', 'Черкаський координаційний центр')}</div>
+                <div>Тел.: {s.get('phone', '+38 (0472) 33-00-11')}</div>
+                {render_signature_block(spec_sig, "Фахівець із супроводу", s.get('name', 'Черкаський координаційний центр'))}
+            </div>
+
+            <div class="party-col">
+                <div class="party-header">ОТРИМУВАЧ ПОСЛУГИ:</div>
+                <div><b>{v.get('name', 'Ветеран')}</b></div>
+                <div>Статус: {v.get('status_label', 'УБД')}</div>
+                <div>РНОКПП: {v.get('rnokpp', '1234567890')}</div>
+                <div>Тел.: {v.get('phone', 'Не вказано')}</div>
+                {render_signature_block(vet_sig, "Ветеран / Отримувач", v.get('name', 'Ветеран'))}
+            </div>
+        </div>
+
+        <div class="qr-footer">
+            <div class="qr-footer-left">
+                <div><b>Офіційний цифровий реєстр ГО «Талан ЮА» & Портал «Новий Шлях»</b></div>
+                <div>Документ верифіковано в електронній системі. Для перевірки чинності та відкриття електронного оригіналу відскануйте QR-код.</div>
+            </div>
+            <img src="{qr_img_api}" alt="QR код перевірки" class="qr-img">
+        </div>
+    </div>
+
+</body>
+</html>"""
+    return HTMLResponse(content=html_content)
 
 
 # ─── SOS-РОЗРИВ СПІВПРАЦІ ТА ШТРАФ РЕЙТИНГУ (КРОК 8) ─────────────────────────

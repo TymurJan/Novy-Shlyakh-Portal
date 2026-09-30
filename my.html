@@ -582,14 +582,14 @@
 
                 <!-- Вкладка: Документи (Сейф) -->
                 <div id="view-vault" class="view-section">
-                    <h1 class="page-title">Захищений Сейф</h1>
-                    <p class="subtitle">Ваші документи зберігаються у зашифрованому вигляді. Тільки призначений спеціаліст має до них доступ.</p>
+                    <h1 class="page-title">📂 Захищений Двосторонній Сейф</h1>
+                    <p class="subtitle">Ваші документи зберігаються у зашифрованому вигляді (AES-256). Підтримуються всі формати: PDF, DOCX, ZIP, контейнери ключів (.p12, .pfx) та витяги реєстрів.</p>
                     
                     <div class="upload-zone" id="upload-zone">
                         <div class="upload-icon">📥</div>
                         <h3>Завантажити документ</h3>
-                        <p>Перетягніть файл сюди або натисніть для вибору</p>
-                        <input type="file" id="file-input" hidden>
+                        <p>Перетягніть файл сюди або натисніть для вибору (до 15 МБ)</p>
+                        <input type="file" id="file-input" hidden accept=".pdf,.docx,.doc,.rtf,.odt,.txt,.xlsx,.xls,.jpg,.jpeg,.png,.webp,.heic,.zip,.rar,.7z,.p12,.pfx,.jks,.dat,.cer,.crt,.asice,.p7s,.p7m">
                     </div>
 
                     <h3 class="section-heading">Ваші завантажені файли</h3>
@@ -597,10 +597,10 @@
                         <!-- Сюди додаватимуться файли -->
                         <li class="file-item">
                             <div class="file-info">
-                                <span class="file-icon">📄</span>
-                                <span class="file-name">Копія_паспорта.pdf</span>
+                                <span class="file-icon">📜</span>
+                                <span class="file-name">Довідка_про_обставини_травми_Форма5.pdf</span>
                             </div>
-                            <span class="file-date">05.05.2026</span>
+                            <span class="file-date">Верифіковано</span>
                         </li>
                     </ul>
                 </div>

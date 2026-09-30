@@ -21,8 +21,9 @@
     <link rel="stylesheet" href="soft_gate.css?v=46">
     <link rel="stylesheet" href="accessibility.css?v=46">
     <link rel="stylesheet" href="demo_switcher.css?v=46">
-    <!-- Leaflet CSS for Map -->
+    <!-- Leaflet CSS & JS for Map -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <!-- Telegram Web App Script -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -595,37 +596,112 @@
         </div>
     </section>
 
-    <!-- БЛОК: Локації та Мережева Мапа -->
-    <section id="locations" style="padding: 100px 0; background: var(--glass-bg);">
+    <!-- БЛОК: Локації та Інтерактивна Мережева Мапа -->
+    <section id="locations" style="padding: 80px 0; background: var(--glass-bg); border-top: 1px solid rgba(46,139,87,0.15);">
         <div class="container">
-            <h3 class="section-title">Мережа підтримки Черкащини</h3>
-            <p class="section-subtitle">Ми об'єднали перевірені локації, де ви можете отримати допомогу офлайн</p>
+            <h3 class="section-title">🗺️ Мережа ветеранської підтримки Черкащини</h3>
+            <p class="section-subtitle" style="margin-bottom: 30px;">139+ верифікованих локацій: обласний госпіталь, ветеранські простори 3 ОШБр, ЦНАПи, департаменти та перевірені фахівці</p>
             
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr)); gap: 40px; align-items: start;">
-                <div class="location-card" style="background: #111; padding: 25px; border-radius: 25px; border: 1px solid var(--glass-border);">
-                    <div id="networkMap" style="width: 100%; height: 450px; background: #222; border-radius: 15px; overflow: hidden; border: 1px solid var(--primary-green);">
-                        <!-- Реальна карта Leaflet -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 460px), 1fr)); gap: 30px; align-items: start;">
+                <!-- Ліва колонка: Інтерактивна карта Leaflet з фільтрами та жестами -->
+                <div class="location-card" style="background: #111; padding: 20px; border-radius: 20px; border: 1px solid var(--glass-border); position: relative;">
+                    <div id="networkMap">
+                        <!-- Динамічна карта Leaflet v2.0 -->
+                    </div>
+                    <div style="margin-top: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                        <span style="font-size: 11px; color: #888;">💡 Сині — держустанови, бурштинові — простори/ГО, зелені — фахівці</span>
+                        <a href="communities.html" style="font-size: 12px; color: var(--primary-green); text-decoration: none; font-weight: 600;">Усі спільноти та хаби →</a>
                     </div>
                 </div>
 
-                <div class="location-info">
-                    <div class="location-card" style="background: linear-gradient(135deg, #1a1c1a 0%, #2d4f4f 100%); padding: 40px; border-radius: 25px; border: 1px solid var(--primary-green); margin-bottom: 30px;">
-                        <div style="display: flex; gap: 20px; align-items: center; margin-bottom: 25px;">
-                            <div style="font-size: 40px;">🏢</div>
-                            <div>
-                                <h4 style="font-size: 24px; color: var(--primary-green);">Цифровий Координатор</h4>
-                                <p style="color: rgba(255,255,255,0.6);">Ваш офіс у смартфоні</p>
-                            </div>
-                        </div>
-                        <p style="color: white; line-height: 1.7; margin-bottom: 30px;">Ми відмовились від одного великого офісу на користь широкої мережі фахівців. Ви обираєте найближчого до вас спеціаліста — ми гарантуємо якість його послуг.</p>
-                        <a href="https://t.me/Veteran_NovyShlyakh_Bot" class="btn-main" style="width: 100%; text-align: center; margin: 0;">Відкрити Бот-Координатор</a>
-                    </div>
+                <!-- Права колонка: Швидкі картки ключових локацій та НСЗУ -->
+                <div class="location-info" style="display: flex; flex-direction: column; gap: 16px;">
                     
-                    <div class="location-card" style="background: #111; padding: 30px; border-radius: 25px; border: 1px solid var(--glass-border);">
-                        <h4 style="margin-bottom: 15px; color: var(--soft-white);">🌿 Проєкт реабілітаційного простору «Ашрам»</h4>
-                        <p style="color: #ccc; font-size: 14px; margin-bottom: 20px;">Наш заміський центр відновлення ветеранів зараз у процесі створення. Ви можете підтримати благодійний збір на його будівництво та облаштування.</p>
-                        <button onclick="openCharityModal()" style="background: var(--secondary-green); color: #000; border: none; padding: 12px 20px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: transform 0.2s;">Підтримати проєкт «Ашрам» →</button>
+                    <!-- Картка 1: Обласний госпіталь ветеранів війни -->
+                    <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(59,130,246,0.3); border-radius: 14px; padding: 16px; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='rgba(59,130,246,0.05)'" onmouseout="this.style.borderColor='rgba(59,130,246,0.3)'; this.style.background='rgba(255,255,255,0.03)'">
+                        <div style="display: flex; justify-content: space-between; align-items: start; gap: 10px; margin-bottom: 6px;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="font-size: 20px;">🏥</span>
+                                <h4 style="font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700; color: #fff; margin: 0;">Черкаський обласний госпіталь ветеранів</h4>
+                            </div>
+                            <span style="font-size: 10px; font-weight: 700; background: rgba(59,130,246,0.2); color: #60a5fa; padding: 2px 8px; border-radius: 20px; border: 1px solid rgba(59,130,246,0.4); white-space: nowrap;">Держзаклад</span>
+                        </div>
+                        <p style="font-size: 12px; color: #aaa; margin: 0 0 10px 0;">📍 м. Черкаси, вул. Онопрієнка, 8 • 100% безоплатна стаціонарна реабілітація та лікування</p>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <button onclick="if(window.focusMapMarker) window.focusMapMarker(49.4241, 32.0285);" style="padding: 6px 12px; border-radius: 8px; background: rgba(59,130,246,0.15); color: #93c5fd; border: 1px solid rgba(59,130,246,0.35); font-size: 11px; font-weight: 600; cursor: pointer;">📍 На мапі</button>
+                            <a href="tel:+380472371288" style="padding: 6px 12px; border-radius: 8px; background: rgba(255,255,255,0.08); color: #fff; text-decoration: none; font-size: 11px; font-weight: 600;">📞 (0472) 37-12-88</a>
+                        </div>
                     </div>
+
+                    <!-- Картка 2: Ветеранський корпус Хаб Іскра 3 ОШБр -->
+                    <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(245,158,11,0.3); border-radius: 14px; padding: 16px; transition: all 0.2s;" onmouseover="this.style.borderColor='#f59e0b'; this.style.background='rgba(245,158,11,0.05)'" onmouseout="this.style.borderColor='rgba(245,158,11,0.3)'; this.style.background='rgba(255,255,255,0.03)'">
+                        <div style="display: flex; justify-content: space-between; align-items: start; gap: 10px; margin-bottom: 6px;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="font-size: 20px;">⚔️</span>
+                                <h4 style="font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700; color: #fff; margin: 0;">Хаб «Іскра» (Ветеранський корпус 3 ОШБр)</h4>
+                            </div>
+                            <span style="font-size: 10px; font-weight: 700; background: rgba(245,158,11,0.2); color: #fbbf24; padding: 2px 8px; border-radius: 20px; border: 1px solid rgba(245,158,11,0.4); white-space: nowrap;">Ветеранський хаб</span>
+                        </div>
+                        <p style="font-size: 12px; color: #aaa; margin: 0 0 10px 0;">📍 м. Черкаси, вул. Хрещатик, 196 • Побратимство, правовий супровід та чат взаємодопомоги</p>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <button onclick="if(window.focusMapMarker) window.focusMapMarker(49.4431, 32.0624);" style="padding: 6px 12px; border-radius: 8px; background: rgba(245,158,11,0.15); color: #fde68a; border: 1px solid rgba(245,158,11,0.35); font-size: 11px; font-weight: 600; cursor: pointer;">📍 На мапі</button>
+                            <a href="https://t.me/VETERANCHATCHE" target="_blank" style="padding: 6px 12px; border-radius: 8px; background: rgba(0,136,204,0.15); color: #0088cc; border: 1px solid rgba(0,136,204,0.3); text-decoration: none; font-size: 11px; font-weight: 600;">💬 Чат «Іскра»</a>
+                            <a href="tel:+380636568999" style="padding: 6px 12px; border-radius: 8px; background: rgba(255,255,255,0.08); color: #fff; text-decoration: none; font-size: 11px; font-weight: 600;">📞 063 656 89 99</a>
+                        </div>
+                    </div>
+
+                    <!-- Картка 3: Ветеранський простір Черкащани -->
+                    <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(46,139,87,0.3); border-radius: 14px; padding: 16px; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--primary-green)'; this.style.background='rgba(46,139,87,0.05)'" onmouseout="this.style.borderColor='rgba(46,139,87,0.3)'; this.style.background='rgba(255,255,255,0.03)'">
+                        <div style="display: flex; justify-content: space-between; align-items: start; gap: 10px; margin-bottom: 6px;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="font-size: 20px;">🏢</span>
+                                <h4 style="font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700; color: #fff; margin: 0;">Ветеранський простір «Черкащани»</h4>
+                            </div>
+                            <span style="font-size: 10px; font-weight: 700; background: rgba(46,139,87,0.2); color: #34d399; padding: 2px 8px; border-radius: 20px; border: 1px solid rgba(46,139,87,0.4); white-space: nowrap;">Коворкінг / Хаб</span>
+                        </div>
+                        <p style="font-size: 12px; color: #aaa; margin: 0 0 10px 0;">📍 м. Черкаси, вул. Байди Вишневецького, 36 • Психологічне розвантаження, події, коворкінг</p>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <button onclick="if(window.focusMapMarker) window.focusMapMarker(49.4444, 32.0597);" style="padding: 6px 12px; border-radius: 8px; background: rgba(46,139,87,0.15); color: #6ee7b7; border: 1px solid rgba(46,139,87,0.35); font-size: 11px; font-weight: 600; cursor: pointer;">📍 На мапі</button>
+                            <a href="tel:+380671234567" style="padding: 6px 12px; border-radius: 8px; background: rgba(255,255,255,0.08); color: #fff; text-decoration: none; font-size: 11px; font-weight: 600;">📞 067 123 45 67</a>
+                        </div>
+                    </div>
+
+                    <!-- Картка 4: Державний портал НСЗУ (Стоматологія та хірургія) -->
+                    <div style="background: linear-gradient(135deg, rgba(20,40,30,0.85) 0%, rgba(10,25,20,0.95) 100%); border: 1px solid rgba(16,185,129,0.5); border-radius: 14px; padding: 18px; position: relative; box-shadow: 0 6px 20px rgba(0,0,0,0.3);">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="font-size: 22px;">🦷</span>
+                                <h4 style="font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700; color: #fff; margin: 0;">Стоматологія та хірургія (Програма НСЗУ)</h4>
+                            </div>
+                            <span style="font-size: 10px; font-weight: 700; background: #10b981; color: #000; padding: 2px 8px; border-radius: 20px;">100% Державне покриття</span>
+                        </div>
+                        <p style="font-size: 12px; color: #d1d5db; line-height: 1.4; margin: 0 0 12px 0;">Безоплатне лікування та протезування зубів, а також планова медична допомога для учасників бойових дій та осіб з інвалідністю внаслідок війни за програмою медгарантій.</p>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <a href="https://edata.e-health.gov.ua/e-data/dashboard/dental" target="_blank" class="btn-primary" style="font-size: 12px; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+                                ↗ Офіційний дашборд НСЗУ
+                            </a>
+                            <a href="resources.html" style="font-size: 12px; padding: 8px 14px; border-radius: 8px; background: rgba(255,255,255,0.08); color: #fff; text-decoration: none; font-weight: 600; border: 1px solid rgba(255,255,255,0.15);">
+                                Інші держресурси →
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Картка 5: Бот-Координатор та Проєкт «Ашрам» -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div style="background: #111; padding: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); text-align: center;">
+                            <div style="font-size: 20px; margin-bottom: 4px;">🤖</div>
+                            <h5 style="color: #fff; margin: 0 0 4px 0; font-size: 13px;">Бот-Координатор</h5>
+                            <p style="color: #888; font-size: 11px; margin: 0 0 8px 0;">Швидкий запис 24/7</p>
+                            <a href="https://t.me/Veteran_NovyShlyakh_Bot" target="_blank" style="font-size: 11px; color: #0088cc; text-decoration: none; font-weight: 600;">Відкрити бот →</a>
+                        </div>
+                        <div style="background: #111; padding: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); text-align: center;">
+                            <div style="font-size: 20px; margin-bottom: 4px;">🌿</div>
+                            <h5 style="color: #fff; margin: 0 0 4px 0; font-size: 13px;">Проєкт «Ашрам»</h5>
+                            <p style="color: #888; font-size: 11px; margin: 0 0 8px 0;">Заміський центр</p>
+                            <button onclick="openCharityModal()" style="background: transparent; border: none; font-size: 11px; color: var(--secondary-green); cursor: pointer; font-weight: 600; padding: 0;">Підтримати →</button>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
