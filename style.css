@@ -648,6 +648,10 @@ body.is-tg-app .section-subtitle {
     transition: all 0.3s ease;
 }
 
+#networkMap .leaflet-tile-pane {
+    filter: brightness(0.65) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.75);
+}
+
 #networkMap.map-fullscreen-active {
     position: fixed !important;
     top: 0 !important;
@@ -795,10 +799,189 @@ body.is-tg-app .section-subtitle {
     animation: pulse-pin 2s infinite;
 }
 
+.pin-ramp {
+    background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+    border: 2px solid #c4b5fd;
+}
+
+.pin-pharmacy {
+    background: linear-gradient(135deg, #ef4444, #b91c1c);
+    border: 2px solid #fca5a5;
+}
+
+.pin-bench {
+    background: linear-gradient(135deg, #059669, #047857);
+    border: 2px solid #a7f3d0;
+}
+
 @keyframes pulse-pin {
     0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
     70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
     100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+/* User GPS Pulse Marker */
+.user-gps-marker {
+    position: relative;
+    width: 22px;
+    height: 22px;
+}
+
+.user-gps-pulse-ring {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    top: -9px;
+    left: -9px;
+    border-radius: 50%;
+    background: rgba(56, 189, 248, 0.45);
+    animation: gps-pulse 1.8s infinite cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.user-gps-dot {
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    top: 2px;
+    left: 2px;
+    border-radius: 50%;
+    background: #0284c7;
+    border: 3px solid #ffffff;
+    box-shadow: 0 0 12px rgba(14, 165, 233, 0.95);
+}
+
+@keyframes gps-pulse {
+    0% { transform: scale(0.5); opacity: 1; }
+    100% { transform: scale(2.2); opacity: 0; }
+}
+
+/* Map Controls Group (Floating) */
+.map-controls-group {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 1000;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.map-ctrl-btn {
+    background: rgba(18, 21, 18, 0.92);
+    border: 1px solid rgba(46, 139, 87, 0.45);
+    color: #fff;
+    padding: 7px 11px;
+    border-radius: 8px;
+    font-size: 11.5px;
+    font-weight: 600;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+}
+
+.map-ctrl-btn:hover {
+    background: var(--primary-green);
+    color: #000;
+}
+
+.map-ctrl-btn.gps-active {
+    background: #0284c7 !important;
+    border-color: #38bdf8 !important;
+    color: #fff !important;
+}
+
+/* Route Navigation HUD */
+.map-route-hud {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    right: auto;
+    width: min(calc(100% - 24px), 360px);
+    z-index: 1001;
+    background: rgba(15, 23, 42, 0.96);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(56, 189, 248, 0.4);
+    border-radius: 14px;
+    padding: 12px 14px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7);
+    display: none;
+    animation: fadeIn 0.25s ease;
+}
+
+.map-route-hud.active {
+    display: block;
+}
+
+.route-hud-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.route-hud-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #38bdf8;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 260px;
+}
+
+.route-hud-close {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 0 4px;
+}
+
+.route-hud-close:hover {
+    color: #fff;
+}
+
+.route-hud-stats {
+    display: flex;
+    gap: 12px;
+    font-size: 12px;
+    color: #f1f5f9;
+    margin-bottom: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 6px 10px;
+    border-radius: 8px;
+}
+
+.route-hud-modes {
+    display: flex;
+    gap: 6px;
+}
+
+.route-mode-btn {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #cbd5e1;
+    padding: 5px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.route-mode-btn.active {
+    background: #0284c7;
+    border-color: #38bdf8;
+    color: #fff;
 }
 
 /* Dark Leaflet Popup Styling */
@@ -853,6 +1036,36 @@ body.is-tg-app .section-subtitle {
     background: rgba(16, 185, 129, 0.2);
     color: #34d399;
     border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.popup-tag-ramp {
+    background: rgba(139, 92, 246, 0.2);
+    color: #c4b5fd;
+    border: 1px solid rgba(139, 92, 246, 0.4);
+}
+
+.popup-tag-pharmacy {
+    background: rgba(239, 68, 68, 0.2);
+    color: #fca5a5;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.popup-tag-bench {
+    background: rgba(16, 185, 129, 0.2);
+    color: #6ee7b7;
+    border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.popup-btn-route {
+    background: linear-gradient(135deg, #0284c7, #0369a1) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    border: 1px solid #38bdf8 !important;
+    box-shadow: 0 2px 8px rgba(2, 132, 199, 0.4);
+}
+
+.popup-btn-route:hover {
+    background: linear-gradient(135deg, #0369a1, #075985) !important;
 }
 
 .popup-title {

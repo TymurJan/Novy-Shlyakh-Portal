@@ -74,15 +74,199 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- ЛОГІКА ІНТЕРАКТИВНОЇ МЕРЕЖЕВОЇ МАПИ ЧЕРКАЩИНИ (v2.0 Hybrid) ---
+    // --- ЛОГІКА ІНТЕРАКТИВНОЇ МЕРЕЖЕВОЇ МАПИ ЧЕРКАЩИНИ (v3.0 Advanced) ---
     let networkMapInstance = null;
     let mapMarkersList = [];
+    let currentUserCoords = null;
+    let userLocationMarker = null;
+    let userLocationCircle = null;
+    let currentRouteLayer = null;
+    let activeRouteDest = null;
+    let activeRouteMode = 'foot';
+    let osmCache = {};
+
+    // 🎯 Визначення геолокації користувача
+    window.locateUser = function(zoomTo = true) {
+        return new Promise((resolve) => {
+            if (!navigator.geolocation) {
+                alert('Ваш браузер не підтримує геолокацію.');
+                resolve(false);
+                return;
+            }
+
+            const gpsBtn = document.getElementById('mapGpsBtn');
+            if (gpsBtn) {
+                gpsBtn.innerHTML = '⏳ Шукаю...';
+                gpsBtn.classList.add('gps-active');
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    const lat = pos.coords.latitude;
+                    const lon = pos.coords.longitude;
+                    currentUserCoords = [lat, lon];
+
+                    if (gpsBtn) gpsBtn.innerHTML = '🎯 Моя локація';
+
+                    if (networkMapInstance) {
+                        // Очищаємо попередні маркери користувача
+                        if (userLocationMarker) networkMapInstance.removeLayer(userLocationMarker);
+                        if (userLocationCircle) networkMapInstance.removeLayer(userLocationCircle);
+
+                        // Кастомний пульсуючий синій маркер
+                        const gpsIcon = L.divIcon({
+                            className: 'user-gps-marker-wrapper',
+                            html: '<div class="user-gps-marker"><div class="user-gps-pulse-ring"></div><div class="user-gps-dot"></div></div>',
+                            iconSize: [22, 22],
+                            iconAnchor: [11, 11]
+                        });
+
+                        userLocationMarker = L.marker([lat, lon], { icon: gpsIcon, zIndexOffset: 1000 }).addTo(networkMapInstance);
+                        userLocationMarker.bindPopup(`
+                            <div class="popup-card">
+                                <span class="popup-tag popup-tag-gov">🎯 Ваша локація</span>
+                                <h4 class="popup-title">Ви знаходитесь тут</h4>
+                                <p class="popup-address">📍 Точність: ±${Math.round(pos.coords.accuracy)} м</p>
+                            </div>
+                        `);
+
+                        userLocationCircle = L.circle([lat, lon], {
+                            radius: Math.min(pos.coords.accuracy, 200),
+                            color: '#38bdf8',
+                            fillColor: '#38bdf8',
+                            fillOpacity: 0.12,
+                            weight: 1
+                        }).addTo(networkMapInstance);
+
+                        if (zoomTo) {
+                            networkMapInstance.setView([lat, lon], 14, { animate: true });
+                            userLocationMarker.openPopup();
+                        }
+                    }
+                    resolve(true);
+                },
+                (err) => {
+                    if (gpsBtn) {
+                        gpsBtn.innerHTML = '🎯 Моя локація';
+                        gpsBtn.classList.remove('gps-active');
+                    }
+                    console.warn('Геолокацію відхилено або недоступно:', err.message);
+                    resolve(false);
+                },
+                { enableHighAccuracy: true, timeout: 8000 }
+            );
+        });
+    };
+
+    // 🚶 Побудова маршруту прямо на сайті через OSRM
+    window.buildInAppRoute = async function(destLat, destLon, destName, mode = 'foot') {
+        activeRouteDest = { lat: destLat, lon: destLon, name: destName };
+        activeRouteMode = mode;
+
+        if (!currentUserCoords) {
+            const located = await window.locateUser(false);
+            if (!located || !currentUserCoords) {
+                alert('Щоб побудувати маршрут від вашого місцезнаходження, будь ласка, надайте дозвіл на визначення геопозиції (GPS).');
+                return;
+            }
+        }
+
+        const profile = mode === 'car' ? 'driving' : 'walking';
+        const url = `https://router.project-osrm.org/route/v1/${profile}/${currentUserCoords[1]},${currentUserCoords[0]};${destLon},${destLat}?overview=full&geometries=geojson`;
+
+        try {
+            const resp = await fetch(url);
+            if (!resp.ok) throw new Error('OSRM Route Error');
+            const data = await resp.json();
+
+            if (!data.routes || !data.routes.length) {
+                alert('Не вдалося прокласти маршрут для обраного типу транспорту.');
+                return;
+            }
+
+            const route = data.routes[0];
+            const distKm = (route.distance / 1000).toFixed(1);
+            const durationMin = Math.round(route.duration / 60);
+
+            if (currentRouteLayer && networkMapInstance) {
+                networkMapInstance.removeLayer(currentRouteLayer);
+            }
+
+            const routeColor = mode === 'foot' ? '#10b981' : '#38bdf8';
+            currentRouteLayer = L.geoJSON(route.geometry, {
+                style: {
+                    color: routeColor,
+                    weight: 5,
+                    opacity: 0.9,
+                    dashArray: mode === 'foot' ? '6, 8' : null
+                }
+            }).addTo(networkMapInstance);
+
+            networkMapInstance.fitBounds(currentRouteLayer.getBounds(), { padding: [50, 50] });
+
+            // Відображаємо Navigation HUD
+            window.showRouteHud(destName, distKm, durationMin, mode, destLat, destLon);
+        } catch (err) {
+            console.error('Помилка побудови маршруту:', err);
+            alert('Тимчасовий збій побудови маршруту. Скористайтесь кнопкою Google Maps нижче.');
+        }
+    };
+
+    // Відкриття Google Maps із передачею точних GPS координат користувача
+    window.openGoogleMapsRoute = async function(destLat, destLon) {
+        if (!currentUserCoords) {
+            await window.locateUser(false);
+        }
+        const originParam = currentUserCoords ? `&origin=${currentUserCoords[0]},${currentUserCoords[1]}` : '';
+        const url = `https://www.google.com/maps/dir/?api=1${originParam}&destination=${destLat},${destLon}`;
+        window.open(url, '_blank');
+    };
+
+    // Відображення плашки активного маршруту
+    window.showRouteHud = function(name, distKm, durationMin, mode, destLat, destLon) {
+        let hud = document.getElementById('mapRouteHud');
+        if (!hud) {
+            hud = document.createElement('div');
+            hud.id = 'mapRouteHud';
+            hud.className = 'map-route-hud';
+            const mapContainer = document.getElementById('networkMap');
+            if (mapContainer) mapContainer.appendChild(hud);
+        }
+
+        const modeIcon = mode === 'foot' ? '🚶' : '🚗';
+        const modeText = mode === 'foot' ? 'пішки' : 'на авто';
+
+        hud.innerHTML = `
+            <div class="route-hud-header">
+                <h5 class="route-hud-title" title="${name}">📍 ${name}</h5>
+                <button class="route-hud-close" onclick="window.clearActiveRoute()" title="Закрити маршрут">✕</button>
+            </div>
+            <div class="route-hud-stats">
+                <span>📏 <b>${distKm} км</b></span>
+                <span>⏱️ <b>~${durationMin} хв</b> (${modeText})</span>
+            </div>
+            <div class="route-hud-modes">
+                <button class="route-mode-btn ${mode === 'foot' ? 'active' : ''}" onclick="window.buildInAppRoute(${destLat}, ${destLon}, '${name.replace(/'/g, "\\'")}', 'foot')">🚶 Пішки</button>
+                <button class="route-mode-btn ${mode === 'car' ? 'active' : ''}" onclick="window.buildInAppRoute(${destLat}, ${destLon}, '${name.replace(/'/g, "\\'")}', 'car')">🚗 На авто</button>
+                <button onclick="window.openGoogleMapsRoute(${destLat}, ${destLon})" class="route-mode-btn">🌐 Google</button>
+            </div>
+        `;
+        hud.classList.add('active');
+    };
+
+    window.clearActiveRoute = function() {
+        if (currentRouteLayer && networkMapInstance) {
+            networkMapInstance.removeLayer(currentRouteLayer);
+            currentRouteLayer = null;
+        }
+        const hud = document.getElementById('mapRouteHud');
+        if (hud) hud.classList.remove('active');
+    };
 
     window.focusMapMarker = function(lat, lon, zoom = 15, openPopup = true) {
         const mapContainer = document.getElementById('networkMap');
         if (!mapContainer) return;
         
-        // Плавний скрол до блоку карти, якщо він не у фокусі
         const locSection = document.getElementById('locations');
         if (locSection) {
             locSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -91,7 +275,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (networkMapInstance) {
             networkMapInstance.setView([lat, lon], zoom, { animate: true, duration: 1.0 });
             if (openPopup) {
-                // Знаходимо маркер за координатами
                 const targetMarker = mapMarkersList.find(m => {
                     const pos = m.getLatLng();
                     return Math.abs(pos.lat - lat) < 0.001 && Math.abs(pos.lng - lon) < 0.001;
@@ -107,7 +290,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const mapContainer = document.getElementById('networkMap');
         if (!mapContainer) return;
 
-        // Захист від повторної ініціалізації
         if (networkMapInstance) {
             networkMapInstance.remove();
             networkMapInstance = null;
@@ -116,25 +298,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
 
-        // Ініціалізація Leaflet з безпечними налаштуваннями жестів для мобільних
         const map = L.map('networkMap', {
-            scrollWheelZoom: false, // Забороняє випадкове перехоплення скролу коліщатком на десктопі
-            dragging: !isMobile,    // На мобільному 1 палець вільно скролить всю сторінку!
+            scrollWheelZoom: false,
+            dragging: !isMobile,
             tap: !isMobile,
             touchZoom: true
         }).setView([49.4444, 32.0597], 10);
 
         networkMapInstance = map;
 
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; <a href="https://carto.com/">CARTO</a> | &copy; OpenStreetMap',
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors',
             maxZoom: 19
         }).addTo(map);
 
-        // Створюємо LayerGroups для швидкої фільтрації
+        // Створюємо LayerGroups
         const layerGov = L.layerGroup();
         const layerNgo = L.layerGroup();
         const layerPortal = L.layerGroup();
+        const layerRamp = L.layerGroup();
+        const layerPharmacy = L.layerGroup();
+        const layerBench = L.layerGroup();
 
         // Створюємо кастомні DivIcon для красивих маркерів
         const createPinIcon = (type, emoji) => L.divIcon({
@@ -148,6 +332,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const iconGov = createPinIcon('gov', '🏛️');
         const iconNgo = createPinIcon('ngo', '🤝');
         const iconPortal = createPinIcon('portal', '🟢');
+        const iconRamp = createPinIcon('ramp', '♿');
+        const iconPharmacy = createPinIcon('pharmacy', '💊');
+        const iconBench = createPinIcon('bench', '🌳');
 
         // 1. Завантажуємо точки інфраструктури Черкащини
         let locationPoints = [];
@@ -175,10 +362,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const tagClass = isGov ? 'popup-tag-gov' : 'popup-tag-ngo';
             const tagLabel = isGov ? '🏛️ Державна установа' : '🤝 Ветеранський простір / ГО';
+            const escapedName = (loc.name || '').replace(/'/g, "\\'");
 
             let phoneHtml = loc.phone ? `<a href="tel:${loc.phone}" class="popup-btn popup-btn-primary">📞 ${loc.phone}</a>` : '';
-            let routeHtml = `<a href="https://www.google.com/maps/dir/?api=1&destination=${loc.lat},${loc.lon}" target="_blank" class="popup-btn popup-btn-secondary">🗺️ Маршрут у Google Maps</a>`;
-            let webHtml = loc.website ? `<a href="${loc.website}" target="_blank" class="popup-btn popup-btn-secondary">🌐 Офіційний сайт / Чат</a>` : '';
+            let inAppRouteHtml = `<button onclick="window.buildInAppRoute(${loc.lat}, ${loc.lon}, '${escapedName}', 'foot')" class="popup-btn popup-btn-route">🧭 Маршрут сюди (на сайті)</button>`;
+            let routeHtml = `<button onclick="window.openGoogleMapsRoute(${loc.lat}, ${loc.lon})" class="popup-btn popup-btn-secondary">🌐 Відкрити в Google Maps</button>`;
+            let webHtml = loc.website ? `<a href="${loc.website}" target="_blank" class="popup-btn popup-btn-secondary">🔗 Офіційний сайт / Чат</a>` : '';
 
             marker.bindPopup(`
                 <div class="popup-card">
@@ -188,6 +377,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     ${loc.bio ? `<p class="popup-bio">${loc.bio}</p>` : ''}
                     <div class="popup-actions">
                         ${phoneHtml}
+                        ${inAppRouteHtml}
                         ${routeHtml}
                         ${webHtml}
                     </div>
@@ -214,6 +404,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!coords || isNaN(coords[0]) || isNaN(coords[1])) return;
 
             const marker = L.marker([coords[0], coords[1]], { icon: iconPortal });
+            const escapedName = (spec.name || '').replace(/'/g, "\\'");
+
             marker.bindPopup(`
                 <div class="popup-card">
                     <span class="popup-tag popup-tag-portal">🟢 Верифікований партнер «Новий Шлях»</span>
@@ -222,6 +414,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p class="popup-bio">${spec.role || spec.category || 'Фахівець із супроводу'}</p>
                     <div class="popup-actions">
                         <a href="tel:${spec.phone}" class="popup-btn popup-btn-primary">📞 Зателефонувати</a>
+                        <button onclick="window.buildInAppRoute(${coords[0]}, ${coords[1]}, '${escapedName}', 'foot')" class="popup-btn popup-btn-route">🧭 Маршрут до фахівця</button>
                         <a href="catalog.html?q=${encodeURIComponent(spec.name)}" class="popup-btn popup-btn-secondary">📅 Профіль та запис</a>
                     </div>
                 </div>
@@ -232,12 +425,74 @@ document.addEventListener('DOMContentLoaded', () => {
             countPortal++;
         });
 
-        // За замовчуванням додаємо всі шари
+        // Додаємо основні шари за замовчуванням
         layerGov.addTo(map);
         layerNgo.addTo(map);
         layerPortal.addTo(map);
 
-        // Створюємо елементи керування: фільтри, підказка жестів, кнопка повного екрану
+        // 3. Функція завантаження мікро-об'єктів OSM (Пандуси, Аптеки, Лавочки)
+        async function fetchOsmElements(type) {
+            if (osmCache[type]) return osmCache[type];
+
+            let query = '';
+            let pinIcon = iconRamp;
+            let tagClass = 'popup-tag-ramp';
+            let tagTitle = '♿ Безбар\'єрність / Пандус';
+
+            if (type === 'ramp') {
+                query = '[out:json][timeout:15];(node["wheelchair"="yes"](49.35,31.90,49.52,32.18);node["wheelchair"="designated"](49.35,31.90,49.52,32.18););out 40;';
+                pinIcon = iconRamp;
+                tagClass = 'popup-tag-ramp';
+                tagTitle = '♿ Безбар\'єрний вхід / Пандус';
+            } else if (type === 'pharmacy') {
+                query = '[out:json][timeout:15];(node["amenity"="pharmacy"](49.38,31.95,49.50,32.15););out 40;';
+                pinIcon = iconPharmacy;
+                tagClass = 'popup-tag-pharmacy';
+                tagTitle = '💊 Аптека / Медикаменти';
+            } else if (type === 'bench') {
+                query = '[out:json][timeout:15];(node["amenity"="bench"](49.38,31.95,49.50,32.15););out 40;';
+                pinIcon = iconBench;
+                tagClass = 'popup-tag-bench';
+                tagTitle = '🌳 Лавочка / Зона відпочинку';
+            }
+
+            try {
+                const res = await fetch('https://overpass-api.de/api/interpreter?data=' + encodeURIComponent(query));
+                if (!res.ok) throw new Error('OSM Overpass Error');
+                const data = await res.json();
+                const targetLayer = type === 'ramp' ? layerRamp : (type === 'pharmacy' ? layerPharmacy : layerBench);
+
+                if (data && data.elements) {
+                    data.elements.forEach(el => {
+                        if (!el.lat || !el.lon) return;
+                        const name = (el.tags && (el.tags.name || el.tags.description || el.tags.operator)) || tagTitle;
+                        const escapedName = name.replace(/'/g, "\\'");
+                        const marker = L.marker([el.lat, el.lon], { icon: pinIcon });
+
+                        marker.bindPopup(`
+                            <div class="popup-card">
+                                <span class="popup-tag ${tagClass}">${tagTitle}</span>
+                                <h4 class="popup-title">${name}</h4>
+                                <p class="popup-address">📍 Координати: ${el.lat.toFixed(4)}, ${el.lon.toFixed(4)}</p>
+                                <div class="popup-actions">
+                                    <button onclick="window.buildInAppRoute(${el.lat}, ${el.lon}, '${escapedName}', 'foot')" class="popup-btn popup-btn-route">🧭 Маршрут сюди (на сайті)</button>
+                                    <button onclick="window.openGoogleMapsRoute(${el.lat}, ${el.lon})" class="popup-btn popup-btn-secondary">🌐 Відкрити в Google Maps</button>
+                                </div>
+                            </div>
+                        `);
+                        targetLayer.addLayer(marker);
+                        mapMarkersList.push(marker);
+                    });
+                }
+                osmCache[type] = targetLayer;
+                return targetLayer;
+            } catch (err) {
+                console.warn('Не вдалося завантажити шар OSM:', type, err);
+                return null;
+            }
+        }
+
+        // 4. Створюємо елементи керування: фільтри
         let filterContainer = document.getElementById('mapFilterChipsContainer');
         if (!filterContainer) {
             filterContainer = document.createElement('div');
@@ -250,16 +505,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
         filterContainer.innerHTML = `
             <button class="map-chip-btn active" data-filter="all">📍 Всі точки <span class="map-chip-badge">${totalPoints}</span></button>
-            <button class="map-chip-btn" data-filter="gov">🏛️ Державні заклади <span class="map-chip-badge">${countGov}</span></button>
+            <button class="map-chip-btn" data-filter="gov">🏛️ Держзаклади <span class="map-chip-badge">${countGov}</span></button>
             <button class="map-chip-btn" data-filter="ngo">🤝 Хаби та ГО <span class="map-chip-badge">${countNgo}</span></button>
-            <button class="map-chip-btn" data-filter="portal">🟢 Фахівці «Новий Шлях» <span class="map-chip-badge">${countPortal}</span></button>
+            <button class="map-chip-btn" data-filter="portal">🟢 Фахівці <span class="map-chip-badge">${countPortal}</span></button>
+            <button class="map-chip-btn" data-filter="ramp">♿ Безбар'єрність (OSM)</button>
+            <button class="map-chip-btn" data-filter="pharmacy">💊 Аптеки (OSM)</button>
+            <button class="map-chip-btn" data-filter="bench">🌳 Лавочки (OSM)</button>
         `;
 
         filterContainer.querySelectorAll('.map-chip-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                filterContainer.querySelectorAll('.map-chip-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
+            btn.addEventListener('click', async () => {
                 const filter = btn.dataset.filter;
+
+                // Для мікро-шарів OSM дозволяємо вмикати/вимикати незалежно
+                if (['ramp', 'pharmacy', 'bench'].includes(filter)) {
+                    btn.classList.toggle('active');
+                    const isActive = btn.classList.contains('active');
+                    const targetLayer = filter === 'ramp' ? layerRamp : (filter === 'pharmacy' ? layerPharmacy : layerBench);
+
+                    if (isActive) {
+                        btn.innerHTML = `⏳ Завантаження...`;
+                        await fetchOsmElements(filter);
+                        if (!map.hasLayer(targetLayer)) map.addLayer(targetLayer);
+                        const titles = { ramp: '♿ Безбар\'єрність', pharmacy: '💊 Аптеки', bench: '🌳 Лавочки' };
+                        btn.innerHTML = `${titles[filter]} (OSM)`;
+                    } else {
+                        if (map.hasLayer(targetLayer)) map.removeLayer(targetLayer);
+                    }
+                    return;
+                }
+
+                filterContainer.querySelectorAll('.map-chip-btn:not([data-filter="ramp"]):not([data-filter="pharmacy"]):not([data-filter="bench"])').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
 
                 if (filter === 'all') {
                     if (!map.hasLayer(layerGov)) map.addLayer(layerGov);
@@ -281,10 +558,59 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        // 3. Додаємо підказку жестів на мобільних при спробі тягнути 1 пальцем
+        // 5. Плаваючі кнопки керування картою (GPS, Скидання, Повний екран)
+        const controlsGroup = document.createElement('div');
+        controlsGroup.className = 'map-controls-group';
+
+        const gpsBtn = document.createElement('button');
+        gpsBtn.id = 'mapGpsBtn';
+        gpsBtn.className = 'map-ctrl-btn';
+        gpsBtn.innerHTML = '🎯 Моя локація';
+        gpsBtn.title = 'Визначити моє місцезнаходження';
+        gpsBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            window.locateUser(true);
+        });
+
+        const resetBtn = document.createElement('button');
+        resetBtn.className = 'map-ctrl-btn';
+        resetBtn.innerHTML = '🔄 Область';
+        resetBtn.title = 'Оглянути всю Черкащину';
+        resetBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            map.setView([49.4444, 32.0597], 10, { animate: true });
+        });
+
+        const fsBtn = document.createElement('button');
+        fsBtn.className = 'map-ctrl-btn';
+        fsBtn.innerHTML = '⛶ На весь екран';
+        fsBtn.title = 'Розгорнути карту на весь екран';
+        fsBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isFs = mapContainer.classList.toggle('map-fullscreen-active');
+            if (isFs) {
+                fsBtn.innerHTML = '✕ Згорнути';
+                map.dragging.enable();
+                map.scrollWheelZoom.enable();
+                document.body.style.overflow = 'hidden';
+            } else {
+                fsBtn.innerHTML = '⛶ На весь екран';
+                if (isMobile) map.dragging.disable();
+                map.scrollWheelZoom.disable();
+                document.body.style.overflow = '';
+            }
+            setTimeout(() => map.invalidateSize(), 200);
+        });
+
+        controlsGroup.appendChild(gpsBtn);
+        controlsGroup.appendChild(resetBtn);
+        controlsGroup.appendChild(fsBtn);
+        mapContainer.appendChild(controlsGroup);
+
+        // 6. Підказка жестів для мобільних
         const gestureHint = document.createElement('div');
         gestureHint.className = 'map-gesture-hint';
-        gestureHint.innerHTML = '👆 Для переміщення мапи проведіть <b>двома пальцями</b> або відкрийте на весь екран';
+        gestureHint.innerHTML = '👆 Для переміщення мапи проведіть <b>двома пальцями</b> або розгорніть на весь екран';
         mapContainer.appendChild(gestureHint);
 
         let hintTimer = null;
@@ -309,30 +635,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // 4. Кнопка повного екрану для комфортної мобільної навігації
-        const fsBtn = document.createElement('button');
-        fsBtn.className = 'map-fullscreen-btn';
-        fsBtn.innerHTML = '⛶ На весь екран';
-        mapContainer.appendChild(fsBtn);
-
-        fsBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const isFs = mapContainer.classList.toggle('map-fullscreen-active');
-            if (isFs) {
-                fsBtn.innerHTML = '✕ Згорнути карту';
-                map.dragging.enable();
-                map.scrollWheelZoom.enable();
-                document.body.style.overflow = 'hidden';
-            } else {
-                fsBtn.innerHTML = '⛶ На весь екран';
-                if (isMobile) map.dragging.disable();
-                map.scrollWheelZoom.disable();
-                document.body.style.overflow = '';
-            }
-            setTimeout(() => map.invalidateSize(), 200);
-        });
-
-        // Перевіряємо URL search params для авто-фокусу точки
+        // Авто-фокус через URL параметри якщо є
         const urlParams = new URLSearchParams(window.location.search);
         const urlLat = parseFloat(urlParams.get('lat'));
         const urlLon = parseFloat(urlParams.get('lon'));
