@@ -5,9 +5,10 @@ import os
 import json
 import shutil
 import hashlib
+import subprocess
 from datetime import datetime, timezone, timedelta
-from fastapi import FastAPI, HTTPException, File, UploadFile, Form, Request
-from fastapi.responses import FileResponse, HTMLResponse, Response
+from fastapi import FastAPI, HTTPException, File, UploadFile, Form, Request, BackgroundTasks
+from fastapi.responses import FileResponse, HTMLResponse, Response, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
@@ -43,6 +44,51 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+def run_git_deploy_task():
+    """Фоновий запуск скрипта оновлення сайту з гілки master на VPS"""
+    script_path = "/home/ngotalanua/app/Talan_UA/Novy_Shlyakh/Novy_Shlyakh_Portal/backend/update.sh"
+    if os.path.exists(script_path):
+        try:
+            subprocess.Popen(["bash", script_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        except Exception as e:
+            print(f"[Webhook Deploy Error]: {e}")
+
+@app.get("/webhook/github")
+@app.get("/api/webhook/github")
+async def github_webhook_status():
+    return {
+        "status": "active",
+        "service": "Novy Shlyakh GitHub Webhook Auto-Deployer v1.0",
+        "supported_events": ["push", "ping"],
+        "target_branch": "master"
+    }
+
+@app.post("/webhook/github")
+@app.post("/api/webhook/github")
+async def github_webhook_receiver(request: Request, background_tasks: BackgroundTasks):
+    event = request.headers.get("X-GitHub-Event", "push")
+    if event == "ping":
+        return {"status": "pong", "message": "GitHub Webhook successfully connected"}
+
+    try:
+        payload = await request.json()
+    except Exception:
+        payload = {}
+
+    ref = payload.get("ref", "")
+    if "refs/heads/master" in ref or not ref:
+        background_tasks.add_task(run_git_deploy_task)
+        return {
+            "status": "deploy_triggered",
+            "branch": "master",
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+
+    return {
+        "status": "ignored",
+        "reason": f"Push was for {ref}, auto-deploy only triggers on master"
+    }
 
 class AIChatHistoryItem(BaseModel):
     role: str
