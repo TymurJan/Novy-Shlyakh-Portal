@@ -100,6 +100,9 @@ class HeroAIChatRequest(BaseModel):
     history: Optional[List[Dict[str, Any]]] = []
     user_id: Optional[str] = "anonymous"
 
+class ChatRequest(HeroAIChatRequest):
+    pass
+
 class ChatResponse(BaseModel):
     reply: str
     sources: list = []
