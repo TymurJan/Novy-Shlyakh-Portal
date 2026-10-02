@@ -1393,12 +1393,13 @@ async def check_phone_ivr_status(call_id: str):
     # Якщо статус підтверджено (або авто-підтвердження через 4 секунди в демо)
     if call["status"] == "confirmed" or (datetime.now(timezone.utc).timestamp() - call["created_at"] >= 4):
         call["status"] = "confirmed"
+        clean_phone = re.sub(r'\D', '', str(call.get('phone', '')))
         return {
             "status": "confirmed",
             "data": {
                 "authenticated": True,
-                "user_id": f"phone_{re.sub(r'\D', '', call['phone'])}",
-                "phone": call["phone"],
+                "user_id": f"phone_{clean_phone}",
+                "phone": call.get("phone", ""),
                 "roles": ["ROLE_VETERAN"]
             }
         }
