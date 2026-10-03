@@ -389,7 +389,7 @@ async def veteran_menu(message: types.Message, state: FSMContext = None):
     # Створюємо нижню клавіатуру для навігації
     nav_kb = []
     if not is_veteran and state_data.get("skipped_reg"):
-        nav_kb.append([KeyboardButton(text="🎖️ Реєстрація ветерана (знижка 10%)")])
+        nav_kb.append([KeyboardButton(text="🎖️ Реєстрація ветерана (безкоштовна підтримка)")])
     elif is_veteran:
         nav_kb.append([KeyboardButton(text="🎖️ Кабінет Ветерана")])
 
@@ -541,7 +541,7 @@ async def show_specialists(callback: types.CallbackQuery, state: FSMContext = No
             
             benefits_text = (
                 f"До речі — якщо зареєструєтесь як ветеран (займе 1 хвилину), ви отримаєте:\n\n"
-                f"✅ **10% знижку** на послуги платних фахівців\n"
+                f"✅ **Безкоштовну фахову підтримку** від перевірених фахівців\n"
                 f"✅ **Персональні підбірки** під ваш район і потреби\n"
                 f"✅ Ваші запити (анонімно) допомагають нам розуміти потреби в регіоні для покращення доступності послуг, про що будемо вас повідомляти."
             )
@@ -624,6 +624,7 @@ async def start_veteran_registration_flow(message: types.Message, state: FSMCont
         reply_markup=markup
     )
 
+@dp.message(F.text == "🎖️ Реєстрація ветерана (безкоштовна підтримка)")
 @dp.message(F.text == "🎖️ Реєстрація ветерана (знижка 10%)")
 async def cmd_register_veteran(message: types.Message, state: FSMContext):
     await start_veteran_registration_flow(message, state)
@@ -1114,7 +1115,7 @@ async def process_vet_consent(callback: types.CallbackQuery, state: FSMContext):
             await callback.message.answer(
                 f"🎉 Вітаємо, {data.get('first_name')}!\n\n"
                 "Ви успішно зареєструвалися на порталі 'Новий Шлях'.\n"
-                "Тепер вам доступні персональні підбірки та знижка 10% у партнерів. 🫡\n\n"
+                "Тепер вам доступні персональні підбірки та безкоштовна фахова підтримка від перевірених фахівців. 🫡\n\n"
                 "💡 *Порада:* Ви можете налаштувати свої персональні критерії пошуку (стать спеціаліста чи локацію Черкащини) в Особистому кабінеті в боті, або перейти безпосередньо на наш веб-портал 🌐, де доступні зручні розширені фільтри, реальні відгуки та відеовізитки спеціалістів!",
                 parse_mode="Markdown"
             )
@@ -3324,6 +3325,15 @@ async def support_collect_device(message: types.Message, state: FSMContext):
         "Продовжуйте писати, якщо є інші запитання, \n"
         "або /start для повернення до меню."
     )
+
+
+# ══════════════════════════════════════════
+# ГОЛОСОВІ ПОВІДОМЛЕННЯ (Whisper Voice-to-Text)
+# ══════════════════════════════════════════
+@dp.message(F.voice)
+async def handle_voice_message_global(message: types.Message, state: FSMContext):
+    """Глобальний обробник голосових повідомлень від ветеранів."""
+    await process_ai_query(message, state)
 
 
 # ══════════════════════════════════════════
