@@ -2139,3 +2139,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     loadPublicDashboardStats();
 
+    // --- Автоматичне підсвічування активної вкладки хедера (зелені літери) ---
+    (function highlightActiveHeaderNav() {
+        var path = window.location.pathname.split('/').pop() || 'index.html';
+        if (path === '' || path === '/') path = 'index.html';
+        var links = document.querySelectorAll('.nav a:not(.btn-primary), .menu-container a');
+        links.forEach(function(link) {
+            var href = link.getAttribute('href');
+            if (href) {
+                var cleanHref = href.split('/').pop().split('?')[0].split('#')[0];
+                if (cleanHref === path) {
+                    link.classList.add('active');
+                    link.setAttribute('aria-current', 'page');
+                } else if (cleanHref !== 'index.html') {
+                    link.classList.remove('active');
+                    link.removeAttribute('aria-current');
+                }
+            }
+        });
+    })();

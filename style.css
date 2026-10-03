@@ -145,8 +145,17 @@ body.is-desktop-tg .logo h1 {
     transition: 0.3s;
 }
 
-.nav a:hover {
-    color: var(--primary-green);
+.nav a:not(.btn-primary):hover,
+.nav a:not(.btn-primary).active,
+.nav a:not(.btn-primary)[aria-current="page"],
+.menu-container a:hover,
+.menu-container a.active,
+.menu-container a[aria-current="page"] {
+    color: var(--primary-green) !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
 }
 
 .login-btn {
